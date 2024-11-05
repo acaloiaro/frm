@@ -1,0 +1,2 @@
+DROP TABLE forms;
+DROP SEQUENCE IF EXISTS forms_ids;

@@ -1,0 +1,238 @@
+// package selector provides a single and multi-slect HTML element powered by Choices.js 
+package selector
+
+import (
+	"fmt"
+	"encoding/json"
+	"github.com/google/uuid"
+)
+
+type FieldOptions []Option
+
+// Option is a select option
+type Option struct {
+	ID       uuid.UUID `json:"id"`
+	Value    string    `json:"value"`
+	Label    string    `json:"label"`
+	Selected bool      `json:"selected"`
+	Disabled bool      `json:"disabled"`
+}
+
+// ContentID is the HTML element ID where content for this option is rendered when OptionsContent is rendered
+func (i Option) ContentID() string {
+	return fmt.Sprintf("option-%s-content", i.ID)
+}
+
+// SelectArgs are the arguments used to initialize selector.Selector
+//
+// ID: element ID for the <select> element
+//
+// Label: The <label> for the <select> element
+//
+// LabelClass: The CSS class(es) for the <label> element
+//
+// Multiple: Allow multiple items to be selected
+//
+// Name: The <select> form element name
+//
+// Options: The <option>s available to be <select>ed. Use either Options or OptionsContent to provide options to selector.Seletor
+//
+// OptionsContent: The <option>s available to be <select>ed, and the content to be conditionally rendered when option is selected. Use either Options or OptionsContent, but not both.
+//
+// Placeholder: Placeholder text shown in the search box
+//
+// SearchDisabled: Disable the ability to search for items
+//
+// EditItems: Allow new items to be created through the ui
+//
+// SelectionChangeEvent: The name of the DOM event to trigger when selections change. This event bubbles. It is triggered on the selector element, which does not handle it. An element up the DOM tree should handle it.
+//
+// Hyperscript: Attach a hyperscript _ attribute to the <select>.
+type SelectArgs struct {
+	ID                   string
+	Label                string
+	LabelClass           string
+	Multiple             bool
+	Name                 string
+	Options              FieldOptions
+	OptionsContent       map[Option]templ.Component
+	Placeholder          string
+	Required             bool
+	SearchDisabled       bool
+	EditItems            bool
+	SelectionChangeEvent string
+	Hyperscript          string
+}
+
+// MarhsahJSON allows SelectArgs to be serialized to JSON, to be added as a `data-*` field for latest access
+func (a SelectArgs) MarshalJSON() (b []byte, err error) {
+	d := struct {
+		ID                   string
+		Name                 string
+		Label                string
+		LabelClass           string
+		Options              []Option
+		OptionsContent       map[string]string // mapping of opton ID to the ID of the HTML element where content should render when selected
+		Placeholder          string
+		Multiple             bool
+		SearchDisabled       bool
+		EditItems            bool
+		SelectionChangeEvent string
+		Hyperscript          string
+	}{
+		ID:                   a.ID,
+		Name:                 a.Name,
+		Label:                a.Label,
+		LabelClass:           a.LabelClass,
+		Options:              a.Options,
+		OptionsContent:       map[string]string{},
+		Placeholder:          a.Placeholder,
+		Multiple:             a.Multiple,
+		SearchDisabled:       a.SearchDisabled,
+		EditItems:            a.EditItems,
+		SelectionChangeEvent: a.SelectionChangeEvent,
+		Hyperscript:          a.Hyperscript,
+	}
+
+	if len(a.OptionsContent) > 0 {
+		for option := range a.OptionsContent {
+			d.Options = append(d.Options, option)
+			d.OptionsContent[option.ID.String()] = option.ContentID()
+		}
+	}
+
+	b, err = json.Marshal(d)
+	if err != nil {
+		return nil, err
+	}
+
+	return
+}
+
+// dataElementID is the element ID of the HTML element that contains the JSON-encoded data for 'args'
+func dataElementID(args SelectArgs) string {
+	return fmt.Sprintf("selector-data-%s", args.ID)
+}
+
+// Selector converts a standard 'select' element into a Choices.js-enriched select element
+//
+// To use seletor as a multi-selet, the select element must have a the 'multiple' attribute, e.g.
+// <select id="my-id" multiple></select>
+templ Selector(args SelectArgs) {
+	if args.Label != "" {
+		<label for={ args.ID } class={ args.LabelClass }>
+			{ args.Label }
+			if args.Required {
+				<span class="text-red-500 required-dot">*</span>
+			}
+		</label>
+	}
+	<select
+		id={ args.ID }
+		name={ args.Name }
+		if args.Multiple {
+			multiple
+		}
+		if args.Required {
+			required="true"
+		}
+		data-placeholder={ args.Placeholder }
+		if args.Hyperscript != "" {
+			_={ args.Hyperscript }
+		}
+	></select>
+	<div id={ dataElementID(args) } data-args={ templ.JSONString(args) } _={ fmt.Sprintf("init initializeSelect('%s')", dataElementID(args)) }></div>
+	<!-- when OptionsContent
+ are present, their components render inside of this element when chosen -->
+	if len(args.OptionsContent) > 0 {
+		<!-- content displayed when specific options are selected -->
+		<div id="selected-content">
+			for item, component := range args.OptionsContent {
+				<div id={ item.ContentID() } class="hidden">
+					@component
+				</div>
+			}
+		</div>
+	}
+	<script>
+		/**
+		 * Function to wait for predicates.
+		 * @param {function() : Promise.<Boolean> | function() : Boolean} predicate
+		 * - A function that returns or resolves a bool
+		 * @param {Number} [timeout] - Optional maximum waiting time in ms after rejected
+		 */
+		function waitFor(predicate, timeout) {
+		    return new Promise((resolve, reject) => {
+		        let running = true;
+
+		        const check = async () => {
+		            const res = await predicate();
+		            if (res) return resolve(res);
+		            if (running) setTimeout(check, 100);
+		        };
+
+		        check();
+
+		        if (!timeout) return;
+		        setTimeout(() => {
+		            running = false;
+		            reject();
+		        }, timeout);
+		    });
+		}
+
+		async function initializeSelect(dataElementID) {
+			// wait 10 seconds for choices.js to load 
+			try {
+				await waitFor(() => typeof Choices !== 'undefined', 10000);
+			} catch {
+				console.log("unable to load choices!")
+			}
+
+			const argsElement = document.getElementById(dataElementID);
+			const args = JSON.parse(argsElement.getAttribute('data-args'));
+			if (args.Options != null) {
+				args.Options.map((option) => {
+					if (option.value === "") {
+						console.error(`option id: (${option.id}) label: (${option.label}) should have a value! ensure every option provided to SelectorArgs has a 'Value'`)
+					}
+				});
+			}
+			var searchEnabled = true
+			if (args.SearchDisabled) {
+				searchEnabled = false
+			}
+
+			var element = document.getElementById(args.ID)
+			var choices = new Choices(element, {
+				choices: args.Options != null ? args.Options : [],
+				duplicateItemsAllowed: false,
+				placeholder: true,
+				placeholderValue: args.Placeholder,
+				searchEnabled: searchEnabled,
+				editItems: args.EditItems,
+				removeItemButton: true,
+				addChoices: true,
+				addItems: true,
+				itemSelectText: "",
+			});
+			element._choices = choices;
+		
+			/**
+			* When the user's selection(s) have changed, notify a DOM element with an event
+			*/
+			function notifySelected(event) {
+				if (args.SelectionChangeEvent == "") {
+					return
+				}
+				var element = document.getElementById(args.ID)
+				if (element == null) {
+					return
+				}
+				element.dispatchEvent(new CustomEvent(args.SelectionChangeEvent, {bubbles: true, detail: { id: args.ID, value: event.detail.value}}))
+			}
+			
+			element.addEventListener('change', notifySelected, false);
+		}
+	</script>
+}

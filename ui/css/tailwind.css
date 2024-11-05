@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+globally kill the tailwind ring by default
+*/
+input {
+  --tw-ring-shadow: 0 0 #000 !important;
+}

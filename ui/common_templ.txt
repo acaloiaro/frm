@@ -1,0 +1,178 @@
+<svg data-src=\"
+\" class=\"h-5 w-5\"></svg>
+<button
+ class=\"
+\">
+</button>
+<div
+ class=\"
+\">
+</div>
+<div id=\"form-builder-nav-title\" data-hx-swap-oob=\"true\" class=\"flex-grow flex justify-center\"><h3 tabindex=\"0\" class=\"hover:bg-gray-100 dark:hover:bg-gray-800 rounded px-2 cursor-pointer relative font-medium py-1 text-md w-1/3 text-gray-500 truncate form-editor-title\" style=\"height: auto;\" id=\"form-editor-title\">
+</h3></div>
+<div id=\"form-builder-nav\" data-hx-swap-oob=\"true\" class=\"w-full border-b p-2 flex gap-x-2 items-center bg-white\"><div id=\"form-editor-navbar-tabs\"><div role=\"tablist\" aria-orientation=\"horizontal\" class=\"tabs tabs-boxed bg-gray-50 dark:bg-gray-800 rounded-lg p-1 h-auto grid grid-cols-2 items-center gap-x-1.5 px-2\">
+</div></div>
+<div class=\"flex items-stretch gap-x-2\"><div class=\"inline-flex items-center relative\"><a href=\"#\" class=\"text-sm p-2 hover:bg-gray-100 cursor-pointer rounded-lg text-gray-500 hover:text-gray-800 cursor-pointer\"><span class=\"iconify i-heroicons:question-mark-circle w-5 h-5\" aria-hidden=\"true\"></span></a><!----></div><div class=\"relative inline-flex\"><button type=\"button\" class=\"focus:outline-none disabled:cursor-not-allowed disabled:opacity-75 aria-disabled:cursor-not-allowed aria-disabled:opacity-75 flex-shrink-0 font-medium rounded-md text-sm gap-x-1.5 shadow-sm text-white dark:text-gray-900 bg-primary-500 hover:bg-primary-600 disabled:bg-primary-500 aria-disabled:bg-primary-500 dark:bg-primary-400 dark:hover:bg-primary-500 dark:disabled:bg-primary-400 dark:aria-disabled:bg-primary-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 dark:focus-visible:outline-primary-400 inline-flex items-center px-8 md:px-4 py-2\"><!----><svg class=\"w-4 h-4 text-white inline mr-1 -mt-1\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M17 21V13H7V21M7 3V8H15M19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16L21 8V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21Z\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg> Save Form <!----></button><!----></div></div></div>
+<head><title>
+ :: 
+</title><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+<link href=\"
+\" rel=\"stylesheet\"><script type=\"text/javascript\" src=\"
+\" nonce=\"
+\"></script> <script type=\"text/javascript\" src=\"
+\" nonce=\"
+\"></script> <script type=\"text/javascript\" src=\"
+\" nonce=\"
+\"></script> <script ytpe=\"text/javascript\" src=\"
+\" nonce=\"
+\"></script> <script type=\"text/javascript\" src=\"https://unpkg.com/external-svg-loader@latest/svg-loader.min.js\" nonce=\"
+\" async></script> <script type=\"text/javascript\" src=\"https://unpkg.com/sortablejs@latest/Sortable.min.js\" nonce=\"
+\"></script> <script type=\"text/javascript\">\n\t\t\t\thtmx.onLoad(function(content) {\n\t\t\t\t    var sortables = content.querySelectorAll(\".sortable\");\n\t\t\t\t    for (var i = 0; i < sortables.length; i++) {\n\t\t\t\t      var sortable = sortables[i];\n\t\t\t\t      var sortableInstance = new Sortable(sortable, {\n\t\t\t\t          animation: 150,\n\t\t\t\t\t\t  draggable: \".sortme\",\n\t\t\t\t          onMove: function (evt) {\n\t\t\t\t            return evt.related.className.indexOf('htmx-indicator') === -1;\n\t\t\t\t          },\n\t\t\t\t          onEnd: function (evt) {\n\t\t\t\t            this.option(\"disabled\", true);\n\t\t\t\t          }\n\t\t\t\t      });\n\t\t\t\t      // Re-enable sorting on the `htmx:afterSwap` event\n\t\t\t\t      sortable.addEventListener(\"htmx:afterSwap\", function() {\n\t\t\t\t        sortableInstance.option(\"disabled\", false);\n\t\t\t\t      });\n\t\t\t\t    }\n\t\t\t\t})\n\n\t\t\t\tfunction formValueChanged(fieldID, newValue) {\n\t\t\t\t\tvar formMetadata = JSON.parse(document.getElementById('form-metadata').getAttribute(\"data-data\"));\n\t\t\t\t\tif (formMetadata == null) {\n\t\t\t\t\t\treturn\n\t\t\t\t\t}\n\n\t\t\t\t\t// collect the fields that have logic monitoring the changed field \n\t\t\t\t\tvar watchingFields = Object.values(formMetadata.form.fields).filter(function(field) {\n\t\t\t\t\t\treturn field.logic != null && fieldID === field.logic.target_field_id\n\t\t\t\t\t});\n\n\t\t\t\t\t// no fields watch the one that changed\n\t\t\t\t\tif (watchingFields.length == 0) {\n\t\t\t\t\t\treturn\n\t\t\t\t\t}\n\t\t\t\t\tvar fieldElement = document.getElementById(fieldID)\n\t\t\t\t\tfor (i in watchingFields) {\n\t\t\t\t\t\tlet watchingField = watchingFields[i]\n\t\t\t\t\t\tlet match = false\n\t\t\t\t\t\tvar watcherFieldContainerID = `field-container-${watchingField.id}` // the DOM element that contains the watching field\n\t\t\t\t\t\tlogic = watchingField.logic\n\n\t\t\t\t\t\t// check whether the new value is coming from a Choices.js field, in which case the new value\n\t\t\t\t\t\t// is the array of chosen values, joined by commas, otherwise newValue is used as it was passed in\n\t\t\t\t\t\tif (fieldElement != null && fieldElement._choices != null) {\n\t\t\t\t\t\t\t// Choics.getValue() returns scalar for single selects and array for multi. Use Array.of\n\t\t\t\t\t\t\t// to treat everything it returns as an array\n\t\t\t\t\t\t\tnewValue = Array.of(fieldElement._choices.getValue(true)).join(',')\n\t\t\t\t\t\t}\n\n\t\t\t\t\t\t// find if _any_ trigger values match the new value\n\t\t\t\t\t\tswitch (logic.field_comparator) {\n\t\t\t\t\t\t\tcase 'equal':\n\t\t\t\t\t\t\t\tmatch = watchingField.logic.trigger_values.every(val => newValue.localeCompare(val, 'en', {sensitivity: \"base\"}) == 0)\n\t\t\t\t\t\t\t\tbreak;\n\t\t\t\t\t\t\tcase 'contains':\n\t\t\t\t\t\t\t\tmatch = watchingField.logic.trigger_values.some(val => newValue.toLowerCase().includes(val.toLowerCase()))\n\t\t\t\t\t\t\t\tbreak;\n\t\t\t\t\t\t}\n\n\t\t\t\t\t\t// Most actions are likely to be performed upon the containing element, such as show/hide/require.\n\t\t\t\t\t\t// This may of course change or be expanded, but for now, only the watcher field container is relevant\n\t\t\t\t\t\t// to applying actions.\n\t\t\t\t\t\tlet el = document.getElementById(watcherFieldContainerID)\n\t\t\t\t\t\tlet actions = watchingField.logic.actions\n\n\t\t\t\t\t\t// we have a match, execute the action\n\t\t\t\t\t\tfor (i in actions) {\n\t\t\t\t\t\t\tswitch (actions[i]) {\n\t\t\t\t\t\t\t\tcase \"field_logic_trigger_show\":\n\t\t\t\t\t\t\t\t\tif (match) {\n\t\t\t\t\t\t\t\t\t\tel.classList.remove(\"hidden\");\n\t\t\t\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t\t\t\tel.classList.add(\"hidden\");\n\t\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\t\tbreak;\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t</script> <link rel=\"stylesheet\" href=\"
+\" nonce=\"
+\">
+</head>
+<!doctype html><html lang=\"eng\">
+<body class=\"\"><div id=\"errors\"></div><main hx-ext=\"response-targets\">
+</main>
+</body></html>
+<section id=\"app-container\">
+<section id=\"builder-main\" class=\"flex w-full\"><!-- Left column -->
+<!-- Middle Column -->
+<!-- Right Column -->
+</section></section>
+<div id=\"settings-main\" class=\"hidden\"><form id=\"settings-form\" data-hx-put=\"
+\" data-hx-trigger=\"
+\" data-hx-swap-oob=\"true\"><div class=\"pt-3\"><label for=\"form-name-field\" class=\"pr-1\">Form name</label>
+</div><input id=\"form-name-field\" name=\"name\" type=\"text\" class=\"w-full rounded-md\" value=\"
+\" placeholder=\"Enter a good name for your form\" autocomplete=\"off\" _=\"
+\"></form></div>
+<section id=\"builder-main-left-col\" class=\"flex flex-col gap-3 w-1/4 min-w-max h-full p-4 text-gray-800 rounded-md\">
+</section>
+<section id=\"builder-main-middle-col\" class=\"w-full h-screen overflow-y-auto overscroll-auto p-4 bg-gray-50 border-y-1\"><div class=\"mockup-browser border-base-300 border bg-white\"><div class=\"mockup-browser-toolbar\"><div class=\"input border-base-300 border\">https://your-form-domain.com/form</div></div><div class=\"h-full border-base-300 flex border-t px-4 py-8\">
+</div></div></section>
+<div class=\"p-1 rounded-md flex items-center justify-center bg-blue-100 text-blue-900 ml-2\">
+</div>
+<div id=\"form-fields\" class=\"active-section\">
+</div>
+<div id=\"form-fields-form\" data-hx-swap-oob=\"true\" class=\"flex flex-col gap-3 w-full\">
+<div class=\"w-full border-b pb-2\"></div><form data-hx-put=\"
+\" data-hx-trigger=\"end\" data-hx-swap=\"outerHTML\" data-hx-target=\"#form-fields-form\" data-hx-indidcator=\"#ind\"><div class=\"flex flex-col gap-1 sortable\">
+<div class=\"mx-auto w-full border-gray-300 transition-colors bg-gray-50 hover:bg-gray-100 rounded-lg sortme max-w-84 field-row\"><input name=\"order\" type=\"hidden\" value=\"
+\"><div class=\"group flex items-center gap-x-0.5 py-1.5 pr-1\"><!-- field item --><a href=\"#\" class=\"w-full\" _=\"
+\"><div class=\"flex flex-col cursor-pointer\"><div tabindex=\"0\" class=\"dark:hover:bg-gray-800 rounded px-2 relative text-gray-700 max-w-72 min-h-6\" style=\"height: auto;\"><p class=\"w-full cursor-pointer truncate\">
+</p></div></div></a> 
+<div class=\"relative inline-flex\"><button class=\"hidden rounded p-0.5 transition-colors hover:bg-nt-blue-lighter items-center px-1 justify-center md:flex text-red-500\"><div class=\"h-6 text-center text-2xl font-bold text-inherit -mt-0.5\">* </div></button></div>
+<div class=\"cursor-move\">
+</div></div></div>
+</div></form></div>
+<span class=\"text-red-500 required-dot\">*</span>
+<section id=\"builder-main-right-col\" class=\"w-1/4 h-full p-4 text-gray-800 rounded-md\"><div id=\"configure-add-field\" class=\"hidden\"><div class=\"h-12 border-b text-lg text-center uppercase\">Add field</div>
+<div class=\"group flex items-center my-1.5 pr-1\"><a href=\"#\" class=\"w-full\"><div class=\"flex flex-col\"><div tabindex=\"
+\" class=\"hover:bg-gray-50 dark:hover:bg-gray-800 rounded cursor-pointer relative truncate text-gray-700 min-w-16 min-h-6\" style=\"height: auto;\" data-hx-post=\"
+\" data-hx-trigger=\"click\" data-hx-vals=\"
+\" data-hx-swap=\"none\">
+</div></div></a></div>
+</div>
+</section>
+<form id=\"fields-form\" data-hx-put=\"
+\" data-hx-trigger=\"
+\" data-hx-swap=\"none\" data-hx-swap-oob=\"true\">
+<div id=\"
+\" class=\"hidden\"><div class=\"mx-auto w-full border-gray-300 transition-colors pb-3\">
+</div><div id=\"
+\" class=\"border-b pb-4\"><div role=\"tablist\" aria-orientation=\"horizontal\" class=\"tabs tabs-boxed bg-gray-50 dark:bg-gray-800 rounded-lg h-auto flex gap-2\">
+</div></div><!-- Form fields settings configurations -->
+<!-- Form fields logic configurations -->
+</div>
+</form>
+<div id=\"
+\" class=\"active-configurator-section\"><input name=\"
+\" type=\"hidden\" value=\"
+\"> <input name=\"
+\" type=\"hidden\" value=\"
+\"> <input name=\"
+\" type=\"hidden\" value=\"
+\"><div class=\"pt-3\"><label for=\"
+\" class=\"pr-1\">Field label</label>
+</div><input id=\"
+\" name=\"
+\" type=\"text\" class=\"w-full rounded-md\" value=\"
+\" autocomplete=\"off\" _=\"
+\"><div class=\"pt-3\"><label for=\"
+\" class=\"pr-1\">Placeholder</label></div><input id=\"
+\" name=\"
+\" type=\"text\" class=\"w-full rounded-md\" value=\"
+\" autocomplete=\"off\" _=\"
+\"> 
+<div class=\"pt-3\"><label for=\"
+\" class=\"pr-1\">Options</label></div>
+<div class=\"pt-3\"><label for=\"
+\" class=\"pr-1\">Required</label></div><input id=\"
+\" name=\"
+\" type=\"checkbox\" class=\"checkbox checkbox-primary\"
+ checked
+ _=\"
+\"><div class=\"pt-3\"><label for=\"
+\" class=\"pr-1\">Hidden</label></div><input id=\"
+\" name=\"
+\" type=\"checkbox\" class=\"checkbox checkbox-primary\"
+ checked
+ _=\"
+\"><div class=\"py-3 divide-y\"><label for=\"delete-field\" class=\"pr-1\">Danger zone</label></div>
+</div>
+<div id=\"
+\" class=\"flex flex-col gap-5 hidden\"><div><div data-hx-get=\"
+\" data-hx-trigger=\"
+\" data-hx-swap=\"innerHTML\" data-hx-target=\"
+\" data-hx-on:htmx:config-request=\"event.detail.parameters[&#39;id&#39;] = event.detail.triggeringEvent.detail.value\">
+</div></div><div>
+</div><div><div id=\"
+\">
+</div></div><div><p class=\"pb-3\">Choose an action</p><input id=\"
+\" type=\"checkbox\" class=\"checkbox\" name=\"
+\"
+ checked
+ _=\"
+\"> <label for=\"
+\">Show this field</label></div></div>
+<input id=\"
+\" name=\"
+\" type=\"text\" class=\"bg-gray-50\" placeholder=\"Enter a value\"
+ value=\"
+\"
+ _=\"
+\">
+<div class=\"flex gap-3\">
+<label class=\"w-full cursor-pointer truncate\">
+Single-line text
+Multi-line text
+Single select
+Multi select
+<label class=\"w-full cursor-pointer truncate\">I unno</label>
+</label></div>
+<label for=\"
+\">
+ 
+</label>
+<div id=\"form-viewer\" class=\"flex flex-col w-full justify-top\" data-hx-swap-oob=\"true\"><div id=\"form-metadata\" data-data=\"
+\"></div><h1 class=\"hover:bg-gray-50 dark:hover:bg-gray-800 rounded cursor-pointer relative mb-2 font-black text-5xl\">
+</h1><form action=\"
+\" _=\"on field_change(field_id, value) formValueChanged(field_id, value)\">
+<div id=\"
+\"
+ class=\"flex flex-col py-3 hidden\"
+ class=\"flex flex-col py-3\"
+>
+ <input id=\"
+\" name=\"
+\" placeholder=\"
+\" type=\"text\" autocomplete=\"off\" _=\"
+\">
+ <textarea id=\"
+\" name=\"
+\" class=\"flex-1 appearance-none border border-gray-300 dark:border-gray-600 w-full bg-white text-gray-700 dark:bg-notion-dark-light dark:text-gray-300 dark:placeholder-gray-500 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:border-transparent focus:ring-opacity-100 rounded-lg px-4 py-2 text-base resize-y block\" name=\"98e021e4-68e0-4273-8576-de89b4459e62\" placeholder=\"
+\" autocomplete=\"off\" style=\"--tw-ring-color: #3B82F6;\" _=\"
+\"></textarea>
+</div>
+<div class=\"py-3\"></div>
+</form></div>
