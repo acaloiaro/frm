@@ -1,6 +1,7 @@
 package frmchi
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -30,18 +31,21 @@ var formFieldIDExtractor = regexp.MustCompile(`^\[([a-fA-F0-9]{8}-[a-fA-F0-9]{4}
 // Mount mounts frm to the router at the given path
 func Mount(f *frm.Frm, router chi.Router, mountPoint string) {
 	r := chi.NewRouter()
+	r.Use(addMountPointContext)
 	router.Mount(mountPoint, r)
-	r.Use(handlers.AddMountPointContext(mountPoint))
+
 	// any requests for which there are no defined chi routes are sent to the "file system"
 	// server, serving static content from the embedded filesystem
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
-		r.URL.Path = strings.ReplaceAll(r.URL.Path, mountPoint, "")
+		mp := r.Context().Value(handlers.MountPointContextKey).(string)
+		// Remove the mount point from the path so the static filesystem paths are resolved relative to its root
+		r.URL.Path = strings.ReplaceAll(r.URL.Path, mp, "")
 		http.FileServer(http.FS(static.Assets)).ServeHTTP(w, r)
 	})
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		forms, err := internal.Q(ctx, f.PostgresURL).ListForm(r.Context())
+		forms, err := internal.Q(ctx, f.PostgresURL).ListForms(r.Context(), f.WorkspaceID)
 		if err != nil {
 			slog.Error("unable to get forms", slog.Any("error", err))
 			w.WriteHeader(http.StatusInternalServerError)
@@ -68,7 +72,10 @@ func Mount(f *frm.Frm, router chi.Router, mountPoint string) {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
-		form, err := internal.Q(ctx, f.PostgresURL).GetForm(ctx, formID)
+		form, err := internal.Q(ctx, f.PostgresURL).GetForm(ctx, internal.GetFormParams{
+			WorkspaceID: f.WorkspaceID,
+			ID:          formID,
+		})
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 			return
@@ -148,7 +155,10 @@ func Mount(f *frm.Frm, router chi.Router, mountPoint string) {
 			return
 		}
 
-		form, err := internal.Q(ctx, f.PostgresURL).GetForm(ctx, formID)
+		form, err := internal.Q(ctx, f.PostgresURL).GetForm(ctx, internal.GetFormParams{
+			WorkspaceID: f.WorkspaceID,
+			ID:          formID,
+		})
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 			return
@@ -175,7 +185,10 @@ func Mount(f *frm.Frm, router chi.Router, mountPoint string) {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
-		form, err := internal.Q(ctx, f.PostgresURL).GetForm(ctx, formID)
+		form, err := internal.Q(ctx, f.PostgresURL).GetForm(ctx, internal.GetFormParams{
+			WorkspaceID: f.WorkspaceID,
+			ID:          formID,
+		})
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 			return
@@ -243,7 +256,10 @@ func Mount(f *frm.Frm, router chi.Router, mountPoint string) {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
-		form, err := internal.Q(ctx, f.PostgresURL).GetForm(ctx, formID)
+		form, err := internal.Q(ctx, f.PostgresURL).GetForm(ctx, internal.GetFormParams{
+			WorkspaceID: f.WorkspaceID,
+			ID:          formID,
+		})
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 			return
@@ -323,7 +339,10 @@ func Mount(f *frm.Frm, router chi.Router, mountPoint string) {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
-		form, err := internal.Q(ctx, f.PostgresURL).GetForm(ctx, formID)
+		form, err := internal.Q(ctx, f.PostgresURL).GetForm(ctx, internal.GetFormParams{
+			WorkspaceID: f.WorkspaceID,
+			ID:          formID,
+		})
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 			return
@@ -456,7 +475,10 @@ func Mount(f *frm.Frm, router chi.Router, mountPoint string) {
 			return
 		}
 
-		form, err := internal.Q(ctx, f.PostgresURL).GetForm(ctx, formID)
+		form, err := internal.Q(ctx, f.PostgresURL).GetForm(ctx, internal.GetFormParams{
+			WorkspaceID: f.WorkspaceID,
+			ID:          formID,
+		})
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 			return
@@ -522,4 +544,30 @@ func toFormFieldOption(field types.FormField, options []string) types.FieldOptio
 	}
 
 	return fieldOptions
+}
+
+// addMountPointContext adds the mount point where frm is mounted to the request context
+func addMountPointContext(h http.Handler) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		mountPoint := chi.RouteContext(r.Context()).RoutePattern()
+		if rctx := chi.RouteContext(ctx); rctx != nil {
+			for i, urlParam := range rctx.URLParams.Keys {
+				if strings.Contains(mountPoint, urlParam) {
+					// routePatterns look like: /foo/{bar}/baz
+					// Where {bar} is the chi pattern placeholder. These placeholders must be replaced with the actual value
+					// that it holders the place for, so we can use the full, realized routePattern as frm's mountpoint
+					mountPoint = strings.ReplaceAll(mountPoint, fmt.Sprintf("{%s}", urlParam), rctx.URLParams.Values[i])
+				}
+			}
+		}
+
+		// remove extraneous chi wildcard patterns from the final path
+		mountPoint = strings.ReplaceAll(mountPoint, "*", "")
+
+		ctx = context.WithValue(ctx, handlers.MountPointContextKey, mountPoint)
+		h.ServeHTTP(w, r.Clone(ctx))
+	}
+
+	return http.HandlerFunc(fn)
 }

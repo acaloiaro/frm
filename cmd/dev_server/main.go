@@ -8,9 +8,10 @@ import (
 	"time"
 
 	"github.com/acaloiaro/frm"
-	"github.com/acaloiaro/frm/frmchi"
+	"github.com/acaloiaro/frm/routers/frmchi"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/httplog/v2"
+	"github.com/google/uuid"
 )
 
 var (
@@ -66,6 +67,7 @@ func main() {
 	router.Use(httplog.RequestLogger(requestLogger))
 	f := frm.New(frm.Args{
 		PostgresURL: os.Getenv("DATABASE_URL"),
+		WorkspaceID: uuid.MustParse("65859a99-a1e2-4094-a59b-3baef73cf31b"),
 	})
 	err := f.Init(context.Background())
 	if err != nil {
