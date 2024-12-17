@@ -17,7 +17,7 @@ type Form struct {
 	// a namespace for the form
 	WorkspaceID uuid.UUID `json:"workspace_id"`
 	Name        string    `json:"name"`
-	// all form fields serialized to JSON, see types.FormFields for structure details
+	// all form fields are serialized to JSON, see types.FormFields for structure details
 	Fields    types.FormFields `json:"fields"`
 	CreatedAt time.Time        `json:"created_at"`
 	UpdatedAt time.Time        `json:"updated_at"`

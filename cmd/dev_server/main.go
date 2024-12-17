@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
@@ -11,7 +12,6 @@ import (
 	"github.com/acaloiaro/frm/routers/frmchi"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/httplog/v2"
-	"github.com/google/uuid"
 )
 
 var (
@@ -63,19 +63,24 @@ func initRequestLogger() {
 func main() {
 	initLogging()
 	logger.Info("frm dev server started")
-	router := chi.NewRouter()
-	router.Use(httplog.RequestLogger(requestLogger))
-	f := frm.New(frm.Args{
-		PostgresURL: os.Getenv("DATABASE_URL"),
-		WorkspaceID: uuid.MustParse("65859a99-a1e2-4094-a59b-3baef73cf31b"),
+	chiRouter := chi.NewRouter()
+	chiRouter.Use(httplog.RequestLogger(requestLogger))
+	const chiUrlParamName = "frm_workspace_id"
+	f, err := frm.New(frm.Args{
+		PostgresURL:         os.Getenv("POSTGRES_URL"),
+		WorkspaceIDUrlParam: chiUrlParamName, // name of the chi URL parameter name
 	})
-	err := f.Init(context.Background())
 	if err != nil {
 		panic(err)
 	}
-	frmchi.Mount(f, router, "/frm")
+	err = f.Init(context.Background())
+	if err != nil {
+		panic(err)
+	}
+	frmchi.Mount(chiRouter, fmt.Sprintf("/frm/{%s}", chiUrlParamName), f)
+
 	s := &http.Server{
-		Handler:      router,
+		Handler:      chiRouter,
 		Addr:         listenAddress,
 		ReadTimeout:  time.Duration(10 * time.Second),
 		WriteTimeout: time.Duration(10 * time.Second),

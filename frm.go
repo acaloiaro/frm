@@ -2,38 +2,50 @@ package frm
 
 import (
 	"context"
+	"errors"
 
 	"github.com/acaloiaro/frm/internal"
 	"github.com/google/uuid"
 )
 
+var ErrCannotDetermineWorkspace = errors.New("workspace cannot be determine without WorkspaceID or WorkspaceIDUrlParam")
+
+// Frm is the primary API into frm
 type Frm struct {
-	PostgresURL string    // the database URL where forms are stored
-	WorkspaceID uuid.UUID // the ID of the workspace that this instance acts on behalf of
+	PostgresURL         string    // the database URL where forms are stored
+	WorkspaceID         uuid.UUID // the ID of the workspace that this instance acts on behalf of
+	WorkspaceIDUrlParam string    // the name of the URL parameter that provides your workspace ID
 }
 
 type Args struct {
-	PostgresURL string
-	WorkspaceID uuid.UUID
+	PostgresURL         string
+	WorkspaceID         uuid.UUID
+	WorkspaceIDUrlParam string
 }
 
 // New initializes a new frm instance
 //
 // If the frm database hasn't been initiailized, the database is initialized
-func New(args Args) *Frm {
-	return &Frm{
-		PostgresURL: args.PostgresURL,
-		WorkspaceID: args.WorkspaceID,
+func New(args Args) (f *Frm, err error) {
+	if args.WorkspaceID == uuid.Nil && args.WorkspaceIDUrlParam == "" {
+		return nil, ErrCannotDetermineWorkspace
 	}
+
+	f = &Frm{
+		PostgresURL:         args.PostgresURL,
+		WorkspaceID:         args.WorkspaceID,
+		WorkspaceIDUrlParam: args.WorkspaceIDUrlParam,
+	}
+	return
 }
 
-// Init ensures that the frm database is initialized
+// Init initializes the frm database if it hasn't been initialized
 func (f *Frm) Init(ctx context.Context) (err error) {
 	err = internal.InitializeDB(ctx, f.PostgresURL)
 	return
 }
 
-// GetForm retrieves a form by ID
+// GetForm retrieves forms by ID
 func (f *Frm) GetForm(ctx context.Context, id int64) (form Form, err error) {
 	var frm internal.Form
 	frm, err = internal.Q(ctx, f.PostgresURL).GetForm(ctx, internal.GetFormParams{
@@ -45,5 +57,15 @@ func (f *Frm) GetForm(ctx context.Context, id int64) (form Form, err error) {
 	}
 
 	form = (Form)(frm)
+	return
+}
+
+// ListForms lists all available forms
+func (f *Frm) ListForms(ctx context.Context, id int64) (forms Forms, err error) {
+	forms, err = internal.Q(ctx, f.PostgresURL).ListForms(ctx, f.WorkspaceID)
+	if err != nil {
+		return
+	}
+
 	return
 }

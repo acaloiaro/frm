@@ -17,4 +17,4 @@ CREATE TABLE IF NOT EXISTS forms (
 
 COMMENT ON table forms IS 'Form contains all the data necesary to render a form';
 COMMENT ON column forms.workspace_id IS 'a namespace for the form';
-COMMENT ON column forms.fields IS 'all form fields serialized to JSON, see types.FormFields for structure details';
+COMMENT ON column forms.fields IS 'all form fields are serialized to JSON, see types.FormFields for structure details';

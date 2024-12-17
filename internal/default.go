@@ -15,7 +15,18 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+type contextKey string
+
+const (
+	// MountPointContextKey is the context key representing frm's mount point on the request context
+	MountPointContextKey contextKey = "mount_point_context_key"
+	// FrmContextKey is the context key representing the frm instance on the request context
+	FrmContextKey contextKey = "frm_instance"
+)
+
 var pool *pgxpool.Pool
+
+type Forms []Form
 
 // getPool returns a database pool for the specified connection string
 func getPool(ctx context.Context, databaseURL string) (p *pgxpool.Pool, err error) {

@@ -8,6 +8,7 @@ import (
 
 // Form is a form
 type Form internal.Form
+type Forms []internal.Form
 
 // JSON returns the form's JSON-seralized string representation
 func (f Form) JSON() string {

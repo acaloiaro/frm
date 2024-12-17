@@ -70,7 +70,7 @@
               ''
                 go install github.com/dmarkham/enumer@latest
                 export DATABASE_URL_NON_PGX="postgres://postgres:postgres@localhost:${toString postgresPort}/frm?sslmode=disable"
-                export DATABASE_URL="$DATABASE_URL_NON_PGX&pool_max_conns=100"
+                export POSTGRES_URL="$DATABASE_URL_NON_PGX&pool_max_conns=100"
                 set +a
                 ${executeEss}
 

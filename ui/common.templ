@@ -6,12 +6,13 @@ import (
 	"context"
 	"github.com/acaloiaro/frm"
 	"github.com/acaloiaro/frm/ui/selector"
-	"github.com/acaloiaro/frm/handlers"
+	"github.com/acaloiaro/frm/internal"
 	"sort"
 	"github.com/acaloiaro/frm/types"
 	"encoding/json"
 	"github.com/google/uuid"
 	"slices"
+	"path/filepath"
 )
 
 var loadDependenciesOnce = templ.NewOnceHandle()
@@ -121,12 +122,14 @@ templ FormBuilderNav(form frm.Form) {
 
 // SafePath returns mountpoint-aware SafeURL paths for the given path
 func SafePath(ctx context.Context, path string) templ.SafeURL {
-	return templ.SafeURL(fmt.Sprintf("%s%s", ctx.Value(handlers.MountPointContextKey).(string), path))
+	return templ.SafeURL(fmt.Sprintf("%s%s", ctx.Value(internal.MountPointContextKey).(string), path))
 }
 
 // Path returns mountpoint-aware string paths for the given path
 func Path(ctx context.Context, path string) string {
-	return fmt.Sprintf("%s%s", ctx.Value(handlers.MountPointContextKey).(string), path)
+	base := ctx.Value(internal.MountPointContextKey).(string)
+	base = filepath.Clean(base)
+	return fmt.Sprintf("%s/%s", base, path)
 }
 
 // head simply provides the <head> element
@@ -136,11 +139,11 @@ templ head(pageTitle string) {
 		<meta charset="UTF-8"/>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 		@loadDependenciesOnce.Once() {
-			<link href={ Path(ctx, "/css/styles.css") } rel="stylesheet"/>
-			<script type="text/javascript" src={ Path(ctx, "/js/htmx.js") } nonce={ templ.GetNonce(ctx) }></script>
-			<script type="text/javascript" src={ Path(ctx, "/js/htmx-response-targets.js") } nonce={ templ.GetNonce(ctx) }></script>
-			<script type="text/javascript" src={ Path(ctx, "/js/hyperscript.js") } nonce={ templ.GetNonce(ctx) }></script>
-			<script ytpe="text/javascript" src={ Path(ctx, "/js/choices.min.js") } nonce={ templ.GetNonce(ctx) }></script>
+			<link href={ Path(ctx, "css/styles.css") } rel="stylesheet"/>
+			<script type="text/javascript" src={ Path(ctx, "js/htmx.js") } nonce={ templ.GetNonce(ctx) }></script>
+			<script type="text/javascript" src={ Path(ctx, "js/htmx-response-targets.js") } nonce={ templ.GetNonce(ctx) }></script>
+			<script type="text/javascript" src={ Path(ctx, "js/hyperscript.js") } nonce={ templ.GetNonce(ctx) }></script>
+			<script ytpe="text/javascript" src={ Path(ctx, "js/choices.min.js") } nonce={ templ.GetNonce(ctx) }></script>
 			<script type="text/javascript" src="https://unpkg.com/external-svg-loader@latest/svg-loader.min.js" nonce={ templ.GetNonce(ctx) } async></script>
 			<script type="text/javascript" src="https://unpkg.com/sortablejs@latest/Sortable.min.js" nonce={ templ.GetNonce(ctx) }></script>
 			<script type="text/javascript">
@@ -226,7 +229,7 @@ templ head(pageTitle string) {
 					}
 				}
 			</script>
-			<link rel="stylesheet" href={ Path(ctx, "/css/choices.min.css") } nonce={ templ.GetNonce(ctx) }/>
+			<link rel="stylesheet" href={ Path(ctx, "css/choices.min.css") } nonce={ templ.GetNonce(ctx) }/>
 		}
 	</head>
 }
@@ -348,7 +351,7 @@ templ FormFieldsForm(form frm.Form) {
 		}
 		<div class="w-full border-b pb-2"></div>
 		<form
-			data-hx-put={ Path(ctx, fmt.Sprintf("/%d/fields/order", form.ID)) }
+			data-hx-put={ formUrl[string](ctx, form, "/fields/order") }
 			data-hx-trigger="end"
 			data-hx-swap="outerHTML"
 			data-hx-target="#form-fields-form"
@@ -438,7 +441,7 @@ templ builderColumnRight(form frm.Form) {
 								tabindex={ fmt.Sprint(i) }
 								class="hover:bg-gray-50 dark:hover:bg-gray-800 rounded cursor-pointer relative truncate text-gray-700 min-w-16 min-h-6"
 								style="height: auto;"
-								data-hx-post={ Path(ctx, fmt.Sprintf("/%d/fields", form.ID)) }
+								data-hx-post={ Path(ctx, fmt.Sprintf("%d/fields", form.ID)) }
 								data-hx-trigger="click"
 								data-hx-vals={ fmt.Sprintf(`{"field_type": "%s"}`, fieldType) }
 								data-hx-swap="none"
@@ -459,7 +462,7 @@ func formUrl[T string | templ.SafeURL](ctx context.Context, form frm.Form, path 
 	if len(path) == 1 {
 		p = path[0]
 	}
-	return T(Path(ctx, fmt.Sprintf("/%d%s", form.ID, p)))
+	return T(Path(ctx, fmt.Sprintf("%d%s", form.ID, p)))
 }
 
 templ FormFieldConfigurator(form frm.Form) {
@@ -608,7 +611,7 @@ templ fieldLogicConfiguration(form frm.Form, field types.FormField) {
 	<div id={ fmt.Sprintf("field-%s-logic", field.ID.String()) } class="flex flex-col gap-5 hidden">
 		<div>
 			<div
-				data-hx-get={ Path(ctx, fmt.Sprintf("/%d/logic_configurator/%s/step3", form.ID, field.ID.String())) }
+				data-hx-get={ Path(ctx, fmt.Sprintf("%d/logic_configurator/%s/step3", form.ID, field.ID.String())) }
 				data-hx-trigger={ LogicConfiguratorTargetFieldSelected }
 				data-hx-swap="innerHTML"
 				data-hx-target={ fmt.Sprintf("#logic-field-value-chooser-%s", field.ID.String()) }
