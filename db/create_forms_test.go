@@ -71,20 +71,21 @@ func TestCreateAndUpdateForm(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	f, err := internal.Q(ctx, frms.PostgresURL).SaveForm(ctx, internal.SaveFormParams{
-		ID:     1,
-		Name:   "hello world",
-		Fields: fields,
+	f, err := internal.Q(ctx, frms.PostgresURL).SaveDraft(ctx, internal.SaveDraftParams{
+		Name:        "hello world",
+		Fields:      fields,
+		WorkspaceID: frms.WorkspaceID,
 	})
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	f, err = internal.Q(ctx, frms.PostgresURL).SaveForm(ctx, internal.SaveFormParams{
-		ID:     1,
-		Name:   nameUpdate,
-		Fields: updatedFields,
+	f, err = internal.Q(ctx, frms.PostgresURL).SaveDraft(ctx, internal.SaveDraftParams{
+		ID:          1,
+		Name:        nameUpdate,
+		Fields:      updatedFields,
+		WorkspaceID: frms.WorkspaceID,
 	})
 	if err != nil {
 		t.Error(err)

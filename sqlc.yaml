@@ -37,6 +37,15 @@ overrides:
           import: github.com/google/uuid
           package: uuid
           type: UUID
+      - column: draft_forms.fields
+        go_type:
+          import: github.com/acaloiaro/frm/types
+          type: FormFields
+      - column: draft_forms.workspace_id
+        go_type:
+          import: github.com/google/uuid
+          package: uuid
+          type: UUID
 
 sql:
   - engine: postgresql

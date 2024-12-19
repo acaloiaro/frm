@@ -6,7 +6,7 @@ import (
 	"github.com/acaloiaro/frm/internal"
 )
 
-// Form is a form
+// Form is a published form
 type Form internal.Form
 type Forms []internal.Form
 

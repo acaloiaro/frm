@@ -49,7 +49,7 @@ func FormEditor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	form, err := internal.Q(ctx, f.PostgresURL).GetForm(r.Context(), internal.GetFormParams{
+	draft, err := internal.Q(ctx, f.PostgresURL).GetDraft(r.Context(), internal.GetDraftParams{
 		WorkspaceID: f.WorkspaceID,
 		ID:          *id,
 	})
@@ -59,7 +59,7 @@ func FormEditor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = ui.Builder((frm.Form)(form)).Render(r.Context(), w)
+	err = ui.Builder((frm.Form)(draft)).Render(r.Context(), w)
 	if err != nil {
 		slog.Error("unable to render builder", slog.Any("error", err))
 		w.WriteHeader(http.StatusInternalServerError)
@@ -80,7 +80,7 @@ func UpdateFieldOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	form, err := internal.Q(ctx, f.PostgresURL).GetForm(ctx, internal.GetFormParams{
+	draft, err := internal.Q(ctx, f.PostgresURL).GetDraft(ctx, internal.GetDraftParams{
 		WorkspaceID: f.WorkspaceID,
 		ID:          *formID,
 	})
@@ -101,7 +101,7 @@ func UpdateFieldOrder(w http.ResponseWriter, r *http.Request) {
 		switch key {
 		case "order":
 			for order, fieldID := range field {
-				oldField := form.Fields[fieldID]
+				oldField := draft.Fields[fieldID]
 				oldField.Order = order
 				updatedFields[fieldID] = oldField
 			}
@@ -109,24 +109,24 @@ func UpdateFieldOrder(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	form.Fields = updatedFields
-	form, err = internal.Q(ctx, f.PostgresURL).SaveForm(ctx, internal.SaveFormParams{
-		ID:     form.ID,
-		Name:   form.Name,
+	draft.Fields = updatedFields
+	draft, err = internal.Q(ctx, f.PostgresURL).SaveDraft(ctx, internal.SaveDraftParams{
+		ID:     draft.ID,
+		Name:   draft.Name,
 		Fields: updatedFields,
 	})
 	if err != nil {
-		slog.Error("unable to save form", slog.Any("error", err))
+		slog.Error("unable to save draft", slog.Any("error", err))
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
 	// Re-render the form fields form UI
-	err = ui.FormFieldsForm((frm.Form)(form)).Render(ctx, w)
+	err = ui.FormFieldsForm((frm.Form)(draft)).Render(ctx, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
-	err = ui.FormView((frm.Form)(form), true).Render(ctx, w)
+	err = ui.FormView((frm.Form)(draft), true).Render(ctx, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
@@ -170,7 +170,7 @@ func LogicConfiguratorStep3(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	form, err := internal.Q(ctx, f.PostgresURL).GetForm(ctx, internal.GetFormParams{
+	draft, err := internal.Q(ctx, f.PostgresURL).GetDraft(ctx, internal.GetDraftParams{
 		WorkspaceID: f.WorkspaceID,
 		ID:          *formID,
 	})
@@ -179,13 +179,13 @@ func LogicConfiguratorStep3(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	targetField, ok := form.Fields[targetFieldID.String()]
+	targetField, ok := draft.Fields[targetFieldID.String()]
 	if !ok {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
-	err = ui.LogicConfiguratorStepThree((frm.Form)(form), form.Fields[fieldID.String()], targetField).Render(ctx, w)
+	err = ui.LogicConfiguratorStepThree((frm.Form)(draft), draft.Fields[fieldID.String()], targetField).Render(ctx, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
@@ -201,14 +201,14 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	formID, err := formID(ctx)
+	draftID, err := formID(ctx)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	form, err := internal.Q(ctx, f.PostgresURL).GetForm(ctx, internal.GetFormParams{
+	form, err := internal.Q(ctx, f.PostgresURL).GetDraft(ctx, internal.GetDraftParams{
 		WorkspaceID: f.WorkspaceID,
-		ID:          *formID,
+		ID:          *draftID,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
@@ -226,8 +226,8 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 	if len(formName) == 0 {
 		formName = "New form"
 	}
-	form, err = internal.Q(ctx, f.PostgresURL).SaveForm(ctx, internal.SaveFormParams{
-		ID:     formID,
+	form, err = internal.Q(ctx, f.PostgresURL).SaveDraft(ctx, internal.SaveDraftParams{
+		ID:     draftID,
 		Name:   formName,
 		Fields: form.Fields,
 	})
@@ -283,7 +283,7 @@ func NewField(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	form, err := internal.Q(ctx, f.PostgresURL).GetForm(ctx, internal.GetFormParams{
+	draft, err := internal.Q(ctx, f.PostgresURL).GetDraft(ctx, internal.GetDraftParams{
 		WorkspaceID: f.WorkspaceID,
 		ID:          *formID,
 	})
@@ -305,7 +305,7 @@ func NewField(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fields := form.Fields
+	fields := draft.Fields
 	order := len(fields) + 1 // place the new field at the end of the field list
 	fieldID := uuid.New()
 	newField := &types.FormField{ID: fieldID, Type: fieldType, Order: order}
@@ -325,9 +325,9 @@ func NewField(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fields[fieldID.String()] = *newField
-	_, err = internal.Q(ctx, f.PostgresURL).SaveForm(ctx, internal.SaveFormParams{
+	_, err = internal.Q(ctx, f.PostgresURL).SaveDraft(ctx, internal.SaveDraftParams{
 		ID:     formID,
-		Name:   form.Name,
+		Name:   draft.Name,
 		Fields: fields,
 	})
 	if err != nil {
@@ -337,19 +337,19 @@ func NewField(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Re-render the form fields form UI
-	err = ui.FormFieldsForm((frm.Form)(form)).Render(ctx, w)
+	err = ui.FormFieldsForm((frm.Form)(draft)).Render(ctx, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
 	// Re-render the form preview
-	err = ui.FormView((frm.Form)(form), true).Render(ctx, w)
+	err = ui.FormView((frm.Form)(draft), true).Render(ctx, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
 	// Re-render the configurator form
-	err = ui.FormFieldConfigurator((frm.Form)(form)).Render(ctx, w)
+	err = ui.FormFieldConfigurator((frm.Form)(draft)).Render(ctx, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
@@ -370,7 +370,7 @@ func UpdateFields(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	form, err := internal.Q(ctx, f.PostgresURL).GetForm(ctx, internal.GetFormParams{
+	draft, err := internal.Q(ctx, f.PostgresURL).GetDraft(ctx, internal.GetDraftParams{
 		WorkspaceID: f.WorkspaceID,
 		ID:          *formID,
 	})
@@ -386,7 +386,7 @@ func UpdateFields(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updatedFields := form.Fields
+	updatedFields := draft.Fields
 
 	// clear out the logic fields, ensuring logic only gets configured when the UI reflects fully configured logic
 	for fid, f := range updatedFields {
@@ -410,24 +410,24 @@ func UpdateFields(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case fieldName == "required":
 			val := (len(fieldValues) > 1 && fieldValues[1] == "on") || (len(fieldValues) > 0 && fieldValues[0] == "on")
-			oldField := form.Fields[fieldID]
+			oldField := draft.Fields[fieldID]
 			oldField.Required = val
 			updatedFields[fieldID] = oldField
 		case fieldName == "hidden":
 			val := (len(fieldValues) > 1 && fieldValues[1] == "on") || (len(fieldValues) > 0 && fieldValues[0] == "on")
-			oldField := form.Fields[fieldID]
+			oldField := draft.Fields[fieldID]
 			oldField.Hidden = val
 			updatedFields[fieldID] = oldField
 		case fieldName == "label":
-			oldField := form.Fields[fieldID]
+			oldField := draft.Fields[fieldID]
 			oldField.Label = fieldValues[0]
 			updatedFields[fieldID] = oldField
 		case fieldName == "placeholder":
-			oldField := form.Fields[fieldID]
+			oldField := draft.Fields[fieldID]
 			oldField.Placeholder = fieldValues[0]
 			updatedFields[fieldID] = oldField
 		case fieldName == "options":
-			oldField := form.Fields[fieldID]
+			oldField := draft.Fields[fieldID]
 			oldField.Options = toFormFieldOption(oldField, fieldValues)
 			updatedFields[fieldID] = oldField
 		case fieldGroup == ui.FieldGroupLogic && fieldName == ui.FieldLogicTargetFieldID:
@@ -435,28 +435,28 @@ func UpdateFields(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				continue
 			}
-			oldField := form.Fields[fieldID]
+			oldField := draft.Fields[fieldID]
 			if oldField.Logic == nil {
 				oldField.Logic = &types.FieldLogic{}
 			}
 			oldField.Logic.TargetFieldID = targetFieldID
 			updatedFields[fieldID] = oldField
 		case fieldGroup == ui.FieldGroupLogic && fieldName == ui.FieldLogicTargetFieldValue:
-			oldField := form.Fields[fieldID]
+			oldField := draft.Fields[fieldID]
 			if oldField.Logic == nil {
 				oldField.Logic = &types.FieldLogic{}
 			}
 			oldField.Logic.TriggerValues = fieldValues
 			updatedFields[fieldID] = oldField
 		case fieldGroup == ui.FieldGroupLogic && fieldName == ui.FieldLogicComparator:
-			oldField := form.Fields[fieldID]
+			oldField := draft.Fields[fieldID]
 			if oldField.Logic == nil {
 				oldField.Logic = &types.FieldLogic{}
 			}
 			oldField.Logic.TriggerComparator, _ = types.FieldLogicComparatorString(fieldValues[0])
 			updatedFields[fieldID] = oldField
 		case fieldGroup == ui.FieldGroupLogic && fieldName == types.FieldLogicTriggerShow.String():
-			oldField := form.Fields[fieldID]
+			oldField := draft.Fields[fieldID]
 			if oldField.Logic == nil {
 				oldField.Logic = &types.FieldLogic{}
 			}
@@ -467,10 +467,10 @@ func UpdateFields(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	form.Fields = updatedFields
-	form, err = internal.Q(ctx, f.PostgresURL).SaveForm(ctx, internal.SaveFormParams{
-		ID:     form.ID,
-		Name:   form.Name,
+	draft.Fields = updatedFields
+	draft, err = internal.Q(ctx, f.PostgresURL).SaveDraft(ctx, internal.SaveDraftParams{
+		ID:     draft.ID,
+		Name:   draft.Name,
 		Fields: updatedFields,
 	})
 	if err != nil {
@@ -479,13 +479,13 @@ func UpdateFields(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Re-render the form fields form UI
-	err = ui.FormFieldsForm((frm.Form)(form)).Render(ctx, w)
+	err = ui.FormFieldsForm((frm.Form)(draft)).Render(ctx, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
 	// Re-render the form preview
-	err = ui.FormView((frm.Form)(form), true).Render(ctx, w)
+	err = ui.FormView((frm.Form)(draft), true).Render(ctx, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
@@ -512,7 +512,7 @@ func DeleteField(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	form, err := internal.Q(ctx, f.PostgresURL).GetForm(ctx, internal.GetFormParams{
+	draft, err := internal.Q(ctx, f.PostgresURL).GetDraft(ctx, internal.GetDraftParams{
 		WorkspaceID: f.WorkspaceID,
 		ID:          *formID,
 	})
@@ -520,12 +520,12 @@ func DeleteField(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	updatedFields := form.Fields
+	updatedFields := draft.Fields
 	delete(updatedFields, fmt.Sprint(fieldID))
-	form.Fields = updatedFields
-	form, err = internal.Q(ctx, f.PostgresURL).SaveForm(ctx, internal.SaveFormParams{
-		ID:     form.ID,
-		Name:   form.Name,
+	draft.Fields = updatedFields
+	draft, err = internal.Q(ctx, f.PostgresURL).SaveDraft(ctx, internal.SaveDraftParams{
+		ID:     draft.ID,
+		Name:   draft.Name,
 		Fields: updatedFields,
 	})
 	if err != nil {
@@ -534,19 +534,19 @@ func DeleteField(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Re-render the form fields form UI
-	err = ui.FormFieldsForm((frm.Form)(form)).Render(ctx, w)
+	err = ui.FormFieldsForm((frm.Form)(draft)).Render(ctx, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
 	// Re-render the form preview
-	err = ui.FormView((frm.Form)(form), true).Render(ctx, w)
+	err = ui.FormView((frm.Form)(draft), true).Render(ctx, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
 	// Re-render the configurator form
-	err = ui.FormFieldConfigurator((frm.Form)(form)).Render(ctx, w)
+	err = ui.FormFieldConfigurator((frm.Form)(draft)).Render(ctx, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
@@ -556,6 +556,42 @@ func DeleteField(w http.ResponseWriter, r *http.Request) {
 
 // NewDraft creates a new draft an existing form
 func NewDraft(w http.ResponseWriter, r *http.Request) {
+}
+
+// PublishDraft copies drafts to published forms
+func PublishDraft(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	f, err := instance(ctx)
+	if err != nil {
+		slog.Error("unable to publish draft", "error", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	formID, err := formID(ctx)
+	if err != nil {
+		slog.Error("unable to publish draft", "error", err)
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	draft, err := internal.Q(ctx, f.PostgresURL).GetDraft(ctx, internal.GetDraftParams{
+		WorkspaceID: f.WorkspaceID,
+		ID:          *formID,
+	})
+	if err != nil {
+		slog.Error("unable to publish draft", "error", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	_, err = internal.Q(ctx, f.PostgresURL).PublishDraft(ctx, draft.ID)
+	if err != nil {
+		slog.Error("unable to publish draft", "error", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
 
 // instance returns the frm instance from the request context

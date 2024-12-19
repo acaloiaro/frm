@@ -33,6 +33,7 @@ func Mount(router chi.Router, mountPoint string, f *frm.Frm) {
 	rc := r.With(addRequestContext)
 	rc.Get(fmt.Sprintf("/{%s}", urlParamFormID), handlers.FormEditor)
 	rc.Get(fmt.Sprintf("/{%s}/draft", urlParamFormID), handlers.NewDraft)
+	rc.Put(fmt.Sprintf("/{%s}/publish", urlParamFormID), handlers.PublishDraft)
 	rc.Put(fmt.Sprintf("/{%s}/fields/order", urlParamFormID), handlers.UpdateFieldOrder)
 	rc.Get(fmt.Sprintf("/{%s}/logic_configurator/{%s}/step3", urlParamFormID, urlParamFieldID), handlers.LogicConfiguratorStep3)
 	rc.Put(fmt.Sprintf("/{%s}/settings", urlParamFormID), handlers.UpdateSettings)

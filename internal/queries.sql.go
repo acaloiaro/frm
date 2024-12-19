@@ -12,9 +12,46 @@ import (
 	uuid "github.com/google/uuid"
 )
 
+const getDraft = `-- name: GetDraft :one
+
+SELECT id, form_id, workspace_id, name, fields, status, created_at, updated_at
+FROM forms
+WHERE workspace_id = $1
+  AND id = $2
+  AND status = 'draft'
+`
+
+type GetDraftParams struct {
+	WorkspaceID uuid.UUID `json:"workspace_id"`
+	ID          int64     `json:"id"`
+}
+
+// GetDraft
+//
+//	SELECT id, form_id, workspace_id, name, fields, status, created_at, updated_at
+//	FROM forms
+//	WHERE workspace_id = $1
+//	  AND id = $2
+//	  AND status = 'draft'
+func (q *Queries) GetDraft(ctx context.Context, arg GetDraftParams) (Form, error) {
+	row := q.db.QueryRow(ctx, getDraft, arg.WorkspaceID, arg.ID)
+	var i Form
+	err := row.Scan(
+		&i.ID,
+		&i.FormID,
+		&i.WorkspaceID,
+		&i.Name,
+		&i.Fields,
+		&i.Status,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getForm = `-- name: GetForm :one
 
-SELECT id, workspace_id, name, fields, created_at, updated_at
+SELECT id, form_id, workspace_id, name, fields, status, created_at, updated_at
 FROM forms
 WHERE workspace_id = $1
   AND id = $2
@@ -27,7 +64,7 @@ type GetFormParams struct {
 
 // GetForm
 //
-//	SELECT id, workspace_id, name, fields, created_at, updated_at
+//	SELECT id, form_id, workspace_id, name, fields, status, created_at, updated_at
 //	FROM forms
 //	WHERE workspace_id = $1
 //	  AND id = $2
@@ -36,29 +73,40 @@ func (q *Queries) GetForm(ctx context.Context, arg GetFormParams) (Form, error) 
 	var i Form
 	err := row.Scan(
 		&i.ID,
+		&i.FormID,
 		&i.WorkspaceID,
 		&i.Name,
 		&i.Fields,
+		&i.Status,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
 	return i, err
 }
 
-const listForms = `-- name: ListForms :many
+const listDrafts = `-- name: ListDrafts :many
 
-SELECT id, workspace_id, name, fields, created_at, updated_at
+SELECT id, form_id, workspace_id, name, fields, status, created_at, updated_at
 FROM forms
 WHERE workspace_id = $1
+  AND form_id = $2
+  AND status = 'draft'
 `
 
-// ListForms
+type ListDraftsParams struct {
+	WorkspaceID uuid.UUID `json:"workspace_id"`
+	FormID      *int64    `json:"form_id"`
+}
+
+// ListDrafts
 //
-//	SELECT id, workspace_id, name, fields, created_at, updated_at
+//	SELECT id, form_id, workspace_id, name, fields, status, created_at, updated_at
 //	FROM forms
 //	WHERE workspace_id = $1
-func (q *Queries) ListForms(ctx context.Context, workspaceID uuid.UUID) ([]Form, error) {
-	rows, err := q.db.Query(ctx, listForms, workspaceID)
+//	  AND form_id = $2
+//	  AND status = 'draft'
+func (q *Queries) ListDrafts(ctx context.Context, arg ListDraftsParams) ([]Form, error) {
+	rows, err := q.db.Query(ctx, listDrafts, arg.WorkspaceID, arg.FormID)
 	if err != nil {
 		return nil, err
 	}
@@ -68,9 +116,11 @@ func (q *Queries) ListForms(ctx context.Context, workspaceID uuid.UUID) ([]Form,
 		var i Form
 		if err := rows.Scan(
 			&i.ID,
+			&i.FormID,
 			&i.WorkspaceID,
 			&i.Name,
 			&i.Fields,
+			&i.Status,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -84,34 +134,152 @@ func (q *Queries) ListForms(ctx context.Context, workspaceID uuid.UUID) ([]Form,
 	return items, nil
 }
 
-const saveForm = `-- name: SaveForm :one
+const listForms = `-- name: ListForms :many
 
-INSERT INTO forms (id, workspace_id, name, fields)
-VALUES (coalesce(nullif($1, 0), nextval('form_ids'))::bigint, $2, $3, $4) ON conflict(id) DO
-UPDATE
-SET updated_at = timezone('utc', now()),
-    name = $3,
-    fields = $4 RETURNING id, workspace_id, name, fields, created_at, updated_at
+SELECT id, form_id, workspace_id, name, fields, status, created_at, updated_at
+FROM forms
+WHERE workspace_id = $1
 `
 
-type SaveFormParams struct {
+// ListForms
+//
+//	SELECT id, form_id, workspace_id, name, fields, status, created_at, updated_at
+//	FROM forms
+//	WHERE workspace_id = $1
+func (q *Queries) ListForms(ctx context.Context, workspaceID uuid.UUID) ([]Form, error) {
+	rows, err := q.db.Query(ctx, listForms, workspaceID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Form
+	for rows.Next() {
+		var i Form
+		if err := rows.Scan(
+			&i.ID,
+			&i.FormID,
+			&i.WorkspaceID,
+			&i.Name,
+			&i.Fields,
+			&i.Status,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const publishDraft = `-- name: PublishDraft :one
+WITH draft AS
+  (SELECT CASE
+              WHEN form_id IS NOT NULL THEN form_id
+              ELSE nextval('form_ids')
+          END AS id,
+          form_id,
+          workspace_id,
+          name,
+          fields,
+          'published'
+   FROM forms
+   WHERE forms.id = $1)
+INSERT INTO forms(id, form_id, workspace_id, name, fields, status)
+VALUES ((SELECT id FROM draft), NULL, (SELECT workspace_id FROM draft), (SELECT name FROM draft), (SELECT fields FROM draft), 'published') ON conflict(id) DO
+UPDATE
+SET updated_at = timezone('utc', now()),
+    form_id = NULL,
+    workspace_id =
+  (SELECT workspace_id
+   FROM draft),
+    name =
+  (SELECT name
+   FROM draft),
+    fields =
+  (SELECT fields
+   FROM draft),
+    status = 'published' RETURNING id, form_id, workspace_id, name, fields, status, created_at, updated_at
+`
+
+// PublishDraft
+//
+//	WITH draft AS
+//	  (SELECT CASE
+//	              WHEN form_id IS NOT NULL THEN form_id
+//	              ELSE nextval('form_ids')
+//	          END AS id,
+//	          form_id,
+//	          workspace_id,
+//	          name,
+//	          fields,
+//	          'published'
+//	   FROM forms
+//	   WHERE forms.id = $1)
+//	INSERT INTO forms(id, form_id, workspace_id, name, fields, status)
+//	VALUES ((SELECT id FROM draft), NULL, (SELECT workspace_id FROM draft), (SELECT name FROM draft), (SELECT fields FROM draft), 'published') ON conflict(id) DO
+//	UPDATE
+//	SET updated_at = timezone('utc', now()),
+//	    form_id = NULL,
+//	    workspace_id =
+//	  (SELECT workspace_id
+//	   FROM draft),
+//	    name =
+//	  (SELECT name
+//	   FROM draft),
+//	    fields =
+//	  (SELECT fields
+//	   FROM draft),
+//	    status = 'published' RETURNING id, form_id, workspace_id, name, fields, status, created_at, updated_at
+func (q *Queries) PublishDraft(ctx context.Context, id int64) (Form, error) {
+	row := q.db.QueryRow(ctx, publishDraft, id)
+	var i Form
+	err := row.Scan(
+		&i.ID,
+		&i.FormID,
+		&i.WorkspaceID,
+		&i.Name,
+		&i.Fields,
+		&i.Status,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const saveDraft = `-- name: SaveDraft :one
+
+INSERT INTO forms (id, form_id, workspace_id, name, fields)
+VALUES (coalesce(nullif($1, 0), nextval('form_ids'))::bigint, $2, $3, $4, $5) ON conflict(id) DO
+UPDATE
+SET updated_at = timezone('utc', now()),
+    name = $4,
+    fields = $5 RETURNING id, form_id, workspace_id, name, fields, status, created_at, updated_at
+`
+
+type SaveDraftParams struct {
 	ID          interface{}      `json:"id"`
+	FormID      *int64           `json:"form_id"`
 	WorkspaceID uuid.UUID        `json:"workspace_id"`
 	Name        string           `json:"name"`
 	Fields      types.FormFields `json:"fields"`
 }
 
-// SaveForm
+// SaveDraft
 //
-//	INSERT INTO forms (id, workspace_id, name, fields)
-//	VALUES (coalesce(nullif($1, 0), nextval('form_ids'))::bigint, $2, $3, $4) ON conflict(id) DO
+//	INSERT INTO forms (id, form_id, workspace_id, name, fields)
+//	VALUES (coalesce(nullif($1, 0), nextval('form_ids'))::bigint, $2, $3, $4, $5) ON conflict(id) DO
 //	UPDATE
 //	SET updated_at = timezone('utc', now()),
-//	    name = $3,
-//	    fields = $4 RETURNING id, workspace_id, name, fields, created_at, updated_at
-func (q *Queries) SaveForm(ctx context.Context, arg SaveFormParams) (Form, error) {
-	row := q.db.QueryRow(ctx, saveForm,
+//	    name = $4,
+//	    fields = $5 RETURNING id, form_id, workspace_id, name, fields, status, created_at, updated_at
+func (q *Queries) SaveDraft(ctx context.Context, arg SaveDraftParams) (Form, error) {
+	row := q.db.QueryRow(ctx, saveDraft,
 		arg.ID,
+		arg.FormID,
 		arg.WorkspaceID,
 		arg.Name,
 		arg.Fields,
@@ -119,9 +287,11 @@ func (q *Queries) SaveForm(ctx context.Context, arg SaveFormParams) (Form, error
 	var i Form
 	err := row.Scan(
 		&i.ID,
+		&i.FormID,
 		&i.WorkspaceID,
 		&i.Name,
 		&i.Fields,
+		&i.Status,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
