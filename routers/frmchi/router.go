@@ -3,7 +3,6 @@ package frmchi
 import (
 	"context"
 	"fmt"
-	"log/slog"
 	"net/http"
 	"strconv"
 	"strings"
@@ -30,7 +29,7 @@ func Mount(router chi.Router, mountPoint string, f *frm.Frm) {
 	r.Use(addFrmContext(f))
 	router.Mount(mountPoint, r)
 	r.NotFound(handlers.StaticAssetHandler)
-	r.With(addRequestContext).Get("/", handlers.FormEditor)
+	r.With(addRequestContext).Get(fmt.Sprintf("/{%s}", urlParamFormID), handlers.FormEditor)
 	r.With(addRequestContext).Put(fmt.Sprintf("/{%s}/fields/order", urlParamFormID), handlers.UpdateFieldOrder)
 	r.With(addRequestContext).Get(fmt.Sprintf("/{%s}/logic_configurator/{%s}/step3", urlParamFormID, urlParamFieldID), handlers.LogicConfiguratorStep3)
 	r.With(addRequestContext).Put(fmt.Sprintf("/{%s}/settings", urlParamFormID), handlers.UpdateSettings)
@@ -70,14 +69,7 @@ func addFrmContext(f *frm.Frm) func(http.Handler) http.Handler {
 			ctx = context.WithValue(ctx, internal.MountPointContextKey, mountPoint)
 
 			// Add the frm instance to the request context, using the workspace ID extracted from the chi route context
-			f, err := frm.New(frm.Args{
-				PostgresURL: f.PostgresURL,
-				WorkspaceID: uuid.MustParse(workspaceID), // TODO don't use MustParse here, figure out what the failure scenario should look like
-			})
-			if err != nil {
-				slog.Error("unable to create frm instance", "error", err)
-				return
-			}
+			f.WorkspaceID = uuid.MustParse(workspaceID) // TODO don't use MustParse here, figure out what the failure scenario should look like
 			ctx = context.WithValue(ctx, internal.FrmContextKey, f)
 
 			h.ServeHTTP(w, r.Clone(ctx))
@@ -100,7 +92,6 @@ func addRequestContext(h http.Handler) http.Handler {
 						return
 					}
 					ctx = context.WithValue(ctx, handlers.FormIDContextKey, &formID)
-
 				}
 
 				// populate the request context with the field id form the URL

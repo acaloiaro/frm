@@ -13,10 +13,11 @@ var ErrCannotDetermineWorkspace = errors.New("workspace cannot be determine with
 // Frm is the primary API into frm
 type Frm struct {
 	PostgresURL         string    // the database URL where forms are stored
-	WorkspaceID         uuid.UUID // the ID of the workspace that this instance acts on behalf of
+	WorkspaceID         uuid.UUID // the ID of the workspace that the frm acts on behalf of
 	WorkspaceIDUrlParam string    // the name of the URL parameter that provides your workspace ID
 }
 
+// Args are arguments passed to Frm
 type Args struct {
 	PostgresURL         string
 	WorkspaceID         uuid.UUID
@@ -60,11 +61,16 @@ func (f *Frm) GetForm(ctx context.Context, id int64) (form Form, err error) {
 	return
 }
 
-// ListForms lists all available forms
-func (f *Frm) ListForms(ctx context.Context, id int64) (forms Forms, err error) {
-	forms, err = internal.Q(ctx, f.PostgresURL).ListForms(ctx, f.WorkspaceID)
+// ListForms lists all forms for the current workspace
+func (f *Frm) ListForms(ctx context.Context) (forms []Form, err error) {
+	var fs Forms
+	fs, err = internal.Q(ctx, f.PostgresURL).ListForms(ctx, f.WorkspaceID)
 	if err != nil {
 		return
+	}
+
+	for _, f := range fs {
+		forms = append(forms, (Form)(f))
 	}
 
 	return

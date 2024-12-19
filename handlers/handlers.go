@@ -43,19 +43,22 @@ func FormEditor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	forms, err := internal.Q(ctx, f.PostgresURL).ListForms(r.Context(), f.WorkspaceID)
+	id, err := formID(ctx)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	form, err := internal.Q(ctx, f.PostgresURL).GetForm(r.Context(), internal.GetFormParams{
+		WorkspaceID: f.WorkspaceID,
+		ID:          *id,
+	})
 	if err != nil {
 		slog.Error("unable to get forms", slog.Any("error", err))
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	if len(forms) == 0 {
-		w.WriteHeader(http.StatusNoContent)
-		return
-	}
-
-	form := forms[0]
 	err = ui.Builder((frm.Form)(form)).Render(r.Context(), w)
 	if err != nil {
 		slog.Error("unable to render builder", slog.Any("error", err))
