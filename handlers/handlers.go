@@ -554,7 +554,11 @@ func DeleteField(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-// instance gets the frm instance from the request context
+// NewDraft creates a new draft an existing form
+func NewDraft(w http.ResponseWriter, r *http.Request) {
+}
+
+// instance returns the frm instance from the request context
 func instance(ctx context.Context) (i *frm.Frm, err error) {
 	var ok bool
 	i, ok = ctx.Value(internal.FrmContextKey).(*frm.Frm)

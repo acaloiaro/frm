@@ -89,7 +89,7 @@ func InitializeDB(ctx context.Context, postgresURL string) (err error) {
 	return
 }
 
-// TODO not all users wil have permission to do this. Fail gracefully when user lacks permission
+// TODO not all db crdentials have permission to do this. Fail gracefully when user lacks permission
 func createIfNotExist(ctx context.Context, cfg *pgx.ConnConfig) (err error) {
 	dbName := cfg.Database
 	cfg.Database = ""

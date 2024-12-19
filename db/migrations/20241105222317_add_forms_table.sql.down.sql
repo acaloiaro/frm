@@ -1,2 +1,4 @@
-DROP TABLE forms;
+DROP TABLE IF EXISTS forms;
+DROP TABLE IF EXISTS draft_forms;
 DROP SEQUENCE IF EXISTS forms_ids;
+DROP SEQUENCE IF EXISTS draft_forms_ids;

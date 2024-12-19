@@ -7,13 +7,10 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/acaloiaro/frm"
 	"github.com/acaloiaro/frm/internal"
 	"github.com/acaloiaro/frm/types"
 	"github.com/google/uuid"
-)
-
-var (
-	postgresURL = os.Getenv("DATABASE_URL")
 )
 
 func TestCreateAndUpdateForm(t *testing.T) {
@@ -61,7 +58,20 @@ func TestCreateAndUpdateForm(t *testing.T) {
 		},
 	}
 	ctx := context.Background()
-	f, err := internal.Q(ctx, postgresURL).SaveForm(ctx, internal.SaveFormParams{
+	frms, err := frm.New(frm.Args{
+		PostgresURL: os.Getenv("POSTGRES_URL"),
+		WorkspaceID: uuid.New(),
+	})
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	err = frms.Init(ctx)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	f, err := internal.Q(ctx, frms.PostgresURL).SaveForm(ctx, internal.SaveFormParams{
 		ID:     1,
 		Name:   "hello world",
 		Fields: fields,
@@ -71,7 +81,7 @@ func TestCreateAndUpdateForm(t *testing.T) {
 		return
 	}
 
-	f, err = internal.Q(ctx, postgresURL).SaveForm(ctx, internal.SaveFormParams{
+	f, err = internal.Q(ctx, frms.PostgresURL).SaveForm(ctx, internal.SaveFormParams{
 		ID:     1,
 		Name:   nameUpdate,
 		Fields: updatedFields,

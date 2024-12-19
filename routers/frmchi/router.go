@@ -29,13 +29,16 @@ func Mount(router chi.Router, mountPoint string, f *frm.Frm) {
 	r.Use(addFrmContext(f))
 	router.Mount(mountPoint, r)
 	r.NotFound(handlers.StaticAssetHandler)
-	r.With(addRequestContext).Get(fmt.Sprintf("/{%s}", urlParamFormID), handlers.FormEditor)
-	r.With(addRequestContext).Put(fmt.Sprintf("/{%s}/fields/order", urlParamFormID), handlers.UpdateFieldOrder)
-	r.With(addRequestContext).Get(fmt.Sprintf("/{%s}/logic_configurator/{%s}/step3", urlParamFormID, urlParamFieldID), handlers.LogicConfiguratorStep3)
-	r.With(addRequestContext).Put(fmt.Sprintf("/{%s}/settings", urlParamFormID), handlers.UpdateSettings)
-	r.With(addRequestContext).Post(fmt.Sprintf("/{%s}/fields", urlParamFormID), handlers.NewField)
-	r.With(addRequestContext).Put(fmt.Sprintf("/{%s}/fields", urlParamFormID), handlers.UpdateFields)
-	r.With(addRequestContext).Delete(fmt.Sprintf("/{%s}/fields/{%s}", urlParamFormID, urlParamFieldID), handlers.DeleteField)
+
+	rc := r.With(addRequestContext)
+	rc.Get(fmt.Sprintf("/{%s}", urlParamFormID), handlers.FormEditor)
+	rc.Get(fmt.Sprintf("/{%s}/draft", urlParamFormID), handlers.NewDraft)
+	rc.Put(fmt.Sprintf("/{%s}/fields/order", urlParamFormID), handlers.UpdateFieldOrder)
+	rc.Get(fmt.Sprintf("/{%s}/logic_configurator/{%s}/step3", urlParamFormID, urlParamFieldID), handlers.LogicConfiguratorStep3)
+	rc.Put(fmt.Sprintf("/{%s}/settings", urlParamFormID), handlers.UpdateSettings)
+	rc.Post(fmt.Sprintf("/{%s}/fields", urlParamFormID), handlers.NewField)
+	rc.Put(fmt.Sprintf("/{%s}/fields", urlParamFormID), handlers.UpdateFields)
+	rc.Delete(fmt.Sprintf("/{%s}/fields/{%s}", urlParamFormID, urlParamFieldID), handlers.DeleteField)
 }
 
 // addFrmContext adds all the context necessary for its handlers to function

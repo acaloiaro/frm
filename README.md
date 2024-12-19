@@ -6,7 +6,15 @@ frm is an embeddable HTML form builder for Go. Its goal is to be embeddable with
 
 ## Concepts
 
+### Workspaces 
+
 frm's design is oriented around the concept of "workspaces". Workspaces may represent users or tenants within your application. As such, every interaction with frm must be workspace-aware.
+
+### Draft forms
+
+"Drafts" are created to edit existing forms. When drafts are saved, they replace the form they were drafted from. Edits are _always_ performed on drafts, such that edits do not go live until the user decides.
+
+Drafts are cleaned up from the database periodically.
 
 ## Usage
 

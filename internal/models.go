@@ -11,6 +11,17 @@ import (
 	uuid "github.com/google/uuid"
 )
 
+// Draft forms allow forms to be edited in situ and act as a staging ground for Forms
+type DraftForm struct {
+	ID          int64     `json:"id"`
+	FormID      *int64    `json:"form_id"`
+	WorkspaceID uuid.UUID `json:"workspace_id"`
+	Name        string    `json:"name"`
+	Fields      []byte    `json:"fields"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
 // Form contains all the data necesary to render a form
 type Form struct {
 	ID int64 `json:"id"`
