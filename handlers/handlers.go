@@ -15,6 +15,7 @@ import (
 	"github.com/acaloiaro/frm/types"
 	"github.com/acaloiaro/frm/ui"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 )
 
 type contextKey string
@@ -34,8 +35,8 @@ func StaticAssetHandler(w http.ResponseWriter, r *http.Request) {
 	http.FileServer(http.FS(static.Assets)).ServeHTTP(w, r)
 }
 
-// FormEditor displays the form editor and previewer
-func FormEditor(w http.ResponseWriter, r *http.Request) {
+// DraftEditor displays the form editor and previewer
+func DraftEditor(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	f, err := instance(ctx)
 	if err != nil {
@@ -554,8 +555,50 @@ func DeleteField(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-// NewDraft creates a new draft an existing form
+// NewDraft creates a new draft from scratch or an existing form
 func NewDraft(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	formID, _ := formID(ctx)
+	f, err := instance(ctx)
+	if err != nil {
+		slog.Error("unable to create draft", "error", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	q := internal.Q(ctx, f.PostgresURL)
+
+	draftParams := &internal.SaveDraftParams{
+		WorkspaceID: f.WorkspaceID,
+		Fields:      types.FormFields{},
+	}
+	if formID != nil {
+		form, err := q.GetForm(ctx, internal.GetFormParams{
+			WorkspaceID: f.WorkspaceID,
+			ID:          *formID,
+		})
+		if err != nil && errors.Is(err, pgx.ErrNoRows) {
+			w.WriteHeader(http.StatusNotFound)
+		} else if err != nil {
+			slog.Error("unable to create draft", "error", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		draftParams.FormID = &form.ID
+		draftParams.Name = form.Name
+		draftParams.Fields = form.Fields
+	} else {
+		draftParams.Name = "New form"
+	}
+
+	draft, err := q.SaveDraft(ctx, *draftParams)
+	if err != nil {
+		slog.Error("unable to create draft", "error", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Add("HX-Trigger", fmt.Sprintf("{\"%s\": {\"draft_id\": \"%d\"}}", frm.EventDraftCreated, draft.ID))
+	w.WriteHeader(http.StatusCreated)
 }
 
 // PublishDraft copies drafts to published forms
@@ -567,7 +610,7 @@ func PublishDraft(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	formID, err := formID(ctx)
+	draftID, err := formID(ctx)
 	if err != nil {
 		slog.Error("unable to publish draft", "error", err)
 		w.WriteHeader(http.StatusNotFound)
@@ -576,7 +619,7 @@ func PublishDraft(w http.ResponseWriter, r *http.Request) {
 
 	draft, err := internal.Q(ctx, f.PostgresURL).GetDraft(ctx, internal.GetDraftParams{
 		WorkspaceID: f.WorkspaceID,
-		ID:          *formID,
+		ID:          *draftID,
 	})
 	if err != nil {
 		slog.Error("unable to publish draft", "error", err)
@@ -592,6 +635,35 @@ func PublishDraft(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+// DeleteForm deletes forms
+func DeleteForm(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	f, err := instance(ctx)
+	if err != nil {
+		slog.Error("unable to delete form", "error", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	formID, err := formID(ctx)
+	if err != nil {
+		slog.Error("unable to delete form", "error", err)
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	err = internal.Q(ctx, f.PostgresURL).DeleteForm(ctx, internal.DeleteFormParams{
+		WorkspaceID: f.WorkspaceID,
+		ID:          *formID,
+	})
+	if err != nil {
+		slog.Error("unable to delete form", "error", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }
 
 // instance returns the frm instance from the request context

@@ -14,7 +14,7 @@ CREATE TYPE form_status AS ENUM (
 -- workspaces represent users, tenants, groupings, etc. in external systems
 CREATE TABLE IF NOT EXISTS forms (
     id BIGINT PRIMARY KEY DEFAULT nextval('form_ids'),
-    form_id BIGINT REFERENCES forms(id),
+    form_id BIGINT REFERENCES forms(id) ON DELETE CASCADE,
     workspace_id UUID NOT NULL,
     name text not null,
     fields jsonb default '{}' NOT NULL,

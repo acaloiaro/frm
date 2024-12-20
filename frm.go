@@ -8,6 +8,10 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	EventDraftCreated = "frmDraftCreated" // htmx event sent when new drafts are created
+)
+
 var ErrCannotDetermineWorkspace = errors.New("workspace cannot be determine without WorkspaceID or WorkspaceIDUrlParam")
 
 // Frm is the primary API into frm
@@ -23,6 +27,8 @@ type Args struct {
 	WorkspaceID         uuid.UUID
 	WorkspaceIDUrlParam string
 }
+
+type FormStatus internal.FormStatus
 
 // New initializes a new frm instance
 //
@@ -61,10 +67,21 @@ func (f *Frm) GetForm(ctx context.Context, id int64) (form Form, err error) {
 	return
 }
 
+type ListFormsArgs struct {
+	Statuses []FormStatus
+}
+
 // ListForms lists all forms for the current workspace
-func (f *Frm) ListForms(ctx context.Context) (forms []Form, err error) {
+func (f *Frm) ListForms(ctx context.Context, args ListFormsArgs) (forms []Form, err error) {
 	var fs Forms
-	fs, err = internal.Q(ctx, f.PostgresURL).ListForms(ctx, f.WorkspaceID)
+	statuses := []internal.FormStatus{}
+	for _, s := range args.Statuses {
+		statuses = append(statuses, (internal.FormStatus)(s))
+	}
+	fs, err = internal.Q(ctx, f.PostgresURL).ListForms(ctx, internal.ListFormsParams{
+		WorkspaceID: f.WorkspaceID,
+		Statuses:    statuses,
+	})
 	if err != nil {
 		return
 	}

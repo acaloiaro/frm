@@ -12,6 +12,30 @@ import (
 	uuid "github.com/google/uuid"
 )
 
+const deleteForm = `-- name: DeleteForm :exec
+
+DELETE
+FROM forms
+WHERE workspace_id = $1
+  AND id = $2
+`
+
+type DeleteFormParams struct {
+	WorkspaceID uuid.UUID `json:"workspace_id"`
+	ID          int64     `json:"id"`
+}
+
+// DeleteForm
+//
+//	DELETE
+//	FROM forms
+//	WHERE workspace_id = $1
+//	  AND id = $2
+func (q *Queries) DeleteForm(ctx context.Context, arg DeleteFormParams) error {
+	_, err := q.db.Exec(ctx, deleteForm, arg.WorkspaceID, arg.ID)
+	return err
+}
+
 const getDraft = `-- name: GetDraft :one
 
 SELECT id, form_id, workspace_id, name, fields, status, created_at, updated_at
@@ -139,15 +163,28 @@ const listForms = `-- name: ListForms :many
 SELECT id, form_id, workspace_id, name, fields, status, created_at, updated_at
 FROM forms
 WHERE workspace_id = $1
+  AND status = any(CASE
+                       WHEN cardinality($2::form_status[]) > 0 THEN $2::form_status[]
+                       ELSE enum_range(NULL::form_status)::form_status[]
+                   END::form_status[])
 `
+
+type ListFormsParams struct {
+	WorkspaceID uuid.UUID    `json:"workspace_id"`
+	Statuses    []FormStatus `json:"statuses"`
+}
 
 // ListForms
 //
 //	SELECT id, form_id, workspace_id, name, fields, status, created_at, updated_at
 //	FROM forms
 //	WHERE workspace_id = $1
-func (q *Queries) ListForms(ctx context.Context, workspaceID uuid.UUID) ([]Form, error) {
-	rows, err := q.db.Query(ctx, listForms, workspaceID)
+//	  AND status = any(CASE
+//	                       WHEN cardinality($2::form_status[]) > 0 THEN $2::form_status[]
+//	                       ELSE enum_range(NULL::form_status)::form_status[]
+//	                   END::form_status[])
+func (q *Queries) ListForms(ctx context.Context, arg ListFormsParams) ([]Form, error) {
+	rows, err := q.db.Query(ctx, listForms, arg.WorkspaceID, arg.Statuses)
 	if err != nil {
 		return nil, err
 	}

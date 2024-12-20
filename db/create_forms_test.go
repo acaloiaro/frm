@@ -13,6 +13,10 @@ import (
 	"github.com/google/uuid"
 )
 
+var (
+	workspaceID = uuid.New()
+)
+
 func TestCreateAndUpdateForm(t *testing.T) {
 	const nameUpdate = "Tell us about you"
 	fieldID := uuid.MustParse("1afd4bf9-42a4-4dfe-b359-d46a65ce5ba5")
@@ -60,7 +64,7 @@ func TestCreateAndUpdateForm(t *testing.T) {
 	ctx := context.Background()
 	frms, err := frm.New(frm.Args{
 		PostgresURL: os.Getenv("POSTGRES_URL"),
-		WorkspaceID: uuid.New(),
+		WorkspaceID: workspaceID,
 	})
 	if err != nil {
 		t.Error(err)
@@ -82,7 +86,7 @@ func TestCreateAndUpdateForm(t *testing.T) {
 	}
 
 	f, err = internal.Q(ctx, frms.PostgresURL).SaveDraft(ctx, internal.SaveDraftParams{
-		ID:          1,
+		ID:          f.ID,
 		Name:        nameUpdate,
 		Fields:      updatedFields,
 		WorkspaceID: frms.WorkspaceID,

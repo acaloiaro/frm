@@ -5,6 +5,13 @@ FROM forms
 WHERE workspace_id = @workspace_id
   AND id = @id;
 
+-- name: DeleteForm :exec
+
+DELETE
+FROM forms
+WHERE workspace_id = @workspace_id
+  AND id = @id;
+
 -- name: GetDraft :one
 
 SELECT *
@@ -17,7 +24,11 @@ WHERE workspace_id = @workspace_id
 
 SELECT *
 FROM forms
-WHERE workspace_id = @workspace_id;
+WHERE workspace_id = @workspace_id
+  AND status = any(CASE
+                       WHEN cardinality(@statuses::form_status[]) > 0 THEN @statuses::form_status[]
+                       ELSE enum_range(NULL::form_status)::form_status[]
+                   END::form_status[]);
 
 -- name: ListDrafts :many
 

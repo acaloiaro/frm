@@ -28,6 +28,11 @@ var pool *pgxpool.Pool
 
 type Forms []Form
 
+var enumTypes = []string{
+	"form_status",
+	"_form_status", // array of form statuses
+}
+
 // getPool returns a database pool for the specified connection string
 func getPool(ctx context.Context, databaseURL string) (p *pgxpool.Pool, err error) {
 	if pool == nil {
@@ -36,6 +41,19 @@ func getPool(ctx context.Context, databaseURL string) (p *pgxpool.Pool, err erro
 		if err != nil {
 			err = fmt.Errorf("invalid connection string: %v", err)
 			return
+		}
+
+		// this after conect hook allows pgx to correclty encode enum types as query params
+		// reference: https://github.com/jackc/pgx/issues/1549#issuecomment-1467107173
+		poolConfig.AfterConnect = func(ctx context.Context, conn *pgx.Conn) error {
+			for _, typ := range enumTypes {
+				t, err := conn.LoadType(ctx, typ)
+				if err != nil {
+					return err
+				}
+				conn.TypeMap().RegisterType(t)
+			}
+			return nil
 		}
 
 		err = InitializeDB(ctx, databaseURL)
@@ -92,7 +110,7 @@ func InitializeDB(ctx context.Context, postgresURL string) (err error) {
 // TODO not all db crdentials have permission to do this. Fail gracefully when user lacks permission
 func createIfNotExist(ctx context.Context, cfg *pgx.ConnConfig) (err error) {
 	dbName := cfg.Database
-	cfg.Database = ""
+	cfg.Database = "postgres"
 	cfg.RuntimeParams = nil
 
 	conn, err := pgx.ConnectConfig(context.Background(), cfg)
@@ -147,7 +165,6 @@ func pgConnectionString(postgresURL string, disableSSL bool, options ...string) 
 	if err != nil {
 		return
 	}
-
 	options = append(options, "x-migrations-table=frm_migrations")
 
 	if disableSSL {

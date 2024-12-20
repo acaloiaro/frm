@@ -31,8 +31,10 @@ func Mount(router chi.Router, mountPoint string, f *frm.Frm) {
 	r.NotFound(handlers.StaticAssetHandler)
 
 	rc := r.With(addRequestContext)
-	rc.Get(fmt.Sprintf("/{%s}", urlParamFormID), handlers.FormEditor)
-	rc.Get(fmt.Sprintf("/{%s}/draft", urlParamFormID), handlers.NewDraft)
+	rc.Post("/draft", handlers.NewDraft)
+	rc.Get(fmt.Sprintf("/{%s}", urlParamFormID), handlers.DraftEditor)
+	rc.Delete(fmt.Sprintf("/{%s}", urlParamFormID), handlers.DeleteForm)
+	rc.Post(fmt.Sprintf("/{%s}/draft", urlParamFormID), handlers.NewDraft)
 	rc.Put(fmt.Sprintf("/{%s}/publish", urlParamFormID), handlers.PublishDraft)
 	rc.Put(fmt.Sprintf("/{%s}/fields/order", urlParamFormID), handlers.UpdateFieldOrder)
 	rc.Get(fmt.Sprintf("/{%s}/logic_configurator/{%s}/step3", urlParamFormID, urlParamFieldID), handlers.LogicConfiguratorStep3)
