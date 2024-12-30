@@ -131,11 +131,13 @@ func SafePath(ctx context.Context, path string) templ.SafeURL {
 	return templ.SafeURL(fmt.Sprintf("%s%s", ctx.Value(internal.MountPointContextKey).(string), path))
 }
 
-// Path returns mountpoint-aware string paths for the given path
+// Path returns paths relative to frm's mount point
 func Path(ctx context.Context, path string) string {
-	base := ctx.Value(internal.MountPointContextKey).(string)
-	base = filepath.Clean(base)
-	return fmt.Sprintf("%s/%s", base, path)
+	base, ok := ctx.Value(internal.MountPointContextKey).(string)
+	if !ok {
+		return "/"
+	}
+	return filepath.Clean(fmt.Sprintf("%s/%s", base, path))
 }
 
 // head simply provides the <head> element
@@ -145,11 +147,12 @@ templ head(pageTitle string) {
 		<meta charset="UTF-8"/>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 		@loadDependenciesOnce.Once() {
-			<link href={ Path(ctx, "css/styles.css") } rel="stylesheet"/>
-			<script type="text/javascript" src={ Path(ctx, "js/htmx.js") } nonce={ templ.GetNonce(ctx) }></script>
-			<script type="text/javascript" src={ Path(ctx, "js/htmx-response-targets.js") } nonce={ templ.GetNonce(ctx) }></script>
-			<script type="text/javascript" src={ Path(ctx, "js/hyperscript.js") } nonce={ templ.GetNonce(ctx) }></script>
-			<script ytpe="text/javascript" src={ Path(ctx, "js/choices.min.js") } nonce={ templ.GetNonce(ctx) }></script>
+			<link href={ Path(ctx, "static/css/styles.css") } rel="stylesheet"/>
+			<link rel="stylesheet" href={ Path(ctx, "static/css/choices.min.css") } nonce={ templ.GetNonce(ctx) }/>
+			<script type="text/javascript" src={ Path(ctx, "static/js/htmx.js") } nonce={ templ.GetNonce(ctx) }></script>
+			<script type="text/javascript" src={ Path(ctx, "static/js/htmx-response-targets.js") } nonce={ templ.GetNonce(ctx) }></script>
+			<script type="text/javascript" src={ Path(ctx, "static/js/hyperscript.js") } nonce={ templ.GetNonce(ctx) }></script>
+			<script ytpe="text/javascript" src={ Path(ctx, "static/js/choices.min.js") } nonce={ templ.GetNonce(ctx) }></script>
 			<script type="text/javascript" src="https://unpkg.com/external-svg-loader@latest/svg-loader.min.js" nonce={ templ.GetNonce(ctx) } async></script>
 			<script type="text/javascript" src="https://unpkg.com/sortablejs@latest/Sortable.min.js" nonce={ templ.GetNonce(ctx) }></script>
 			<script type="text/javascript">
@@ -235,7 +238,6 @@ templ head(pageTitle string) {
 					}
 				}
 			</script>
-			<link rel="stylesheet" href={ Path(ctx, "css/choices.min.css") } nonce={ templ.GetNonce(ctx) }/>
 		}
 	</head>
 }
@@ -468,7 +470,7 @@ func formUrl[T string | templ.SafeURL](ctx context.Context, form frm.Form, path 
 	if len(path) == 1 {
 		p = path[0]
 	}
-	return T(Path(ctx, fmt.Sprintf("%d%s", form.ID, p)))
+	return T(Path(ctx, f("/forms/%d%s", form.ID, p)))
 }
 
 templ FormFieldConfigurator(form frm.Form) {
@@ -920,4 +922,9 @@ func sortFields(fields types.FormFields) (sorted []types.FormField) {
 	sorted = toFrmFields(fields)
 	sort.Sort(types.FormFieldSortByOrder(sorted))
 	return
+}
+
+// f is shorthand for fmt.Sprintf, for readability
+func f(s string, args ...any) string {
+	return fmt.Sprintf(s, args...)
 }

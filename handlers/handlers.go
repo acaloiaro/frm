@@ -30,8 +30,17 @@ var ErrFieldIDNotFound = errors.New("a field ID was not found in the request con
 // StaticAssetHandler handles requests for assets embedded in frm's static file system
 func StaticAssetHandler(w http.ResponseWriter, r *http.Request) {
 	mp := r.Context().Value(internal.MountPointContextKey).(string)
-	// Remove the mount point from the path so the static filesystem paths are resolved relative to its root
-	r.URL.Path = strings.ReplaceAll(r.URL.Path, mp, "")
+
+	// mp ends in a slash (e.g. foo/bar/), and we want to remove /foo/bar/static from the path prefix before searching for
+	// paths in the static file system. Join mp with "static" to form foo/bar/static as path prefix to be removed
+	// before searching inside the file system for files.
+	pathPrefix := fmt.Sprintf("%s%s", mp, "static")
+
+	// Remove the mount point and static prefix from the path so the static filesystem paths are resolved relative to
+	// the file system's root, e.g. if frm is mounted at /foo/bar, /foo/bar/static is removed from the URL path before
+	// searching inside the file system.
+	r.URL.Path = strings.ReplaceAll(r.URL.Path, pathPrefix, "")
+
 	http.FileServer(http.FS(static.Assets)).ServeHTTP(w, r)
 }
 
