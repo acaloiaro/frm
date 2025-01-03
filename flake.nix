@@ -4,10 +4,6 @@
     systems.url = "github:nix-systems/default";
     devenv.url = "github:cachix/devenv";
     tailwindcss.url = "github:acaloiaro/tailwind-cli-extra";
-    gomod2nix = {
-      url = "github:nix-community/gomod2nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     ess = {
       url = "github:acaloiaro/ess/v2.13.0";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -25,7 +21,6 @@
     devenv,
     systems,
     air,
-    gomod2nix,
     tailwindcss,
     ...
   } @ inputs: let
@@ -56,7 +51,6 @@
             packages = with pkgs; [
               air.packages.${system}.default
               go-migrate
-              gomod2nix.legacyPackages.${system}.gomod2nix
               nixpacks
               sqlc
               postgresql
@@ -103,14 +97,6 @@
                 run-show-help
               '';
             process.managers.process-compose.unixSocket.enable = true;
-            pre-commit.hooks.gomod2nix = {
-              enable = true;
-              always_run = true;
-              pass_filenames = false;
-              name = "gomod2nix";
-              description = "Run gomod2nix before commit";
-              entry = "${gomod2nix.legacyPackages.${system}.gomod2nix}/bin/gomod2nix";
-            };
 
             pre-commit.hooks.env-sample-sync = {
               enable = true;
