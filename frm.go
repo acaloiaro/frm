@@ -3,6 +3,8 @@ package frm
 import (
 	"context"
 	"errors"
+	"fmt"
+	"path/filepath"
 
 	"github.com/acaloiaro/frm/internal"
 	"github.com/google/uuid"
@@ -16,13 +18,15 @@ var ErrCannotDetermineWorkspace = errors.New("workspace cannot be determine with
 
 // Frm is the primary API into frm
 type Frm struct {
-	PostgresURL         string    // the database URL where forms are stored
+	MountPoint          string    // the relative URL path where frm mounts to your aplication
+	PostgresURL         string    // the database URL where form data are stored
 	WorkspaceID         uuid.UUID // the ID of the workspace that the frm acts on behalf of
 	WorkspaceIDUrlParam string    // the name of the URL parameter that provides your workspace ID
 }
 
 // Args are arguments passed to Frm
 type Args struct {
+	MountPoint          string
 	PostgresURL         string
 	WorkspaceID         uuid.UUID
 	WorkspaceIDUrlParam string
@@ -32,13 +36,14 @@ type FormStatus internal.FormStatus
 
 // New initializes a new frm instance
 //
-// If the frm database hasn't been initiailized, the database is initialized
+// If the frm database has not yet been initialized, Init() should be called before mounting to a router
 func New(args Args) (f *Frm, err error) {
 	if args.WorkspaceID == uuid.Nil && args.WorkspaceIDUrlParam == "" {
 		return nil, ErrCannotDetermineWorkspace
 	}
 
 	f = &Frm{
+		MountPoint:          args.MountPoint,
 		PostgresURL:         args.PostgresURL,
 		WorkspaceID:         args.WorkspaceID,
 		WorkspaceIDUrlParam: args.WorkspaceIDUrlParam,
@@ -91,4 +96,17 @@ func (f *Frm) ListForms(ctx context.Context, args ListFormsArgs) (forms []Form, 
 	}
 
 	return
+}
+
+// URLPath returns paths to frm endpoints
+//
+// This function takes into account where frm is mounted on an application's router.
+// e.g. If frm is mounted with `frmchi.Mount(chiRouter, "/frm", f)` then `Path(ctx, "/forms/100")` returns `/frm/forms/100`
+func URLPath(ctx context.Context, path string) string {
+	base, ok := ctx.Value(internal.MountPointContextKey).(string)
+	if !ok {
+		return "/"
+	}
+	urlPath := filepath.Clean(fmt.Sprintf("%s/%s", base, path))
+	return urlPath
 }

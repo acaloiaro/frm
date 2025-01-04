@@ -24,10 +24,14 @@ const (
 )
 
 // Mount mounts frm to the router at the given path
-func Mount(router chi.Router, mountPoint string, f *frm.Frm) {
+//
+// root: The root of your application's routing tree. This is used by frm to lookup where it is in the tree.
+// router: The router on which frm will mount itself. Must be in root's routing tree.
+// f: The frm instance
+func Mount(router chi.Router, f *frm.Frm) {
 	r := chi.NewRouter()
-	r.Use(addFrmContext(f))
-	router.Mount(mountPoint, r)
+	r.Use(Middlware(f))
+	router.Mount(f.MountPoint, r)
 	rc := r.With(addRequestContext)
 	rc.NotFound(handlers.StaticAssetHandler)
 	rc.Route(fmt.Sprintf("/forms/{%s}", urlParamFormID), func(form chi.Router) {
@@ -45,16 +49,15 @@ func Mount(router chi.Router, mountPoint string, f *frm.Frm) {
 	})
 }
 
-// addFrmContext adds all the context necessary for its handlers to function
+// Middlware adds all the context necessary for frm's handlers and path helpers to function
 //
-// 1. Adds the mount point where frm is mounted to the request context
-// 2. Add an frm instance to the request context, to be used by handlers
-func addFrmContext(f *frm.Frm) func(http.Handler) http.Handler {
+// Adds the mount point where frm is mounted to the request context
+func Middlware(f *frm.Frm) func(http.Handler) http.Handler {
 	return func(h http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
+			mountPoint := chi.RouteContext(ctx).RoutePattern()
 			var workspaceID string
-			mountPoint := chi.RouteContext(r.Context()).RoutePattern()
 			if rctx := chi.RouteContext(ctx); rctx != nil {
 				for i, urlParam := range rctx.URLParams.Keys {
 					if strings.Contains(mountPoint, urlParam) {
@@ -63,7 +66,6 @@ func addFrmContext(f *frm.Frm) func(http.Handler) http.Handler {
 						// that it holders the place for, so we can use the full, realized routePattern as frm's mountpoint
 						mountPoint = strings.ReplaceAll(mountPoint, fmt.Sprintf("{%s}", urlParam), rctx.URLParams.Values[i])
 					}
-
 					// extract the workspace id
 					if urlParam == f.WorkspaceIDUrlParam {
 						workspaceID = rctx.URLParams.Values[i]
@@ -71,12 +73,12 @@ func addFrmContext(f *frm.Frm) func(http.Handler) http.Handler {
 				}
 			}
 
-			// remove extraneous chi wildcard patterns from the final path
+			// remove chi wildcard patterns from the final path
 			mountPoint = strings.ReplaceAll(mountPoint, "*", "")
 			ctx = context.WithValue(ctx, internal.MountPointContextKey, mountPoint)
 
 			// Add the frm instance to the request context, using the workspace ID extracted from the chi route context
-			f.WorkspaceID = uuid.MustParse(workspaceID) // TODO don't use MustParse here, figure out what the failure scenario should look like
+			f.WorkspaceID = uuid.MustParse(workspaceID) // TODO don't use MustParse here, figure out what the failure scenario should look like, or switch frm to use string workspace IDs rather than UUIDs, so that parsing is not necessary and provide more flexiblity for users to namespace forms
 			ctx = context.WithValue(ctx, internal.FrmContextKey, f)
 
 			h.ServeHTTP(w, r.Clone(ctx))
@@ -91,7 +93,7 @@ func addRequestContext(h http.Handler) http.Handler {
 		ctx := r.Context()
 		if rctx := chi.RouteContext(ctx); rctx != nil {
 			for _, urlParam := range rctx.URLParams.Keys {
-				// populate the request context with the form id form the URL
+				// populate the request context with the form id from the URL
 				if urlParam == string(urlParamFormID) {
 					formID, err := strconv.ParseInt(chi.URLParam(r, string(urlParamFormID)), 10, 64)
 					if err != nil {
@@ -101,7 +103,7 @@ func addRequestContext(h http.Handler) http.Handler {
 					ctx = context.WithValue(ctx, handlers.FormIDContextKey, &formID)
 				}
 
-				// populate the request context with the field id form the URL
+				// populate the request context with the field id from the URL
 				if urlParam == string(urlParamFieldID) {
 					fieldID, err := uuid.Parse(chi.URLParam(r, string(urlParamFieldID)))
 					if err != nil {

@@ -69,6 +69,7 @@ func main() {
 	f, err := frm.New(frm.Args{
 		PostgresURL:         os.Getenv("POSTGRES_URL"),
 		WorkspaceIDUrlParam: chiUrlParamName, // name of the chi URL parameter name
+		MountPoint:          fmt.Sprintf("/frm/{%s}", chiUrlParamName),
 	})
 	if err != nil {
 		panic(err)
@@ -77,7 +78,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	frmchi.Mount(chiRouter, fmt.Sprintf("/frm/{%s}", chiUrlParamName), f)
+	frmchi.Mount(chiRouter, f)
 
 	s := &http.Server{
 		Handler:      chiRouter,
