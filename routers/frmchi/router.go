@@ -18,9 +18,9 @@ type urlParam string
 
 const (
 	// the name for the chi url parameter for form IDs
-	urlParamFormID urlParam = "frm_form_id"
+	UrlParamFormID urlParam = "frm_form_id"
 	// the name for the chi url parameter for field IDs
-	urlParamFieldID urlParam = "frm_field_id"
+	UrlParamFieldID urlParam = "frm_field_id"
 )
 
 // Mount mounts frm to the router at the given path
@@ -32,9 +32,10 @@ func Mount(router chi.Router, f *frm.Frm) {
 	r := chi.NewRouter()
 	r.Use(Middlware(f))
 	router.Mount(f.MountPoint, r)
-	rc := r.With(addRequestContext)
-	rc.NotFound(handlers.StaticAssetHandler)
-	rc.Route(fmt.Sprintf("/forms/{%s}", urlParamFormID), func(form chi.Router) {
+	r.NotFound(handlers.StaticAssetHandler)
+	r.With(addRequestContext).Post("/draft", handlers.NewDraft)
+	r.Route(fmt.Sprintf("/forms/{%s}", UrlParamFormID), func(form chi.Router) {
+		form = form.With(addRequestContext)
 		form.Get("/", handlers.DraftEditor)
 		form.Delete("/", handlers.DeleteForm)
 		form.Post("/draft", handlers.NewDraft)
@@ -43,8 +44,8 @@ func Mount(router chi.Router, f *frm.Frm) {
 		form.Put("/settings", handlers.UpdateSettings)
 		form.Post("/fields", handlers.NewField)
 		form.Put("/fields", handlers.UpdateFields)
-		form.Delete(fmt.Sprintf("/fields/{%s}", urlParamFieldID), handlers.DeleteField)
-		form.Get(fmt.Sprintf("/logic_configurator/{%s}/step3", urlParamFieldID), handlers.LogicConfiguratorStep3)
+		form.Delete(fmt.Sprintf("/fields/{%s}", UrlParamFieldID), handlers.DeleteField)
+		form.Get(fmt.Sprintf("/logic_configurator/{%s}/step3", UrlParamFieldID), handlers.LogicConfiguratorStep3)
 		form.NotFound(handlers.StaticAssetHandler)
 	})
 }
@@ -94,8 +95,8 @@ func addRequestContext(h http.Handler) http.Handler {
 		if rctx := chi.RouteContext(ctx); rctx != nil {
 			for _, urlParam := range rctx.URLParams.Keys {
 				// populate the request context with the form id from the URL
-				if urlParam == string(urlParamFormID) {
-					formID, err := strconv.ParseInt(chi.URLParam(r, string(urlParamFormID)), 10, 64)
+				if urlParam == string(UrlParamFormID) {
+					formID, err := strconv.ParseInt(chi.URLParam(r, string(UrlParamFormID)), 10, 64)
 					if err != nil {
 						w.WriteHeader(http.StatusNotFound)
 						return
@@ -104,8 +105,8 @@ func addRequestContext(h http.Handler) http.Handler {
 				}
 
 				// populate the request context with the field id from the URL
-				if urlParam == string(urlParamFieldID) {
-					fieldID, err := uuid.Parse(chi.URLParam(r, string(urlParamFieldID)))
+				if urlParam == string(UrlParamFieldID) {
+					fieldID, err := uuid.Parse(chi.URLParam(r, string(UrlParamFieldID)))
 					if err != nil {
 						w.WriteHeader(http.StatusNotFound)
 						return

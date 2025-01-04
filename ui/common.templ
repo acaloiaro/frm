@@ -438,7 +438,7 @@ templ builderColumnRight(form frm.Form) {
 								tabindex={ fmt.Sprint(i) }
 								class="hover:bg-gray-50 dark:hover:bg-gray-800 rounded cursor-pointer relative truncate text-gray-700 min-w-16 min-h-6"
 								style="height: auto;"
-								data-hx-post={ frm.URLPath(ctx, fmt.Sprintf("%d/fields", form.ID)) }
+								data-hx-post={ formUrl[string](ctx, form, "/fields") }
 								data-hx-trigger="click"
 								data-hx-vals={ fmt.Sprintf(`{"field_type": "%s"}`, fieldType) }
 								data-hx-swap="none"
@@ -486,7 +486,6 @@ templ FormFieldConfigurator(form frm.Form) {
 							"role":     "tab",
 							"tabindex": 2,
 							"_":        fmt.Sprintf("on click take .tab-active from <#configurator-tabs-%s .tab-active/> then add .hidden to #field-%s-settings then take .active-configurator-section from #field-%s-settings for #%s then remove .hidden from #%s", field.ID.String(), field.ID.String(), field.ID.String(), fmt.Sprintf("field-%s-logic", field.ID.String()), fmt.Sprintf("field-%s-logic", field.ID.String())),
-							// "_":        fmt.Sprintf("on click take .tab-active from <#configurator-tabs .tab-active/> then add .hidden to .active-form-fields-section then take .active-form-fields-section for #%s then remove .hidden from #%s", fmt.Sprintf("field-%s-logic", field.ID.String()), fmt.Sprintf("field-%s-logic", field.ID.String())),
 						})
 					</div>
 				</div>
