@@ -18,7 +18,8 @@ var ErrCannotDetermineWorkspace = errors.New("workspace cannot be determine with
 
 // Frm is the primary API into frm
 type Frm struct {
-	MountPoint          string    // the relative URL path where frm mounts to your aplication
+	BuilderMountPoint   string    // the relative URL path where frm mounts the builder to your app's router
+	CollectorMountPoint string    // the relative URL path where frm mounts the collector to your app's router
 	PostgresURL         string    // the database URL where form data are stored
 	WorkspaceID         uuid.UUID // the ID of the workspace that the frm acts on behalf of
 	WorkspaceIDUrlParam string    // the name of the URL parameter that provides your workspace ID
@@ -26,7 +27,8 @@ type Frm struct {
 
 // Args are arguments passed to Frm
 type Args struct {
-	MountPoint          string
+	BuilderMountPoint   string
+	CollectorMountPoint string
 	PostgresURL         string
 	WorkspaceID         uuid.UUID
 	WorkspaceIDUrlParam string
@@ -43,7 +45,8 @@ func New(args Args) (f *Frm, err error) {
 	}
 
 	f = &Frm{
-		MountPoint:          args.MountPoint,
+		BuilderMountPoint:   args.BuilderMountPoint,
+		CollectorMountPoint: args.CollectorMountPoint,
 		PostgresURL:         args.PostgresURL,
 		WorkspaceID:         args.WorkspaceID,
 		WorkspaceIDUrlParam: args.WorkspaceIDUrlParam,

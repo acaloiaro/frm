@@ -23,15 +23,14 @@ const (
 	UrlParamFieldID urlParam = "frm_field_id"
 )
 
-// Mount mounts frm to the router at the given path
+// MountBuilder mounts the frm form builder to the router at the given path
 //
-// root: The root of your application's routing tree. This is used by frm to lookup where it is in the tree.
-// router: The router on which frm will mount itself. Must be in root's routing tree.
+// router: The router on which frm mounts the builder.
 // f: The frm instance
-func Mount(router chi.Router, f *frm.Frm) {
+func MountBuilder(router chi.Router, f *frm.Frm) {
 	r := chi.NewRouter()
 	r.Use(Middlware(f))
-	router.Mount(f.MountPoint, r)
+	router.Mount(f.BuilderMountPoint, r)
 	r.NotFound(handlers.StaticAssetHandler)
 	r.With(addRequestContext).Post("/draft", handlers.NewDraft)
 	r.Route(fmt.Sprintf("/forms/{%s}", UrlParamFormID), func(form chi.Router) {
@@ -46,7 +45,21 @@ func Mount(router chi.Router, f *frm.Frm) {
 		form.Put("/fields", handlers.UpdateFields)
 		form.Delete(fmt.Sprintf("/fields/{%s}", UrlParamFieldID), handlers.DeleteField)
 		form.Get(fmt.Sprintf("/logic_configurator/{%s}/step3", UrlParamFieldID), handlers.LogicConfiguratorStep3)
-		form.NotFound(handlers.StaticAssetHandler)
+	})
+}
+
+// MountCollector mounts the frm form collector to the router at the given path
+//
+// router: The router on which frm mounts the collector
+// f: The frm instance
+func MountCollector(router chi.Router, f *frm.Frm) {
+	r := chi.NewRouter()
+	r.Use(Middlware(f))
+	router.Mount(f.CollectorMountPoint, r)
+	r.NotFound(handlers.StaticAssetHandler)
+	r.Route(fmt.Sprintf("/{%s}", UrlParamFormID), func(form chi.Router) {
+		form = form.With(addRequestContext)
+		form.Get("/", handlers.View)
 	})
 }
 

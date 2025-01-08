@@ -65,11 +65,12 @@ func main() {
 	logger.Info("frm dev server started")
 	chiRouter := chi.NewRouter()
 	chiRouter.Use(httplog.RequestLogger(requestLogger))
-	const chiUrlParamName = "frm_workspace_id"
+	const workspaceParamName = "frm_workspace_id"
 	f, err := frm.New(frm.Args{
 		PostgresURL:         os.Getenv("POSTGRES_URL"),
-		WorkspaceIDUrlParam: chiUrlParamName, // name of the chi URL parameter name
-		MountPoint:          fmt.Sprintf("/frm/{%s}", chiUrlParamName),
+		WorkspaceIDUrlParam: workspaceParamName, // name of the chi URL parameter name
+		BuilderMountPoint:   fmt.Sprintf("/frm/{%s}", workspaceParamName),
+		CollectorMountPoint: fmt.Sprintf("/frm/{%s}/c", workspaceParamName),
 	})
 	if err != nil {
 		panic(err)
@@ -78,7 +79,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	frmchi.Mount(chiRouter, f)
+	frmchi.MountBuilder(chiRouter, f)
+	frmchi.MountCollector(chiRouter, f)
 
 	s := &http.Server{
 		Handler:      chiRouter,

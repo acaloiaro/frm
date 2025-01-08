@@ -503,6 +503,35 @@ func UpdateFields(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+// View renders the form viewer for the collector
+func View(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	i, err := instance(ctx)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	formID, err := formID(ctx)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	f, err := internal.Q(ctx, i.PostgresURL).GetForm(ctx, internal.GetFormParams{
+		WorkspaceID: i.WorkspaceID,
+		ID:          *formID,
+	})
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	// Render the form collector
+	err = ui.Viewer((frm.Form)(f)).Render(ctx, w)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+}
+
 // DeleteField deletes fields
 func DeleteField(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
