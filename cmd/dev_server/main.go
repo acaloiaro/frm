@@ -68,9 +68,10 @@ func main() {
 	const workspaceParamName = "frm_workspace_id"
 	f, err := frm.New(frm.Args{
 		PostgresURL:         os.Getenv("POSTGRES_URL"),
+		PostgresDisableSSL:  true,
 		WorkspaceIDUrlParam: workspaceParamName, // name of the chi URL parameter name
-		BuilderMountPoint:   fmt.Sprintf("/frm/{%s}", workspaceParamName),
-		CollectorMountPoint: fmt.Sprintf("/frm/{%s}/c", workspaceParamName),
+		BuilderMountPoint:   fmt.Sprintf("/frm/{%s}/build", workspaceParamName),
+		CollectorMountPoint: fmt.Sprintf("/frm/{%s}/collect", workspaceParamName),
 	})
 	if err != nil {
 		panic(err)
@@ -79,8 +80,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	frmchi.MountBuilder(chiRouter, f)
-	frmchi.MountCollector(chiRouter, f)
+	frmchi.Mount(chiRouter, f)
 
 	s := &http.Server{
 		Handler:      chiRouter,

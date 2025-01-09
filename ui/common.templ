@@ -463,12 +463,18 @@ templ builderColumnRight(form frm.Form) {
 	</section>
 }
 
+// formUrl returns form builder URLs for the given form and additional path arguments
 func formUrl[T string | templ.SafeURL](ctx context.Context, form frm.Form, path ...string) T {
 	p := ""
 	if len(path) == 1 {
 		p = path[0]
 	}
-	return T(frm.URLPath(ctx, f("/forms/%d%s", form.ID, p)))
+	return T(f("%s%s", frm.BuilderPathForm(ctx, form.ID), p))
+}
+
+// formCollectorUrl returns form collector URLs for the given form and additional path arguments
+func formCollectorUrl[T string | templ.SafeURL](ctx context.Context, form frm.Form, path ...string) T {
+	return T(frm.CollectorPathForm(ctx, form.ID, path...))
 }
 
 templ FormFieldConfigurator(form frm.Form) {
@@ -616,7 +622,7 @@ templ fieldLogicConfiguration(form frm.Form, field types.FormField) {
 	<div id={ fmt.Sprintf("field-%s-logic", field.ID.String()) } class="flex flex-col gap-5 hidden">
 		<div>
 			<div
-				data-hx-get={ frm.URLPath(ctx, fmt.Sprintf("/forms/%d/logic_configurator/%s/step3", form.ID, field.ID.String())) }
+				data-hx-get={ frm.URLPath(ctx, fmt.Sprintf("/build/%d/logic_configurator/%s/step3", form.ID, field.ID.String())) }
 				data-hx-trigger={ LogicConfiguratorTargetFieldSelected }
 				data-hx-swap="innerHTML"
 				data-hx-target={ fmt.Sprintf("#logic-field-value-chooser-%s", field.ID.String()) }
@@ -884,7 +890,7 @@ templ FormView(form frm.Form, isPreview bool) {
 				Classes: []string{"flex-grow", "justify-center", "uppercase"},
 			}, templ.Attributes{
 				"type":            "submit",
-				"data-hx-post":    fmt.Sprintf("/%d", form.ID),
+				"data-hx-post":    formCollectorUrl[string](ctx, form),
 				"data-hx-trigger": "click",
 				"data-hx-swap":    "none",
 				"disabled":        isPreview,

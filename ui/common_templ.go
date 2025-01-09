@@ -1387,12 +1387,18 @@ func builderColumnRight(form frm.Form) templ.Component {
 	})
 }
 
+// formUrl returns form builder URLs for the given form and additional path arguments
 func formUrl[T string | templ.SafeURL](ctx context.Context, form frm.Form, path ...string) T {
 	p := ""
 	if len(path) == 1 {
 		p = path[0]
 	}
-	return T(frm.URLPath(ctx, f("/forms/%d%s", form.ID, p)))
+	return T(f("%s%s", frm.BuilderPathForm(ctx, form.ID), p))
+}
+
+// formCollectorUrl returns form collector URLs for the given form and additional path arguments
+func formCollectorUrl[T string | templ.SafeURL](ctx context.Context, form frm.Form, path ...string) T {
+	return T(frm.CollectorPathForm(ctx, form.ID, path...))
 }
 
 func FormFieldConfigurator(form frm.Form) templ.Component {
@@ -1423,7 +1429,7 @@ func FormFieldConfigurator(form frm.Form) templ.Component {
 		var templ_7745c5c3_Var59 string
 		templ_7745c5c3_Var59, templ_7745c5c3_Err = templ.JoinStringErrs(formUrl[string](ctx, form, "/fields"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 477, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 483, Col: 53}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var59))
 		if templ_7745c5c3_Err != nil {
@@ -1436,7 +1442,7 @@ func FormFieldConfigurator(form frm.Form) templ.Component {
 		var templ_7745c5c3_Var60 string
 		templ_7745c5c3_Var60, templ_7745c5c3_Err = templ.JoinStringErrs(FieldsFormUpdateEvent)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 478, Col: 41}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 484, Col: 41}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var60))
 		if templ_7745c5c3_Err != nil {
@@ -1454,7 +1460,7 @@ func FormFieldConfigurator(form frm.Form) templ.Component {
 			var templ_7745c5c3_Var61 string
 			templ_7745c5c3_Var61, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("configure-%s", field.ID.String()))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 483, Col: 59}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 489, Col: 59}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var61))
 			if templ_7745c5c3_Err != nil {
@@ -1475,7 +1481,7 @@ func FormFieldConfigurator(form frm.Form) templ.Component {
 			var templ_7745c5c3_Var62 string
 			templ_7745c5c3_Var62, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("configurator-tabs-%s", field.ID.String()))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 487, Col: 68}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 493, Col: 68}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var62))
 			if templ_7745c5c3_Err != nil {
@@ -1558,7 +1564,7 @@ func fieldSettingsConfiguration(form frm.Form, field types.FormField) templ.Comp
 		var templ_7745c5c3_Var64 string
 		templ_7745c5c3_Var64, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("field-%s-settings", field.ID.String()))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 511, Col: 62}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 517, Col: 62}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var64))
 		if templ_7745c5c3_Err != nil {
@@ -1571,7 +1577,7 @@ func fieldSettingsConfiguration(form frm.Form, field types.FormField) templ.Comp
 		var templ_7745c5c3_Var65 string
 		templ_7745c5c3_Var65, templ_7745c5c3_Err = templ.JoinStringErrs(fieldName(field, "", "required"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 512, Col: 48}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 518, Col: 48}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var65))
 		if templ_7745c5c3_Err != nil {
@@ -1584,7 +1590,7 @@ func fieldSettingsConfiguration(form frm.Form, field types.FormField) templ.Comp
 		var templ_7745c5c3_Var66 string
 		templ_7745c5c3_Var66, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(field.Required))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 512, Col: 99}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 518, Col: 99}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var66))
 		if templ_7745c5c3_Err != nil {
@@ -1597,7 +1603,7 @@ func fieldSettingsConfiguration(form frm.Form, field types.FormField) templ.Comp
 		var templ_7745c5c3_Var67 string
 		templ_7745c5c3_Var67, templ_7745c5c3_Err = templ.JoinStringErrs(fieldName(field, "", "hidden"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 513, Col: 46}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 519, Col: 46}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var67))
 		if templ_7745c5c3_Err != nil {
@@ -1610,7 +1616,7 @@ func fieldSettingsConfiguration(form frm.Form, field types.FormField) templ.Comp
 		var templ_7745c5c3_Var68 string
 		templ_7745c5c3_Var68, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(field.Hidden))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 513, Col: 95}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 519, Col: 95}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var68))
 		if templ_7745c5c3_Err != nil {
@@ -1623,7 +1629,7 @@ func fieldSettingsConfiguration(form frm.Form, field types.FormField) templ.Comp
 		var templ_7745c5c3_Var69 string
 		templ_7745c5c3_Var69, templ_7745c5c3_Err = templ.JoinStringErrs(fieldName(field, "", "field_type"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 514, Col: 50}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 520, Col: 50}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var69))
 		if templ_7745c5c3_Err != nil {
@@ -1636,7 +1642,7 @@ func fieldSettingsConfiguration(form frm.Form, field types.FormField) templ.Comp
 		var templ_7745c5c3_Var70 string
 		templ_7745c5c3_Var70, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(field.Type))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 514, Col: 97}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 520, Col: 97}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var70))
 		if templ_7745c5c3_Err != nil {
@@ -1649,7 +1655,7 @@ func fieldSettingsConfiguration(form frm.Form, field types.FormField) templ.Comp
 		var templ_7745c5c3_Var71 string
 		templ_7745c5c3_Var71, templ_7745c5c3_Err = templ.JoinStringErrs(fieldName(field, "", "label"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 516, Col: 45}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 522, Col: 45}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var71))
 		if templ_7745c5c3_Err != nil {
@@ -1670,7 +1676,7 @@ func fieldSettingsConfiguration(form frm.Form, field types.FormField) templ.Comp
 		var templ_7745c5c3_Var72 string
 		templ_7745c5c3_Var72, templ_7745c5c3_Err = templ.JoinStringErrs(fieldName(field, "", "label"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 522, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 528, Col: 37}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var72))
 		if templ_7745c5c3_Err != nil {
@@ -1683,7 +1689,7 @@ func fieldSettingsConfiguration(form frm.Form, field types.FormField) templ.Comp
 		var templ_7745c5c3_Var73 string
 		templ_7745c5c3_Var73, templ_7745c5c3_Err = templ.JoinStringErrs(fieldName(field, "", "label"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 523, Col: 39}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 529, Col: 39}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var73))
 		if templ_7745c5c3_Err != nil {
@@ -1696,7 +1702,7 @@ func fieldSettingsConfiguration(form frm.Form, field types.FormField) templ.Comp
 		var templ_7745c5c3_Var74 string
 		templ_7745c5c3_Var74, templ_7745c5c3_Err = templ.JoinStringErrs(field.Label)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 526, Col: 22}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 532, Col: 22}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var74))
 		if templ_7745c5c3_Err != nil {
@@ -1709,7 +1715,7 @@ func fieldSettingsConfiguration(form frm.Form, field types.FormField) templ.Comp
 		var templ_7745c5c3_Var75 string
 		templ_7745c5c3_Var75, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("on keyup debounced at 600ms trigger '%s'", FieldsFormUpdateEvent))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 528, Col: 85}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 534, Col: 85}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var75))
 		if templ_7745c5c3_Err != nil {
@@ -1722,7 +1728,7 @@ func fieldSettingsConfiguration(form frm.Form, field types.FormField) templ.Comp
 		var templ_7745c5c3_Var76 string
 		templ_7745c5c3_Var76, templ_7745c5c3_Err = templ.JoinStringErrs(fieldName(field, "", "placeholder"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 531, Col: 51}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 537, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var76))
 		if templ_7745c5c3_Err != nil {
@@ -1735,7 +1741,7 @@ func fieldSettingsConfiguration(form frm.Form, field types.FormField) templ.Comp
 		var templ_7745c5c3_Var77 string
 		templ_7745c5c3_Var77, templ_7745c5c3_Err = templ.JoinStringErrs(fieldName(field, "", "placeholder"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 536, Col: 43}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 542, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var77))
 		if templ_7745c5c3_Err != nil {
@@ -1748,7 +1754,7 @@ func fieldSettingsConfiguration(form frm.Form, field types.FormField) templ.Comp
 		var templ_7745c5c3_Var78 string
 		templ_7745c5c3_Var78, templ_7745c5c3_Err = templ.JoinStringErrs(fieldName(field, "", "placeholder"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 537, Col: 45}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 543, Col: 45}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var78))
 		if templ_7745c5c3_Err != nil {
@@ -1761,7 +1767,7 @@ func fieldSettingsConfiguration(form frm.Form, field types.FormField) templ.Comp
 		var templ_7745c5c3_Var79 string
 		templ_7745c5c3_Var79, templ_7745c5c3_Err = templ.JoinStringErrs(field.Placeholder)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 540, Col: 28}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 546, Col: 28}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var79))
 		if templ_7745c5c3_Err != nil {
@@ -1774,7 +1780,7 @@ func fieldSettingsConfiguration(form frm.Form, field types.FormField) templ.Comp
 		var templ_7745c5c3_Var80 string
 		templ_7745c5c3_Var80, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("on keyup debounced at 600ms trigger '%s'", FieldsFormUpdateEvent))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 542, Col: 85}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 548, Col: 85}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var80))
 		if templ_7745c5c3_Err != nil {
@@ -1792,7 +1798,7 @@ func fieldSettingsConfiguration(form frm.Form, field types.FormField) templ.Comp
 			var templ_7745c5c3_Var81 string
 			templ_7745c5c3_Var81, templ_7745c5c3_Err = templ.JoinStringErrs(fieldName(field, "", "options"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 546, Col: 48}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 552, Col: 48}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var81))
 			if templ_7745c5c3_Err != nil {
@@ -1822,7 +1828,7 @@ func fieldSettingsConfiguration(form frm.Form, field types.FormField) templ.Comp
 		var templ_7745c5c3_Var82 string
 		templ_7745c5c3_Var82, templ_7745c5c3_Err = templ.JoinStringErrs(fieldName(field, "", "required"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 561, Col: 48}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 567, Col: 48}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var82))
 		if templ_7745c5c3_Err != nil {
@@ -1835,7 +1841,7 @@ func fieldSettingsConfiguration(form frm.Form, field types.FormField) templ.Comp
 		var templ_7745c5c3_Var83 string
 		templ_7745c5c3_Var83, templ_7745c5c3_Err = templ.JoinStringErrs(fieldName(field, "", "required"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 566, Col: 40}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 572, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var83))
 		if templ_7745c5c3_Err != nil {
@@ -1848,7 +1854,7 @@ func fieldSettingsConfiguration(form frm.Form, field types.FormField) templ.Comp
 		var templ_7745c5c3_Var84 string
 		templ_7745c5c3_Var84, templ_7745c5c3_Err = templ.JoinStringErrs(fieldName(field, "", "required"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 567, Col: 42}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 573, Col: 42}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var84))
 		if templ_7745c5c3_Err != nil {
@@ -1877,7 +1883,7 @@ func fieldSettingsConfiguration(form frm.Form, field types.FormField) templ.Comp
 						then trigger '%s'`,
 			fieldName(field, "", "hidden"), FieldsFormUpdateEvent))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 579, Col: 59}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 585, Col: 59}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var85))
 		if templ_7745c5c3_Err != nil {
@@ -1890,7 +1896,7 @@ func fieldSettingsConfiguration(form frm.Form, field types.FormField) templ.Comp
 		var templ_7745c5c3_Var86 string
 		templ_7745c5c3_Var86, templ_7745c5c3_Err = templ.JoinStringErrs(fieldName(field, "", "hidden"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 582, Col: 46}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 588, Col: 46}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var86))
 		if templ_7745c5c3_Err != nil {
@@ -1903,7 +1909,7 @@ func fieldSettingsConfiguration(form frm.Form, field types.FormField) templ.Comp
 		var templ_7745c5c3_Var87 string
 		templ_7745c5c3_Var87, templ_7745c5c3_Err = templ.JoinStringErrs(fieldName(field, "", "hidden"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 587, Col: 38}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 593, Col: 38}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var87))
 		if templ_7745c5c3_Err != nil {
@@ -1916,7 +1922,7 @@ func fieldSettingsConfiguration(form frm.Form, field types.FormField) templ.Comp
 		var templ_7745c5c3_Var88 string
 		templ_7745c5c3_Var88, templ_7745c5c3_Err = templ.JoinStringErrs(fieldName(field, "", "hidden"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 588, Col: 40}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 594, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var88))
 		if templ_7745c5c3_Err != nil {
@@ -1945,7 +1951,7 @@ func fieldSettingsConfiguration(form frm.Form, field types.FormField) templ.Comp
 						then trigger '%s'`,
 			fieldName(field, "", "required"), FieldsFormUpdateEvent))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 600, Col: 61}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 606, Col: 61}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var89))
 		if templ_7745c5c3_Err != nil {
@@ -1999,7 +2005,7 @@ func fieldLogicConfiguration(form frm.Form, field types.FormField) templ.Compone
 		var templ_7745c5c3_Var91 string
 		templ_7745c5c3_Var91, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("field-%s-logic", field.ID.String()))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 616, Col: 59}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 622, Col: 59}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var91))
 		if templ_7745c5c3_Err != nil {
@@ -2010,9 +2016,9 @@ func fieldLogicConfiguration(form frm.Form, field types.FormField) templ.Compone
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var92 string
-		templ_7745c5c3_Var92, templ_7745c5c3_Err = templ.JoinStringErrs(frm.URLPath(ctx, fmt.Sprintf("/forms/%d/logic_configurator/%s/step3", form.ID, field.ID.String())))
+		templ_7745c5c3_Var92, templ_7745c5c3_Err = templ.JoinStringErrs(frm.URLPath(ctx, fmt.Sprintf("/build/%d/logic_configurator/%s/step3", form.ID, field.ID.String())))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 619, Col: 116}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 625, Col: 116}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var92))
 		if templ_7745c5c3_Err != nil {
@@ -2025,7 +2031,7 @@ func fieldLogicConfiguration(form frm.Form, field types.FormField) templ.Compone
 		var templ_7745c5c3_Var93 string
 		templ_7745c5c3_Var93, templ_7745c5c3_Err = templ.JoinStringErrs(LogicConfiguratorTargetFieldSelected)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 620, Col: 58}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 626, Col: 58}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var93))
 		if templ_7745c5c3_Err != nil {
@@ -2038,7 +2044,7 @@ func fieldLogicConfiguration(form frm.Form, field types.FormField) templ.Compone
 		var templ_7745c5c3_Var94 string
 		templ_7745c5c3_Var94, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#logic-field-value-chooser-%s", field.ID.String()))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 622, Col: 84}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 628, Col: 84}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var94))
 		if templ_7745c5c3_Err != nil {
@@ -2081,7 +2087,7 @@ func fieldLogicConfiguration(form frm.Form, field types.FormField) templ.Compone
 		var templ_7745c5c3_Var95 string
 		templ_7745c5c3_Var95, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("logic-field-value-chooser-%s", field.ID.String()))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 647, Col: 71}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 653, Col: 71}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var95))
 		if templ_7745c5c3_Err != nil {
@@ -2104,7 +2110,7 @@ func fieldLogicConfiguration(form frm.Form, field types.FormField) templ.Compone
 		var templ_7745c5c3_Var96 string
 		templ_7745c5c3_Var96, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s-logic-action", field.ID.String()))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 657, Col: 58}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 663, Col: 58}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var96))
 		if templ_7745c5c3_Err != nil {
@@ -2117,7 +2123,7 @@ func fieldLogicConfiguration(form frm.Form, field types.FormField) templ.Compone
 		var templ_7745c5c3_Var97 string
 		templ_7745c5c3_Var97, templ_7745c5c3_Err = templ.JoinStringErrs(fieldName(field, FieldGroupLogic, types.FieldLogicTriggerShow.String()))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 660, Col: 82}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 666, Col: 82}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var97))
 		if templ_7745c5c3_Err != nil {
@@ -2143,7 +2149,7 @@ func fieldLogicConfiguration(form frm.Form, field types.FormField) templ.Compone
 						trigger '%s'`,
 			FieldsFormUpdateEvent))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 667, Col: 28}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 673, Col: 28}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var98))
 		if templ_7745c5c3_Err != nil {
@@ -2156,7 +2162,7 @@ func fieldLogicConfiguration(form frm.Form, field types.FormField) templ.Compone
 		var templ_7745c5c3_Var99 string
 		templ_7745c5c3_Var99, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s-logic-action", field.ID.String()))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 669, Col: 65}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 675, Col: 65}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var99))
 		if templ_7745c5c3_Err != nil {
@@ -2237,7 +2243,7 @@ func LogicConfiguratorStepThree(form frm.Form, field types.FormField, targetFiel
 			var templ_7745c5c3_Var101 string
 			templ_7745c5c3_Var101, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s-logic-chosen-field-value", field.ID.String()))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 712, Col: 70}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 718, Col: 70}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var101))
 			if templ_7745c5c3_Err != nil {
@@ -2250,7 +2256,7 @@ func LogicConfiguratorStepThree(form frm.Form, field types.FormField, targetFiel
 			var templ_7745c5c3_Var102 string
 			templ_7745c5c3_Var102, templ_7745c5c3_Err = templ.JoinStringErrs(fieldName(field, FieldGroupLogic, FieldLogicTargetFieldValue))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 713, Col: 72}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 719, Col: 72}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var102))
 			if templ_7745c5c3_Err != nil {
@@ -2268,7 +2274,7 @@ func LogicConfiguratorStepThree(form frm.Form, field types.FormField, targetFiel
 				var templ_7745c5c3_Var103 string
 				templ_7745c5c3_Var103, templ_7745c5c3_Err = templ.JoinStringErrs(field.Logic.TriggerValues[0])
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 718, Col: 41}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 724, Col: 41}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var103))
 				if templ_7745c5c3_Err != nil {
@@ -2286,7 +2292,7 @@ func LogicConfiguratorStepThree(form frm.Form, field types.FormField, targetFiel
 			var templ_7745c5c3_Var104 string
 			templ_7745c5c3_Var104, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("on keyup debounced at 600ms trigger '%s'", FieldsFormUpdateEvent))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 720, Col: 86}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 726, Col: 86}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var104))
 			if templ_7745c5c3_Err != nil {
@@ -2448,7 +2454,7 @@ func fieldLabel(field types.FormField) templ.Component {
 		var templ_7745c5c3_Var107 string
 		templ_7745c5c3_Var107, templ_7745c5c3_Err = templ.JoinStringErrs(field.ID.String())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 799, Col: 31}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 805, Col: 31}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var107))
 		if templ_7745c5c3_Err != nil {
@@ -2461,7 +2467,7 @@ func fieldLabel(field types.FormField) templ.Component {
 		var templ_7745c5c3_Var108 string
 		templ_7745c5c3_Var108, templ_7745c5c3_Err = templ.JoinStringErrs(field.Label)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 800, Col: 15}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 806, Col: 15}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var108))
 		if templ_7745c5c3_Err != nil {
@@ -2528,7 +2534,7 @@ func FormView(form frm.Form, isPreview bool) templ.Component {
 		var templ_7745c5c3_Var110 string
 		templ_7745c5c3_Var110, templ_7745c5c3_Err = templ.JoinStringErrs(ViewerMetadata{Form: form}.JSON())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 826, Col: 48}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 832, Col: 48}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var110))
 		if templ_7745c5c3_Err != nil {
@@ -2541,7 +2547,7 @@ func FormView(form frm.Form, isPreview bool) templ.Component {
 		var templ_7745c5c3_Var111 string
 		templ_7745c5c3_Var111, templ_7745c5c3_Err = templ.JoinStringErrs(form.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 829, Col: 14}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 835, Col: 14}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var111))
 		if templ_7745c5c3_Err != nil {
@@ -2559,7 +2565,7 @@ func FormView(form frm.Form, isPreview bool) templ.Component {
 			var templ_7745c5c3_Var112 string
 			templ_7745c5c3_Var112, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("field-container-%s", field.ID.String()))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 836, Col: 62}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 842, Col: 62}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var112))
 			if templ_7745c5c3_Err != nil {
@@ -2597,7 +2603,7 @@ func FormView(form frm.Form, isPreview bool) templ.Component {
 				var templ_7745c5c3_Var113 string
 				templ_7745c5c3_Var113, templ_7745c5c3_Err = templ.JoinStringErrs(field.ID.String())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 847, Col: 30}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 853, Col: 30}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var113))
 				if templ_7745c5c3_Err != nil {
@@ -2610,7 +2616,7 @@ func FormView(form frm.Form, isPreview bool) templ.Component {
 				var templ_7745c5c3_Var114 string
 				templ_7745c5c3_Var114, templ_7745c5c3_Err = templ.JoinStringErrs(field.ID.String())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 848, Col: 32}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 854, Col: 32}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var114))
 				if templ_7745c5c3_Err != nil {
@@ -2623,7 +2629,7 @@ func FormView(form frm.Form, isPreview bool) templ.Component {
 				var templ_7745c5c3_Var115 string
 				templ_7745c5c3_Var115, templ_7745c5c3_Err = templ.JoinStringErrs(field.Placeholder)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 849, Col: 39}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 855, Col: 39}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var115))
 				if templ_7745c5c3_Err != nil {
@@ -2636,7 +2642,7 @@ func FormView(form frm.Form, isPreview bool) templ.Component {
 				var templ_7745c5c3_Var116 string
 				templ_7745c5c3_Var116, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("on keyup debounced at 250ms trigger field_change(field_id: '%s', value: my.value)", field.ID.String()))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 852, Col: 127}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 858, Col: 127}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var116))
 				if templ_7745c5c3_Err != nil {
@@ -2658,7 +2664,7 @@ func FormView(form frm.Form, isPreview bool) templ.Component {
 				var templ_7745c5c3_Var117 string
 				templ_7745c5c3_Var117, templ_7745c5c3_Err = templ.JoinStringErrs(field.ID.String())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 857, Col: 30}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 863, Col: 30}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var117))
 				if templ_7745c5c3_Err != nil {
@@ -2671,7 +2677,7 @@ func FormView(form frm.Form, isPreview bool) templ.Component {
 				var templ_7745c5c3_Var118 string
 				templ_7745c5c3_Var118, templ_7745c5c3_Err = templ.JoinStringErrs(field.ID.String())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 858, Col: 32}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 864, Col: 32}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var118))
 				if templ_7745c5c3_Err != nil {
@@ -2684,7 +2690,7 @@ func FormView(form frm.Form, isPreview bool) templ.Component {
 				var templ_7745c5c3_Var119 string
 				templ_7745c5c3_Var119, templ_7745c5c3_Err = templ.JoinStringErrs(field.Placeholder)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 861, Col: 39}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 867, Col: 39}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var119))
 				if templ_7745c5c3_Err != nil {
@@ -2697,7 +2703,7 @@ func FormView(form frm.Form, isPreview bool) templ.Component {
 				var templ_7745c5c3_Var120 string
 				templ_7745c5c3_Var120, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("on keyup debounced at 250ms trigger field_change(field_id: '%s', value: my.value)", field.ID.String()))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 864, Col: 127}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 870, Col: 127}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var120))
 				if templ_7745c5c3_Err != nil {
@@ -2737,7 +2743,7 @@ func FormView(form frm.Form, isPreview bool) templ.Component {
 			Classes: []string{"flex-grow", "justify-center", "uppercase"},
 		}, templ.Attributes{
 			"type":            "submit",
-			"data-hx-post":    fmt.Sprintf("/%d", form.ID),
+			"data-hx-post":    formCollectorUrl[string](ctx, form),
 			"data-hx-trigger": "click",
 			"data-hx-swap":    "none",
 			"disabled":        isPreview,

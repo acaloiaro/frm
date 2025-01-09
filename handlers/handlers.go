@@ -23,18 +23,19 @@ type contextKey string
 var FormIDContextKey contextKey = "frm_form_id"
 var FieldIDContextKey contextKey = "frm_field_id"
 
-var ErrNoInstanceAvailable = errors.New("no frm instance is available on the context")
 var ErrFormIDNotFound = errors.New("a form ID was not found in the request context")
 var ErrFieldIDNotFound = errors.New("a field ID was not found in the request context")
 
 // StaticAssetHandler handles requests for assets embedded in frm's static file system
 func StaticAssetHandler(w http.ResponseWriter, r *http.Request) {
-	mp := r.Context().Value(internal.MountPointContextKey).(string)
+	// static assets could feasibly be loaded from either the collector or builder mount point. this arbitrarily chooses
+	// the collector's mount point for all static assets
+	mp := r.Context().Value(internal.CollectorMountPointContextKey).(string)
 
 	// mp ends in a slash (e.g. foo/bar/), and we want to remove /foo/bar/static from the path prefix before searching for
 	// paths in the static file system. Join mp with "static" to form foo/bar/static as path prefix to be removed
 	// before searching inside the file system for files.
-	pathPrefix := fmt.Sprintf("%s%s", mp, "static")
+	pathPrefix := fmt.Sprintf("%s/%s", mp, "static")
 
 	// Remove the mount point and static prefix from the path so the static filesystem paths are resolved relative to
 	// the file system's root, e.g. if frm is mounted at /foo/bar, /foo/bar/static is removed from the URL path before
@@ -47,7 +48,7 @@ func StaticAssetHandler(w http.ResponseWriter, r *http.Request) {
 // DraftEditor displays the form editor and previewer
 func DraftEditor(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	f, err := instance(ctx)
+	f, err := frm.Instance(ctx)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -59,11 +60,14 @@ func DraftEditor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	draft, err := internal.Q(ctx, f.PostgresURL).GetDraft(r.Context(), internal.GetDraftParams{
+	draft, err := internal.Q(ctx, f.DBArgs).GetDraft(r.Context(), internal.GetDraftParams{
 		WorkspaceID: f.WorkspaceID,
 		ID:          *id,
 	})
-	if err != nil {
+	if err != nil && errors.Is(err, pgx.ErrNoRows) {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	} else if err != nil {
 		slog.Error("unable to get forms", slog.Any("error", err))
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -79,7 +83,7 @@ func DraftEditor(w http.ResponseWriter, r *http.Request) {
 // UpdateFieldOrder handles requests updating form field order
 func UpdateFieldOrder(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	f, err := instance(ctx)
+	f, err := frm.Instance(ctx)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -90,7 +94,7 @@ func UpdateFieldOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	draft, err := internal.Q(ctx, f.PostgresURL).GetDraft(ctx, internal.GetDraftParams{
+	draft, err := internal.Q(ctx, f.DBArgs).GetDraft(ctx, internal.GetDraftParams{
 		WorkspaceID: f.WorkspaceID,
 		ID:          *formID,
 	})
@@ -120,7 +124,7 @@ func UpdateFieldOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	draft.Fields = updatedFields
-	draft, err = internal.Q(ctx, f.PostgresURL).SaveDraft(ctx, internal.SaveDraftParams{
+	draft, err = internal.Q(ctx, f.DBArgs).SaveDraft(ctx, internal.SaveDraftParams{
 		ID:     draft.ID,
 		Name:   draft.Name,
 		Fields: updatedFields,
@@ -148,7 +152,7 @@ func UpdateFieldOrder(w http.ResponseWriter, r *http.Request) {
 // chosen form field
 func LogicConfiguratorStep3(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	f, err := instance(ctx)
+	f, err := frm.Instance(ctx)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -180,7 +184,7 @@ func LogicConfiguratorStep3(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	draft, err := internal.Q(ctx, f.PostgresURL).GetDraft(ctx, internal.GetDraftParams{
+	draft, err := internal.Q(ctx, f.DBArgs).GetDraft(ctx, internal.GetDraftParams{
 		WorkspaceID: f.WorkspaceID,
 		ID:          *formID,
 	})
@@ -206,7 +210,7 @@ func LogicConfiguratorStep3(w http.ResponseWriter, r *http.Request) {
 // UpdateSettings handles updates to form settings
 func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	f, err := instance(ctx)
+	f, err := frm.Instance(ctx)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -216,7 +220,7 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	form, err := internal.Q(ctx, f.PostgresURL).GetDraft(ctx, internal.GetDraftParams{
+	form, err := internal.Q(ctx, f.DBArgs).GetDraft(ctx, internal.GetDraftParams{
 		WorkspaceID: f.WorkspaceID,
 		ID:          *draftID,
 	})
@@ -236,7 +240,7 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 	if len(formName) == 0 {
 		formName = "New form"
 	}
-	form, err = internal.Q(ctx, f.PostgresURL).SaveDraft(ctx, internal.SaveDraftParams{
+	form, err = internal.Q(ctx, f.DBArgs).SaveDraft(ctx, internal.SaveDraftParams{
 		ID:     draftID,
 		Name:   formName,
 		Fields: form.Fields,
@@ -283,7 +287,7 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 // NewField creates new form fields
 func NewField(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	f, err := instance(ctx)
+	f, err := frm.Instance(ctx)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -293,7 +297,7 @@ func NewField(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	draft, err := internal.Q(ctx, f.PostgresURL).GetDraft(ctx, internal.GetDraftParams{
+	draft, err := internal.Q(ctx, f.DBArgs).GetDraft(ctx, internal.GetDraftParams{
 		WorkspaceID: f.WorkspaceID,
 		ID:          *formID,
 	})
@@ -335,7 +339,7 @@ func NewField(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fields[fieldID.String()] = *newField
-	_, err = internal.Q(ctx, f.PostgresURL).SaveDraft(ctx, internal.SaveDraftParams{
+	_, err = internal.Q(ctx, f.DBArgs).SaveDraft(ctx, internal.SaveDraftParams{
 		ID:     formID,
 		Name:   draft.Name,
 		Fields: fields,
@@ -370,7 +374,7 @@ func NewField(w http.ResponseWriter, r *http.Request) {
 // UpdateFields handles updates to a form's fields
 func UpdateFields(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	f, err := instance(ctx)
+	f, err := frm.Instance(ctx)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -380,7 +384,7 @@ func UpdateFields(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	draft, err := internal.Q(ctx, f.PostgresURL).GetDraft(ctx, internal.GetDraftParams{
+	draft, err := internal.Q(ctx, f.DBArgs).GetDraft(ctx, internal.GetDraftParams{
 		WorkspaceID: f.WorkspaceID,
 		ID:          *formID,
 	})
@@ -478,7 +482,7 @@ func UpdateFields(w http.ResponseWriter, r *http.Request) {
 	}
 
 	draft.Fields = updatedFields
-	draft, err = internal.Q(ctx, f.PostgresURL).SaveDraft(ctx, internal.SaveDraftParams{
+	draft, err = internal.Q(ctx, f.DBArgs).SaveDraft(ctx, internal.SaveDraftParams{
 		ID:     draft.ID,
 		Name:   draft.Name,
 		Fields: updatedFields,
@@ -503,39 +507,10 @@ func UpdateFields(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-// View renders the form viewer for the collector
-func View(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	i, err := instance(ctx)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	formID, err := formID(ctx)
-	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-	f, err := internal.Q(ctx, i.PostgresURL).GetForm(ctx, internal.GetFormParams{
-		WorkspaceID: i.WorkspaceID,
-		ID:          *formID,
-	})
-	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-
-	// Render the form collector
-	err = ui.Viewer((frm.Form)(f)).Render(ctx, w)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-	}
-}
-
 // DeleteField deletes fields
 func DeleteField(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	f, err := instance(ctx)
+	f, err := frm.Instance(ctx)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -551,7 +526,7 @@ func DeleteField(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	draft, err := internal.Q(ctx, f.PostgresURL).GetDraft(ctx, internal.GetDraftParams{
+	draft, err := internal.Q(ctx, f.DBArgs).GetDraft(ctx, internal.GetDraftParams{
 		WorkspaceID: f.WorkspaceID,
 		ID:          *formID,
 	})
@@ -562,7 +537,7 @@ func DeleteField(w http.ResponseWriter, r *http.Request) {
 	updatedFields := draft.Fields
 	delete(updatedFields, fmt.Sprint(fieldID))
 	draft.Fields = updatedFields
-	draft, err = internal.Q(ctx, f.PostgresURL).SaveDraft(ctx, internal.SaveDraftParams{
+	draft, err = internal.Q(ctx, f.DBArgs).SaveDraft(ctx, internal.SaveDraftParams{
 		ID:     draft.ID,
 		Name:   draft.Name,
 		Fields: updatedFields,
@@ -597,13 +572,13 @@ func DeleteField(w http.ResponseWriter, r *http.Request) {
 func NewDraft(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	formID, _ := formID(ctx)
-	f, err := instance(ctx)
+	f, err := frm.Instance(ctx)
 	if err != nil {
 		slog.Error("unable to create draft", "error", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	q := internal.Q(ctx, f.PostgresURL)
+	q := internal.Q(ctx, f.DBArgs)
 
 	draftParams := &internal.SaveDraftParams{
 		WorkspaceID: f.WorkspaceID,
@@ -642,7 +617,7 @@ func NewDraft(w http.ResponseWriter, r *http.Request) {
 // PublishDraft copies drafts to published forms
 func PublishDraft(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	f, err := instance(ctx)
+	f, err := frm.Instance(ctx)
 	if err != nil {
 		slog.Error("unable to publish draft", "error", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -655,7 +630,7 @@ func PublishDraft(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	draft, err := internal.Q(ctx, f.PostgresURL).GetDraft(ctx, internal.GetDraftParams{
+	draft, err := internal.Q(ctx, f.DBArgs).GetDraft(ctx, internal.GetDraftParams{
 		WorkspaceID: f.WorkspaceID,
 		ID:          *draftID,
 	})
@@ -665,7 +640,7 @@ func PublishDraft(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = internal.Q(ctx, f.PostgresURL).PublishDraft(ctx, draft.ID)
+	_, err = internal.Q(ctx, f.DBArgs).PublishDraft(ctx, draft.ID)
 	if err != nil {
 		slog.Error("unable to publish draft", "error", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -678,7 +653,7 @@ func PublishDraft(w http.ResponseWriter, r *http.Request) {
 // DeleteForm deletes forms
 func DeleteForm(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	f, err := instance(ctx)
+	f, err := frm.Instance(ctx)
 	if err != nil {
 		slog.Error("unable to delete form", "error", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -691,7 +666,7 @@ func DeleteForm(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = internal.Q(ctx, f.PostgresURL).DeleteForm(ctx, internal.DeleteFormParams{
+	err = internal.Q(ctx, f.DBArgs).DeleteForm(ctx, internal.DeleteFormParams{
 		WorkspaceID: f.WorkspaceID,
 		ID:          *formID,
 	})
@@ -702,16 +677,6 @@ func DeleteForm(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-}
-
-// instance returns the frm instance from the request context
-func instance(ctx context.Context) (i *frm.Frm, err error) {
-	var ok bool
-	i, ok = ctx.Value(internal.FrmContextKey).(*frm.Frm)
-	if !ok {
-		return nil, ErrNoInstanceAvailable
-	}
-	return
 }
 
 // formID gets the form ID from the request context
@@ -768,4 +733,62 @@ func toFormFieldOption(field types.FormField, options []string) types.FieldOptio
 	}
 
 	return fieldOptions
+}
+
+// View renders the form viewer for the collector
+func View(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	i, err := frm.Instance(ctx)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	formID, err := formID(ctx)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	f, err := internal.Q(ctx, i.DBArgs).GetForm(ctx, internal.GetFormParams{
+		WorkspaceID: i.WorkspaceID,
+		ID:          *formID,
+	})
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	// Render the form collector
+	err = ui.Viewer((frm.Form)(f)).Render(ctx, w)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+}
+
+// Collect handles collector form submissions
+func Collect(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	i, err := frm.Instance(ctx)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	formID, err := formID(ctx)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	f, err := internal.Q(ctx, i.DBArgs).GetForm(ctx, internal.GetFormParams{
+		WorkspaceID: i.WorkspaceID,
+		ID:          *formID,
+	})
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	// Render the form collector
+	err = ui.Viewer((frm.Form)(f)).Render(ctx, w)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 }

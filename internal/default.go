@@ -18,8 +18,10 @@ import (
 type contextKey string
 
 const (
-	// MountPointContextKey is the context key representing frm's mount point on the request context
-	MountPointContextKey contextKey = "mount_point_context_key"
+	// BuilderMountPointContextKey is the context key representing frm's builder mount point on the request context
+	BuilderMountPointContextKey contextKey = "builder_mount_point_context_key"
+	// CollectorMountPointContextKey is the context key representing frm's collector mount point on the request context
+	CollectorMountPointContextKey contextKey = "collector_mount_point_context_key"
 	// FrmContextKey is the context key representing the frm instance on the request context
 	FrmContextKey contextKey = "frm_instance"
 )
@@ -34,10 +36,15 @@ var enumTypes = []string{
 }
 
 // getPool returns a database pool for the specified connection string
-func getPool(ctx context.Context, databaseURL string) (p *pgxpool.Pool, err error) {
+func getPool(ctx context.Context, args DBArgs) (p *pgxpool.Pool, err error) {
 	if pool == nil {
 		var poolConfig *pgxpool.Config
-		poolConfig, err = pgxpool.ParseConfig(databaseURL)
+		var postgresURL string
+		postgresURL, err = pgConnectionString(args)
+		if err != nil {
+			return
+		}
+		poolConfig, err = pgxpool.ParseConfig(postgresURL)
 		if err != nil {
 			err = fmt.Errorf("invalid connection string: %v", err)
 			return
@@ -56,7 +63,7 @@ func getPool(ctx context.Context, databaseURL string) (p *pgxpool.Pool, err erro
 			return nil
 		}
 
-		err = InitializeDB(ctx, databaseURL)
+		err = InitializeDB(ctx, args)
 		if err != nil {
 			err = fmt.Errorf("database failed to initialize: %v", err)
 			return
@@ -74,8 +81,8 @@ func getPool(ctx context.Context, databaseURL string) (p *pgxpool.Pool, err erro
 }
 
 // Q returns a DBTX instance for querying the frm database
-func Q(ctx context.Context, postgresURL string) *Queries {
-	p, err := getPool(ctx, postgresURL)
+func Q(ctx context.Context, args DBArgs) *Queries {
+	p, err := getPool(ctx, args)
 	if err != nil {
 		slog.Error("database pool unavailable", "error", err)
 		return nil // TODO return a no-op DBTX to avoid NPEs
@@ -83,33 +90,39 @@ func Q(ctx context.Context, postgresURL string) *Queries {
 	return New(p)
 }
 
+type DBArgs struct {
+	URL        string
+	DisableSSL bool
+	Schema     string
+}
+
 // InitializeDB creates the application database if it doesn't exist and runs all migrations against it
 //
 // databaseUrl is the database URL string to connect to the database
-func InitializeDB(ctx context.Context, postgresURL string) (err error) {
-	postgresURL, err = pgConnectionString(postgresURL, true)
-	if err != nil {
-		return fmt.Errorf("invalid connection string: %v", err)
-	}
-
-	var cfg *pgx.ConnConfig
-	cfg, err = pgx.ParseConfig(postgresURL)
+func InitializeDB(ctx context.Context, args DBArgs) (err error) {
+	err = createIfNotExist(ctx, args)
 	if err != nil {
 		return
 	}
 
-	err = createIfNotExist(ctx, cfg)
-	if err != nil {
-		return
-	}
-
-	err = runMigrations(postgresURL)
+	err = runMigrations(args)
 	return
 }
 
-// TODO not all db crdentials have permission to do this. Fail gracefully when user lacks permission
-func createIfNotExist(ctx context.Context, cfg *pgx.ConnConfig) (err error) {
+// TODO not all db credentials have permission create databases/schemas. Fail gracefully when user lacks permission
+func createIfNotExist(ctx context.Context, args DBArgs) (err error) {
+	var cfg *pgx.ConnConfig
+	cfg, err = pgx.ParseConfig(args.URL)
+	if err != nil {
+		return
+	}
+
 	dbName := cfg.Database
+	schemaName := "frm"
+	if args.Schema != "" {
+		schemaName = args.Schema
+	}
+
 	cfg.Database = "postgres"
 	cfg.RuntimeParams = nil
 
@@ -118,24 +131,48 @@ func createIfNotExist(ctx context.Context, cfg *pgx.ConnConfig) (err error) {
 		return
 	}
 
-	var exists int
-	err = conn.QueryRow(ctx, "SELECT 1 FROM pg_database WHERE datname=$1", dbName).Scan(&exists)
+	var dbExists int
+	err = conn.QueryRow(ctx, "SELECT 1 FROM pg_database WHERE datname=$1", dbName).Scan(&dbExists)
 	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		return fmt.Errorf("unable to create database: %w", err)
 	}
 
-	if exists != 1 {
+	if dbExists != 1 {
 		// note: prepared statements are not supported by pgx for CREATE DATABASE queries
 		_, err = conn.Exec(ctx, fmt.Sprintf("CREATE DATABASE %s", dbName))
 		if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 			return fmt.Errorf("unable to create database: %w", err)
 		}
 	}
+
+	cfg.Database = dbName
+	conn, err = pgx.ConnectConfig(context.Background(), cfg)
+	if err != nil {
+		return
+	}
+	var schemaExists int
+	err = conn.QueryRow(ctx, "SELECT 1 FROM information_schema.schemata where schema_name=$1", schemaName).Scan(&schemaExists)
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+		return fmt.Errorf("unable to create schema: %w", err)
+	}
+
+	if schemaExists != 1 {
+		// note: prepared statements are not supported by pgx for CREATE DATABASE queries
+		_, err = conn.Exec(ctx, fmt.Sprintf("CREATE schema %s", schemaName))
+		if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+			return fmt.Errorf("unable to create schema: %w", err)
+		}
+	}
+
 	return
 }
 
 // runMigrations runs all available migrations if steps are unspecified ( 0 ), and runs either up steps or down steps
-func runMigrations(postgresURL string) (err error) {
+func runMigrations(args DBArgs) (err error) {
+	postgresURL, err := pgConnectionString(args)
+	if err != nil {
+		return fmt.Errorf("invalid connection string: %v", err)
+	}
 	ms, err := iofs.New(migrations.FS, ".")
 	if err != nil {
 		panic(fmt.Sprintf("unable to run migrations: %v", err))
@@ -151,7 +188,7 @@ func runMigrations(postgresURL string) (err error) {
 
 	err = m.Up()
 	if err != nil && !errors.Is(err, migrate.ErrNoChange) {
-		err = fmt.Errorf("unable to run migrations!!!: %v", err)
+		err = fmt.Errorf("unable to run frm migrations: %v", err)
 	} else {
 		err = nil
 	}
@@ -159,16 +196,21 @@ func runMigrations(postgresURL string) (err error) {
 	return
 }
 
-func pgConnectionString(postgresURL string, disableSSL bool, options ...string) (connString string, err error) {
+func pgConnectionString(args DBArgs) (connString string, err error) {
 	var cfg *pgx.ConnConfig
-	cfg, err = pgx.ParseConfig(postgresURL)
+	cfg, err = pgx.ParseConfig(args.URL)
 	if err != nil {
 		return
 	}
-	options = append(options, "x-migrations-table=frm_migrations")
-
-	if disableSSL {
+	options := []string{}
+	if args.DisableSSL {
 		options = append(options, "sslmode=disable")
+	}
+
+	if args.Schema != "" {
+		options = append(options, fmt.Sprintf("search_path=%s", args.Schema))
+	} else {
+		options = append(options, "search_path=frm")
 	}
 
 	connString = fmt.Sprintf("postgres://%s:%s@%s:%d/%s?%s", cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.Database, strings.Join(options, "&"))

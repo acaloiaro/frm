@@ -15,23 +15,26 @@ const (
 )
 
 var ErrCannotDetermineWorkspace = errors.New("workspace cannot be determine without WorkspaceID or WorkspaceIDUrlParam")
+var ErrNoInstanceAvailable = errors.New("no frm instance is available on the context")
 
 // Frm is the primary API into frm
 type Frm struct {
-	BuilderMountPoint   string    // the relative URL path where frm mounts the builder to your app's router
-	CollectorMountPoint string    // the relative URL path where frm mounts the collector to your app's router
-	PostgresURL         string    // the database URL where form data are stored
-	WorkspaceID         uuid.UUID // the ID of the workspace that the frm acts on behalf of
-	WorkspaceIDUrlParam string    // the name of the URL parameter that provides your workspace ID
+	BuilderMountPoint   string          // relative URL path where frm mounts the builder to your app's router
+	CollectorMountPoint string          // relative URL path where frm mounts the collector to your app's router
+	DBArgs              internal.DBArgs // database arguments
+	WorkspaceID         uuid.UUID       // ID of the workspace that the frm acts on behalf of
+	WorkspaceIDUrlParam string          // name of the URL parameter that provides your workspace ID
 }
 
 // Args are arguments passed to Frm
 type Args struct {
-	BuilderMountPoint   string
-	CollectorMountPoint string
-	PostgresURL         string
-	WorkspaceID         uuid.UUID
-	WorkspaceIDUrlParam string
+	BuilderMountPoint   string    // path on the router to mount frm's builder
+	CollectorMountPoint string    // path on the router to mount frm's collector
+	PostgresDisableSSL  bool      // disable ssl when connecting to postgres
+	PostgresURL         string    // postgres database URL
+	PostgresSchema      string    // postgres schema where frm stores data
+	WorkspaceID         uuid.UUID // ID of the workspace for which frm is being initialized
+	WorkspaceIDUrlParam string    // named URL parameter that identifies the workspace, e.g. for route /{workspace_id}, the value would be "workspace_id"
 }
 
 type FormStatus internal.FormStatus
@@ -47,23 +50,27 @@ func New(args Args) (f *Frm, err error) {
 	f = &Frm{
 		BuilderMountPoint:   args.BuilderMountPoint,
 		CollectorMountPoint: args.CollectorMountPoint,
-		PostgresURL:         args.PostgresURL,
 		WorkspaceID:         args.WorkspaceID,
 		WorkspaceIDUrlParam: args.WorkspaceIDUrlParam,
+		DBArgs: internal.DBArgs{
+			URL:        args.PostgresURL,
+			DisableSSL: args.PostgresDisableSSL,
+			Schema:     args.PostgresSchema,
+		},
 	}
 	return
 }
 
 // Init initializes the frm database if it hasn't been initialized
 func (f *Frm) Init(ctx context.Context) (err error) {
-	err = internal.InitializeDB(ctx, f.PostgresURL)
+	err = internal.InitializeDB(ctx, f.DBArgs)
 	return
 }
 
 // GetForm retrieves forms by ID
 func (f *Frm) GetForm(ctx context.Context, id int64) (form Form, err error) {
 	var frm internal.Form
-	frm, err = internal.Q(ctx, f.PostgresURL).GetForm(ctx, internal.GetFormParams{
+	frm, err = internal.Q(ctx, f.DBArgs).GetForm(ctx, internal.GetFormParams{
 		WorkspaceID: f.WorkspaceID,
 		ID:          id,
 	})
@@ -86,7 +93,7 @@ func (f *Frm) ListForms(ctx context.Context, args ListFormsArgs) (forms []Form, 
 	for _, s := range args.Statuses {
 		statuses = append(statuses, (internal.FormStatus)(s))
 	}
-	fs, err = internal.Q(ctx, f.PostgresURL).ListForms(ctx, internal.ListFormsParams{
+	fs, err = internal.Q(ctx, f.DBArgs).ListForms(ctx, internal.ListFormsParams{
 		WorkspaceID: f.WorkspaceID,
 		Statuses:    statuses,
 	})
@@ -106,10 +113,58 @@ func (f *Frm) ListForms(ctx context.Context, args ListFormsArgs) (forms []Form, 
 // This function takes into account where frm is mounted on an application's router.
 // e.g. If frm is mounted with `frmchi.Mount(chiRouter, "/frm", f)` then `Path(ctx, "/forms/100")` returns `/frm/forms/100`
 func URLPath(ctx context.Context, path string) string {
-	base, ok := ctx.Value(internal.MountPointContextKey).(string)
+	base, ok := ctx.Value(internal.CollectorMountPointContextKey).(string)
 	if !ok {
 		return "/"
 	}
 	urlPath := filepath.Clean(fmt.Sprintf("%s/%s", base, path))
 	return urlPath
+}
+
+// Instance returns the frm instance from the request context
+func Instance(ctx context.Context) (i *Frm, err error) {
+	var ok bool
+	i, ok = ctx.Value(internal.FrmContextKey).(*Frm)
+	if !ok {
+		return nil, ErrNoInstanceAvailable
+	}
+	return
+}
+
+// BuilderBuildPathBase returns the builder /build base URL path
+func BuilderBuildPathBase(ctx context.Context) string {
+	base, ok := ctx.Value(internal.BuilderMountPointContextKey).(string)
+	if !ok {
+		return "/"
+	}
+	return base
+}
+
+// BuilderPathForm returns the builder URL path for the provided form ID
+func BuilderPathForm(ctx context.Context, formID int64) string {
+	base, ok := ctx.Value(internal.BuilderMountPointContextKey).(string)
+	if !ok {
+		return "/"
+	}
+
+	return fmt.Sprintf("%s/%d", base, formID)
+}
+
+// BuilderPathFormField returns the URL path for the provided form ID's field
+func BuilderPathFormField(ctx context.Context, formID int, fieldID uuid.UUID) string {
+	i, err := Instance(ctx)
+	if err != nil {
+		return ""
+	}
+	return fmt.Sprintf("%s/build/%d/fields/%s", i.BuilderMountPoint, formID, fieldID)
+}
+
+// CollectorPathForm returns the collector URL path for the provided form ID
+func CollectorPathForm(ctx context.Context, formID int64, path ...string) string {
+	base, ok := ctx.Value(internal.CollectorMountPointContextKey).(string)
+	if !ok {
+		return "/"
+	}
+	base = filepath.Clean(fmt.Sprintf("%s/collect", base))
+	return fmt.Sprintf("%s/%d", base, formID)
 }

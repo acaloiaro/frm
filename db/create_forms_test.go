@@ -63,7 +63,7 @@ func TestCreateAndUpdateForm(t *testing.T) {
 	}
 	ctx := context.Background()
 	frms, err := frm.New(frm.Args{
-		PostgresURL: os.Getenv("POSTGRES_URL"),
+		DBUrl:       os.Getenv("POSTGRES_URL"),
 		WorkspaceID: workspaceID,
 	})
 	if err != nil {

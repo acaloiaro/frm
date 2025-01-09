@@ -23,17 +23,16 @@ const (
 	UrlParamFieldID urlParam = "frm_field_id"
 )
 
-// MountBuilder mounts the frm form builder to the router at the given path
+// Mount mounts the frm form builder and collector to the router
 //
 // router: The router on which frm mounts the builder.
 // f: The frm instance
-func MountBuilder(router chi.Router, f *frm.Frm) {
-	r := chi.NewRouter()
-	r.Use(Middlware(f))
-	router.Mount(f.BuilderMountPoint, r)
-	r.NotFound(handlers.StaticAssetHandler)
-	r.With(addRequestContext).Post("/draft", handlers.NewDraft)
-	r.Route(fmt.Sprintf("/forms/{%s}", UrlParamFormID), func(form chi.Router) {
+func Mount(router chi.Router, f *frm.Frm) {
+	builder := chi.NewRouter()
+	builder.Use(Middlware(f))
+	builder.NotFound(handlers.StaticAssetHandler)
+	builder.With(addRequestContext).Post("/draft", handlers.NewDraft)
+	builder.Route(fmt.Sprintf("/{%s}", UrlParamFormID), func(form chi.Router) {
 		form = form.With(addRequestContext)
 		form.Get("/", handlers.DraftEditor)
 		form.Delete("/", handlers.DeleteForm)
@@ -46,21 +45,18 @@ func MountBuilder(router chi.Router, f *frm.Frm) {
 		form.Delete(fmt.Sprintf("/fields/{%s}", UrlParamFieldID), handlers.DeleteField)
 		form.Get(fmt.Sprintf("/logic_configurator/{%s}/step3", UrlParamFieldID), handlers.LogicConfiguratorStep3)
 	})
-}
 
-// MountCollector mounts the frm form collector to the router at the given path
-//
-// router: The router on which frm mounts the collector
-// f: The frm instance
-func MountCollector(router chi.Router, f *frm.Frm) {
-	r := chi.NewRouter()
-	r.Use(Middlware(f))
-	router.Mount(f.CollectorMountPoint, r)
-	r.NotFound(handlers.StaticAssetHandler)
-	r.Route(fmt.Sprintf("/{%s}", UrlParamFormID), func(form chi.Router) {
+	collector := chi.NewRouter()
+	collector.Use(Middlware(f))
+	collector.NotFound(handlers.StaticAssetHandler)
+	collector.Route(fmt.Sprintf("/{%s}", UrlParamFormID), func(form chi.Router) {
 		form = form.With(addRequestContext)
 		form.Get("/", handlers.View)
+		form.Post("/", handlers.Collect)
 	})
+
+	router.Mount(f.CollectorMountPoint, collector)
+	router.Mount(f.BuilderMountPoint, builder)
 }
 
 // Middlware adds all the context necessary for frm's handlers and path helpers to function
@@ -70,26 +66,37 @@ func Middlware(f *frm.Frm) func(http.Handler) http.Handler {
 	return func(h http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
-			mountPoint := chi.RouteContext(ctx).RoutePattern()
+			builderMountPoint := chi.RouteContext(ctx).RoutePattern()
+			collectorMountPoint := chi.RouteContext(ctx).RoutePattern()
 			var workspaceID string
 			if rctx := chi.RouteContext(ctx); rctx != nil {
-				for i, urlParam := range rctx.URLParams.Keys {
-					if strings.Contains(mountPoint, urlParam) {
-						// routePatterns look like: /foo/{bar}/baz
-						// Where {bar} is the chi pattern placeholder. These placeholders must be replaced with the actual value
-						// that it holders the place for, so we can use the full, realized routePattern as frm's mountpoint
-						mountPoint = strings.ReplaceAll(mountPoint, fmt.Sprintf("{%s}", urlParam), rctx.URLParams.Values[i])
+				for i, paramName := range rctx.URLParams.Keys {
+					paramValue := rctx.URLParams.Values[i]
+					paramPlaceholder := fmt.Sprintf("{%s}", paramName)
+
+					// Route patterns look like: /foo/{bar}/baz
+					// Where {bar} is the chi pattern placeholder. These placeholders must be replaced with the actual value
+					// that it holds a place for, so we can use the full, realized routePattern as frm's mountpoint
+					if strings.Contains(f.BuilderMountPoint, paramName) {
+						builderMountPoint = strings.ReplaceAll(f.BuilderMountPoint, paramPlaceholder, paramValue)
 					}
+
+					if strings.Contains(f.CollectorMountPoint, paramName) {
+						collectorMountPoint = strings.ReplaceAll(f.CollectorMountPoint, paramPlaceholder, paramValue)
+					}
+
 					// extract the workspace id
-					if urlParam == f.WorkspaceIDUrlParam {
-						workspaceID = rctx.URLParams.Values[i]
+					if paramName == f.WorkspaceIDUrlParam {
+						workspaceID = paramValue
 					}
 				}
 			}
 
 			// remove chi wildcard patterns from the final path
-			mountPoint = strings.ReplaceAll(mountPoint, "*", "")
-			ctx = context.WithValue(ctx, internal.MountPointContextKey, mountPoint)
+			builderMountPoint = strings.ReplaceAll(builderMountPoint, "*", "")
+			collectorMountPoint = strings.ReplaceAll(collectorMountPoint, "*", "")
+			ctx = context.WithValue(ctx, internal.BuilderMountPointContextKey, builderMountPoint)
+			ctx = context.WithValue(ctx, internal.CollectorMountPointContextKey, collectorMountPoint)
 
 			// Add the frm instance to the request context, using the workspace ID extracted from the chi route context
 			f.WorkspaceID = uuid.MustParse(workspaceID) // TODO don't use MustParse here, figure out what the failure scenario should look like, or switch frm to use string workspace IDs rather than UUIDs, so that parsing is not necessary and provide more flexiblity for users to namespace forms
