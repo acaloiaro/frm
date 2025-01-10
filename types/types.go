@@ -2,9 +2,20 @@ package types
 
 import (
 	"encoding/json"
+	"errors"
 
 	"github.com/google/uuid"
 )
+
+// ErrRequiredNoValueProvided is a form validation error for required fields missing values
+var ErrRequiredNoValueProvided = errors.New("This field is required")
+
+// ValidationErrors is a mapping of form field IDs to the errors validating values submitted to those fields
+type ValidationErrors map[string]error
+
+func (v ValidationErrors) Any() bool {
+	return len(v) > 0
+}
 
 // FormFieldType enum enumerates all possible form field types
 //
@@ -98,6 +109,21 @@ type FormFieldSortByOrder []FormField
 func (f FormFieldSortByOrder) Len() int           { return len(f) }
 func (f FormFieldSortByOrder) Swap(i, j int)      { f[i], f[j] = f[j], f[i] }
 func (f FormFieldSortByOrder) Less(i, j int) bool { return f[i].Order < f[j].Order }
+
+// Validate validates values submitted to a form field
+func (f FormField) Validate(value []string) (err error) {
+	if f.Required {
+		if len(value) == 0 {
+			return ErrRequiredNoValueProvided
+		}
+		for _, ffv := range value {
+			if ffv == "" {
+				return ErrRequiredNoValueProvided
+			}
+		}
+	}
+	return nil
+}
 
 // MarshalJSON implements the json.Marshaler interface for FormFieldType
 func (f FormField) MarshalJSON() ([]byte, error) {

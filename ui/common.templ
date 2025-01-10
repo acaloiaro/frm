@@ -240,8 +240,7 @@ templ App(pageTitle string) {
 	<!DOCTYPE html>
 	<html lang="eng">
 		@head(pageTitle)
-		<body class="">
-			<div id="errors"></div>
+		<body>
 			<main hx-ext="response-targets">
 				{ children... }
 			</main>
@@ -846,6 +845,10 @@ templ FormView(form frm.Form, isPreview bool) {
 						class="flex flex-col py-3"
 					}
 				>
+					<div
+						id={ fmt.Sprintf("errors-%s", field.ID.String()) }
+						class="text-red-400"
+					></div>
 					switch field.Type {
 						case types.FormFieldTypeTextSingle:
 							@fieldLabel(field)
@@ -871,14 +874,16 @@ templ FormView(form frm.Form, isPreview bool) {
 							></textarea>
 						case types.FormFieldTypeSingleSelect, types.FormFieldTypeMultiSelect:
 							@selector.Selector(selector.SelectArgs{
-								ID:          field.ID.String(),
-								Name:        field.ID.String(),
-								Label:       field.Label,
-								Required:    field.Required,
-								Placeholder: field.Placeholder,
-								Multiple:    field.Type == types.FormFieldTypeMultiSelect,
-								Options:     toSelectorOpts(field.Options, false),
-								Hyperscript: fmt.Sprintf("on change trigger field_change(field_id: '%s', value: my.value)", field.ID.String()),
+								ID:             field.ID.String(),
+								Name:           field.ID.String(),
+								Label:          field.Label,
+								Required:       field.Required,
+								Placeholder:    field.Placeholder,
+								Multiple:       field.Type == types.FormFieldTypeMultiSelect,
+								Options:        toSelectorOpts(field.Options, false),
+								SearchDisabled: true,
+								EditItems:      false,
+								Hyperscript:    fmt.Sprintf("on change trigger field_change(field_id: '%s', value: my.value)", field.ID.String()),
 							})
 					}
 				</div>
@@ -889,11 +894,12 @@ templ FormView(form frm.Form, isPreview bool) {
 				Type:    "submit",
 				Classes: []string{"flex-grow", "justify-center", "uppercase"},
 			}, templ.Attributes{
-				"type":            "submit",
-				"data-hx-post":    formCollectorUrl[string](ctx, form),
-				"data-hx-trigger": "click",
-				"data-hx-swap":    "none",
-				"disabled":        isPreview,
+				"type":               "submit",
+				"data-hx-post":       formCollectorUrl[string](ctx, form),
+				"data-hx-trigger":    "click",
+				"data-hx-swap":       "none",
+				"data-hx-target-400": "form",
+				"disabled":           isPreview,
 			},
 			)
 		</form>
@@ -901,6 +907,10 @@ templ FormView(form frm.Form, isPreview bool) {
 }
 
 func toSelectorOpts(opts []types.Option, selectAll bool) (sopts []selector.Option) {
+	// TODO: Fix -- adding an empty option because the first select <option> is selected by default, for some reason
+	sopts = append(sopts, (selector.Option)(selector.Option{
+		Value: "",
+	}))
 	for _, opt := range opts {
 		if selectAll {
 			opt.Selected = true
@@ -929,4 +939,8 @@ func sortFields(fields types.FormFields) (sorted []types.FormField) {
 // f is shorthand for fmt.Sprintf, for readability
 func f(s string, args ...any) string {
 	return fmt.Sprintf(s, args...)
+}
+
+func domID(s string) string {
+	return strings.ReplaceAll(s, "-", "")
 }

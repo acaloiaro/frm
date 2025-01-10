@@ -165,6 +165,6 @@ func CollectorPathForm(ctx context.Context, formID int64, path ...string) string
 	if !ok {
 		return "/"
 	}
-	base = filepath.Clean(fmt.Sprintf("%s/collect", base))
+	base = filepath.Clean(base)
 	return fmt.Sprintf("%s/%d", base, formID)
 }

@@ -2850,6 +2850,11 @@ input.tab:checked + .tab-content,
   color: inherit;
 }
 
+.text-red-400 {
+  --tw-text-opacity: 1;
+  color: rgb(255 153 153 / var(--tw-text-opacity));
+}
+
 .text-red-500 {
   --tw-text-opacity: 1;
   color: rgb(255 119 119 / var(--tw-text-opacity));

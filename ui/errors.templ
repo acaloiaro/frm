@@ -1,0 +1,19 @@
+package ui
+
+import "fmt"
+import "github.com/acaloiaro/frm/types"
+
+// Validation checks which of a form's fields have validation errors and oob-swaps in error messages for fields that fail validation, and clear errors for fields that are valid
+templ Validation(allFields []string, errs types.ValidationErrors) {
+	for _, fieldID := range allFields {
+		<div
+			id={ fmt.Sprintf("errors-%s", fieldID) }
+			data-hx-swap-oob="true"
+			class="text-red-400"
+		>
+			if verr, ok := errs[fieldID]; ok {
+				{ verr.Error() }
+			}
+		</div>
+	}
+}
