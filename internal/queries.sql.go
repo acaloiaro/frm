@@ -334,3 +334,50 @@ func (q *Queries) SaveDraft(ctx context.Context, arg SaveDraftParams) (Form, err
 	)
 	return i, err
 }
+
+const saveSubmission = `-- name: SaveSubmission :one
+
+INSERT INTO form_submissions (id, form_id, workspace_id, fields, status)
+VALUES (coalesce(nullif($1, 0), nextval('submission_ids'))::bigint, $2, $3, $4, $5) ON conflict(id) DO
+UPDATE
+SET updated_at = timezone('utc', now()),
+    fields = $4,
+    status = $5 RETURNING id, form_id, workspace_id, fields, status, created_at, updated_at
+`
+
+type SaveSubmissionParams struct {
+	ID          interface{}           `json:"id"`
+	FormID      *int64                `json:"form_id"`
+	WorkspaceID uuid.UUID             `json:"workspace_id"`
+	Fields      types.FormFieldValues `json:"fields"`
+	Status      SubmissionStatus      `json:"status"`
+}
+
+// SaveSubmission
+//
+//	INSERT INTO form_submissions (id, form_id, workspace_id, fields, status)
+//	VALUES (coalesce(nullif($1, 0), nextval('submission_ids'))::bigint, $2, $3, $4, $5) ON conflict(id) DO
+//	UPDATE
+//	SET updated_at = timezone('utc', now()),
+//	    fields = $4,
+//	    status = $5 RETURNING id, form_id, workspace_id, fields, status, created_at, updated_at
+func (q *Queries) SaveSubmission(ctx context.Context, arg SaveSubmissionParams) (FormSubmission, error) {
+	row := q.db.QueryRow(ctx, saveSubmission,
+		arg.ID,
+		arg.FormID,
+		arg.WorkspaceID,
+		arg.Fields,
+		arg.Status,
+	)
+	var i FormSubmission
+	err := row.Scan(
+		&i.ID,
+		&i.FormID,
+		&i.WorkspaceID,
+		&i.Fields,
+		&i.Status,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}

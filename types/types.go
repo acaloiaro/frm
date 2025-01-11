@@ -29,6 +29,16 @@ const (
 	FormFieldTypeMultiSelect                       // multi-select dropdown
 )
 
+// FormFieldDataType enum enumerates all possible data types for form fields
+//
+//go:generate enumer -type FormFieldDataType -trimprefix FormFieldDataType -transform=snake -json
+type FormFieldDataType int
+
+const (
+	FormFieldDataTypeText    FormFieldDataType = iota // textual data
+	FormFieldDataTypeNumeric                          // numeric data
+)
+
 // FieldLogicComparator enum enumerates all possible form field logic comparators
 //
 //go:generate enumer -type FieldLogicComparator -trimprefix FieldLogicComparator -transform=snake -json -text
@@ -53,20 +63,38 @@ const (
 // The underlying type is a map, where keys are form field IDs and values are the corresponding form field
 type FormFields map[string]FormField
 
+// FormFieldValues is a collection of form fields submitted to a form
+//
+// The underlying type is a map, where keys are form field IDs and values are what was submited to the form representing that field
+type FormFieldValues map[string]FormFieldSubmission
+
 // FieldOptions are options for single or multi-selector fields
 type FieldOptions []Option
 
 // FormField is a field associated with a form
 type FormField struct {
-	ID          uuid.UUID     `json:"id"`          // field's unique id
-	Order       int           `json:"order"`       // order in which the field appears on forms
-	Label       string        `json:"label"`       // field's label (name)
-	Logic       *FieldLogic   `json:"logic"`       // UI logic for this field
-	Options     FieldOptions  `json:"options"`     // single/multi-select options
-	Placeholder string        `json:"placeholder"` // placeholder value
-	Required    bool          `json:"required"`    // whether the field is required
-	Hidden      bool          `json:"hidden"`      // whether the field is hidden
-	Type        FormFieldType `json:"type"`        // field type
+	ID          uuid.UUID         `json:"id"`          // field's unique id
+	Order       int               `json:"order"`       // order in which the field appears on forms
+	Label       string            `json:"label"`       // field's label (name)
+	Logic       *FieldLogic       `json:"logic"`       // UI logic for this field
+	Options     FieldOptions      `json:"options"`     // single/multi-select options
+	Placeholder string            `json:"placeholder"` // placeholder value
+	Required    bool              `json:"required"`    // whether the field is required
+	Hidden      bool              `json:"hidden"`      // whether the field is hidden
+	Type        FormFieldType     `json:"type"`        // field type
+	DataType    FormFieldDataType `json:"data_type"`   // the data type for form submissions to this field
+}
+
+// FormFieldSubmission is a form submission for a particular form field. Form submissions consists of one or more form field submission
+type FormFieldSubmission struct {
+	ID          uuid.UUID         `json:"id"` // field submission's unique id
+	FormFieldID uuid.UUID         `json:"form_field_id"`
+	Order       int               `json:"order"`     // order in which the field appeared on the submitted form
+	Required    bool              `json:"required"`  // whether the field was requird
+	Hidden      bool              `json:"hidden"`    // whether the field was hidden
+	Type        FormFieldType     `json:"type"`      // field type
+	DataType    FormFieldDataType `json:"data_type"` // the data type of the Value
+	Value       any               `json:"value"`     // the value that was submitted
 }
 
 // FieldLogic defines logic associated with a field

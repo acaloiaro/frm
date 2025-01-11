@@ -2811,8 +2811,4 @@ func f(s string, args ...any) string {
 	return fmt.Sprintf(s, args...)
 }
 
-func domID(s string) string {
-	return strings.ReplaceAll(s, "-", "")
-}
-
 var _ = templruntime.GeneratedTemplate

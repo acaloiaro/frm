@@ -33,6 +33,8 @@ type Forms []Form
 var enumTypes = []string{
 	"form_status",
 	"_form_status", // array of form statuses
+	"submission_status",
+	"_submission_status",
 }
 
 // getPool returns a database pool for the specified connection string

@@ -76,22 +76,12 @@ SET updated_at = timezone('utc', now()),
    FROM draft),
     status = 'published' RETURNING *;
 
--- update
- -- INSERT INTO forms(id, form_id, workspace_id, name, fields, status)
--- SELECT CASE
---            WHEN form_id IS NOT NULL THEN form_id
---            ELSE nextval('form_ids')
---        END AS id,
---        form_id,
---        workspace_id,
---        name,
---        fields,
---        'published'
--- FROM forms
--- WHERE forms.id = @id ON conflict(id) DO
---   UPDATE
---   SET updated_at = timezone('utc', now()),
---       form_id = NULL,
---       name = forms.name,
---       fields = forms.fields,
---       status = 'published' RETURNING *;
+-- name: SaveSubmission :one
+
+INSERT INTO form_submissions (id, form_id, workspace_id, fields, status)
+VALUES (coalesce(nullif(@id, 0), nextval('submission_ids'))::bigint, @form_id, @workspace_id, @fields, @status) ON conflict(id) DO
+UPDATE
+SET updated_at = timezone('utc', now()),
+    fields = @fields,
+    status = @status RETURNING *;
+

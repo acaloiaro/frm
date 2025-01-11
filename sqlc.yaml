@@ -41,6 +41,15 @@ overrides:
         go_type:
           import: github.com/acaloiaro/frm/types
           type: FormFields
+      - column: form_submissions.fields
+        go_type:
+          import: github.com/acaloiaro/frm/types
+          type: FormFieldValues
+      - column: form_submissions.workspace_id 
+        go_type:
+          import: github.com/google/uuid
+          package: uuid
+          type: UUID
       - column: draft_forms.workspace_id
         go_type:
           import: github.com/google/uuid

@@ -55,6 +55,48 @@ func (ns NullFormStatus) Value() (driver.Value, error) {
 	return string(ns.FormStatus), nil
 }
 
+type SubmissionStatus string
+
+const (
+	SubmissionStatusComplete SubmissionStatus = "complete"
+	SubmissionStatusPartial  SubmissionStatus = "partial"
+)
+
+func (e *SubmissionStatus) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = SubmissionStatus(s)
+	case string:
+		*e = SubmissionStatus(s)
+	default:
+		return fmt.Errorf("unsupported scan type for SubmissionStatus: %T", src)
+	}
+	return nil
+}
+
+type NullSubmissionStatus struct {
+	SubmissionStatus SubmissionStatus `json:"submission_status"`
+	Valid            bool             `json:"valid"` // Valid is true if SubmissionStatus is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullSubmissionStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.SubmissionStatus, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.SubmissionStatus.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullSubmissionStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.SubmissionStatus), nil
+}
+
 // Form contains all the data necesary to render a form
 type Form struct {
 	ID     int64  `json:"id"`
@@ -67,4 +109,16 @@ type Form struct {
 	Status    FormStatus       `json:"status"`
 	CreatedAt time.Time        `json:"created_at"`
 	UpdatedAt time.Time        `json:"updated_at"`
+}
+
+// Respondants submit forms/fields to the collector as form_submissions
+type FormSubmission struct {
+	ID          int64     `json:"id"`
+	FormID      *int64    `json:"form_id"`
+	WorkspaceID uuid.UUID `json:"workspace_id"`
+	// all form submissions are serialized to JSON, see types.FormFieldValue for structure details
+	Fields    types.FormFieldValues `json:"fields"`
+	Status    SubmissionStatus      `json:"status"`
+	CreatedAt time.Time             `json:"created_at"`
+	UpdatedAt time.Time             `json:"updated_at"`
 }
