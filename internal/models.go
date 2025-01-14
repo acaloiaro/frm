@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/acaloiaro/frm/types"
-	uuid "github.com/google/uuid"
 )
 
 type FormStatus string
@@ -102,8 +101,8 @@ type Form struct {
 	ID     int64  `json:"id"`
 	FormID *int64 `json:"form_id"`
 	// a namespace for the form
-	WorkspaceID uuid.UUID `json:"workspace_id"`
-	Name        string    `json:"name"`
+	WorkspaceID string `json:"workspace_id"`
+	Name        string `json:"name"`
 	// all form fields are serialized to JSON, see types.FormFields for structure details
 	Fields    types.FormFields `json:"fields"`
 	Status    FormStatus       `json:"status"`
@@ -113,12 +112,23 @@ type Form struct {
 
 // Respondants submit forms/fields to the collector as form_submissions
 type FormSubmission struct {
-	ID          int64     `json:"id"`
-	FormID      *int64    `json:"form_id"`
-	WorkspaceID uuid.UUID `json:"workspace_id"`
+	ID          int64  `json:"id"`
+	FormID      *int64 `json:"form_id"`
+	WorkspaceID string `json:"workspace_id"`
 	// all form submissions are serialized to JSON, see types.FormFieldValue for structure details
 	Fields    types.FormFieldValues `json:"fields"`
 	Status    SubmissionStatus      `json:"status"`
 	CreatedAt time.Time             `json:"created_at"`
 	UpdatedAt time.Time             `json:"updated_at"`
+}
+
+// Short codes are short codes/names for URLs that identify the subject submitting a form
+type ShortCode struct {
+	ID          int64     `json:"id"`
+	WorkspaceID string    `json:"workspace_id"`
+	FormID      *int64    `json:"form_id"`
+	ShortCode   string    `json:"short_code"`
+	SubjectID   string    `json:"subject_id"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }

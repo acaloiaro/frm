@@ -9,7 +9,6 @@ import (
 	"context"
 
 	"github.com/acaloiaro/frm/types"
-	uuid "github.com/google/uuid"
 )
 
 const deleteForm = `-- name: DeleteForm :exec
@@ -21,8 +20,8 @@ WHERE workspace_id = $1
 `
 
 type DeleteFormParams struct {
-	WorkspaceID uuid.UUID `json:"workspace_id"`
-	ID          int64     `json:"id"`
+	WorkspaceID string `json:"workspace_id"`
+	ID          int64  `json:"id"`
 }
 
 // DeleteForm
@@ -46,8 +45,8 @@ WHERE workspace_id = $1
 `
 
 type GetDraftParams struct {
-	WorkspaceID uuid.UUID `json:"workspace_id"`
-	ID          int64     `json:"id"`
+	WorkspaceID string `json:"workspace_id"`
+	ID          int64  `json:"id"`
 }
 
 // GetDraft
@@ -82,8 +81,8 @@ WHERE workspace_id = $1
 `
 
 type GetFormParams struct {
-	WorkspaceID uuid.UUID `json:"workspace_id"`
-	ID          int64     `json:"id"`
+	WorkspaceID string `json:"workspace_id"`
+	ID          int64  `json:"id"`
 }
 
 // GetForm
@@ -118,8 +117,8 @@ WHERE workspace_id = $1
 `
 
 type ListDraftsParams struct {
-	WorkspaceID uuid.UUID `json:"workspace_id"`
-	FormID      *int64    `json:"form_id"`
+	WorkspaceID string `json:"workspace_id"`
+	FormID      *int64 `json:"form_id"`
 }
 
 // ListDrafts
@@ -170,7 +169,7 @@ WHERE workspace_id = $1
 `
 
 type ListFormsParams struct {
-	WorkspaceID uuid.UUID    `json:"workspace_id"`
+	WorkspaceID string       `json:"workspace_id"`
 	Statuses    []FormStatus `json:"statuses"`
 }
 
@@ -300,7 +299,7 @@ SET updated_at = timezone('utc', now()),
 type SaveDraftParams struct {
 	ID          interface{}      `json:"id"`
 	FormID      *int64           `json:"form_id"`
-	WorkspaceID uuid.UUID        `json:"workspace_id"`
+	WorkspaceID string           `json:"workspace_id"`
 	Name        string           `json:"name"`
 	Fields      types.FormFields `json:"fields"`
 }
@@ -348,7 +347,7 @@ SET updated_at = timezone('utc', now()),
 type SaveSubmissionParams struct {
 	ID          interface{}           `json:"id"`
 	FormID      *int64                `json:"form_id"`
-	WorkspaceID uuid.UUID             `json:"workspace_id"`
+	WorkspaceID string                `json:"workspace_id"`
 	Fields      types.FormFieldValues `json:"fields"`
 	Status      SubmissionStatus      `json:"status"`
 }

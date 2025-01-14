@@ -21,6 +21,8 @@ const (
 	UrlParamFormID urlParam = "frm_form_id"
 	// the name for the chi url parameter for field IDs
 	UrlParamFieldID urlParam = "frm_field_id"
+	// the name of the chi short code parameter for form short codes
+	UrlParamShortCode urlParam = "frm_short_code"
 )
 
 // Mount mounts the frm form builder and collector to the router
@@ -42,13 +44,18 @@ func Mount(router chi.Router, f *frm.Frm) {
 		form.Put("/settings", handlers.UpdateSettings)
 		form.Post("/fields", handlers.NewField)
 		form.Put("/fields", handlers.UpdateFields)
-		form.Delete(fmt.Sprintf("/fields/{%s}", UrlParamFieldID), handlers.DeleteField)
-		form.Get(fmt.Sprintf("/logic_configurator/{%s}/step3", UrlParamFieldID), handlers.LogicConfiguratorStep3)
+		form.Route(fmt.Sprintf("/fields/{%s}", UrlParamFieldID), func(fields chi.Router) {
+			fields.Delete("/", handlers.DeleteField)
+			fields.Get("/logic/choices", handlers.LogicConfiguratorChoices)
+		})
 	})
 
 	collector := chi.NewRouter()
 	collector.Use(Middlware(f))
 	collector.NotFound(handlers.StaticAssetHandler)
+	collector.Route("/s", func(form chi.Router) {
+		form.Get("/{short_code}", handlers.View)
+	})
 	collector.Route(fmt.Sprintf("/{%s}", UrlParamFormID), func(form chi.Router) {
 		form = form.With(addRequestContext)
 		form.Get("/", handlers.View)
@@ -99,7 +106,8 @@ func Middlware(f *frm.Frm) func(http.Handler) http.Handler {
 			ctx = context.WithValue(ctx, internal.CollectorMountPointContextKey, collectorMountPoint)
 
 			// Add the frm instance to the request context, using the workspace ID extracted from the chi route context
-			f.WorkspaceID = uuid.MustParse(workspaceID) // TODO don't use MustParse here, figure out what the failure scenario should look like, or switch frm to use string workspace IDs rather than UUIDs, so that parsing is not necessary and provide more flexiblity for users to namespace forms
+			f.WorkspaceID = workspaceID
+
 			ctx = context.WithValue(ctx, internal.FrmContextKey, f)
 
 			h.ServeHTTP(w, r.Clone(ctx))
@@ -114,27 +122,30 @@ func addRequestContext(h http.Handler) http.Handler {
 		ctx := r.Context()
 		if rctx := chi.RouteContext(ctx); rctx != nil {
 			for _, urlParam := range rctx.URLParams.Keys {
-				// populate the request context with the form id from the URL
-				if urlParam == string(UrlParamFormID) {
+				switch urlParam {
+				case string(UrlParamFormID):
 					formID, err := strconv.ParseInt(chi.URLParam(r, string(UrlParamFormID)), 10, 64)
 					if err != nil {
 						w.WriteHeader(http.StatusNotFound)
 						return
 					}
 					ctx = context.WithValue(ctx, handlers.FormIDContextKey, &formID)
-				}
-
-				// populate the request context with the field id from the URL
-				if urlParam == string(UrlParamFieldID) {
+				case string(UrlParamFieldID):
 					fieldID, err := uuid.Parse(chi.URLParam(r, string(UrlParamFieldID)))
 					if err != nil {
 						w.WriteHeader(http.StatusNotFound)
 						return
 					}
 					ctx = context.WithValue(ctx, handlers.FieldIDContextKey, &fieldID)
+				case string(UrlParamShortCode):
+					shortCode := chi.URLParam(r, string(UrlParamFieldID))
+					if shortCode != "" {
+						w.WriteHeader(http.StatusNotFound)
+						return
+					}
+					ctx = context.WithValue(ctx, handlers.ShortCodeContextKey, &shortCode)
 				}
 			}
-
 		}
 		h.ServeHTTP(w, r.Clone(ctx))
 	}

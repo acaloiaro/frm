@@ -22,6 +22,7 @@ type contextKey string
 
 var FormIDContextKey contextKey = "frm_form_id"
 var FieldIDContextKey contextKey = "frm_field_id"
+var ShortCodeContextKey contextKey = "frm_short_code"
 
 var ErrFormIDNotFound = errors.New("a form ID was not found in the request context")
 var ErrFieldIDNotFound = errors.New("a field ID was not found in the request context")
@@ -148,9 +149,9 @@ func UpdateFieldOrder(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-// LogicConfigurationStep3 handles changes to form field configuration logic, rendering the correct input type for the
+// LogicConfiguratorChoices handles changes to form field configuration logic, rendering the correct input type for the
 // chosen form field
-func LogicConfiguratorStep3(w http.ResponseWriter, r *http.Request) {
+func LogicConfiguratorChoices(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	f, err := frm.Instance(ctx)
 	if err != nil {
@@ -684,6 +685,10 @@ func formID(ctx context.Context) (formID *int64, err error) {
 	var ok bool
 	formID, ok = ctx.Value(FormIDContextKey).(*int64)
 	if !ok {
+		// TODO lookup the short code from the db
+		// if shortCode, ok := ctx.Value(ShortCodeContextKey).(string); !ok {
+
+		// }
 		return nil, ErrFormIDNotFound
 	}
 	return

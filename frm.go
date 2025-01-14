@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 
 	"github.com/acaloiaro/frm/internal"
-	"github.com/google/uuid"
 )
 
 const (
@@ -22,19 +21,19 @@ type Frm struct {
 	BuilderMountPoint   string          // relative URL path where frm mounts the builder to your app's router
 	CollectorMountPoint string          // relative URL path where frm mounts the collector to your app's router
 	DBArgs              internal.DBArgs // database arguments
-	WorkspaceID         uuid.UUID       // ID of the workspace that the frm acts on behalf of
+	WorkspaceID         string          // ID of the workspace that frm acts on behalf of
 	WorkspaceIDUrlParam string          // name of the URL parameter that provides your workspace ID
 }
 
 // Args are arguments passed to Frm
 type Args struct {
-	BuilderMountPoint   string    // path on the router to mount frm's builder
-	CollectorMountPoint string    // path on the router to mount frm's collector
-	PostgresDisableSSL  bool      // disable ssl when connecting to postgres
-	PostgresURL         string    // postgres database URL
-	PostgresSchema      string    // postgres schema where frm stores data
-	WorkspaceID         uuid.UUID // ID of the workspace for which frm is being initialized
-	WorkspaceIDUrlParam string    // named URL parameter that identifies the workspace, e.g. for route /{workspace_id}, the value would be "workspace_id"
+	BuilderMountPoint   string // path on the router to mount frm's builder
+	CollectorMountPoint string // path on the router to mount frm's collector
+	PostgresDisableSSL  bool   // disable ssl when connecting to postgres
+	PostgresURL         string // postgres database URL
+	PostgresSchema      string // postgres schema where frm stores data
+	WorkspaceID         string // ID of the workspace for which frm is being initialized
+	WorkspaceIDUrlParam string // named URL parameter that identifies the workspace, e.g. for route /{workspace_id}, the value would be "workspace_id"
 }
 
 type FormStatus internal.FormStatus
@@ -43,7 +42,7 @@ type FormStatus internal.FormStatus
 //
 // If the frm database has not yet been initialized, Init() should be called before mounting to a router
 func New(args Args) (f *Frm, err error) {
-	if args.WorkspaceID == uuid.Nil && args.WorkspaceIDUrlParam == "" {
+	if args.WorkspaceID == "" && args.WorkspaceIDUrlParam == "" {
 		return nil, ErrCannotDetermineWorkspace
 	}
 
@@ -138,6 +137,22 @@ func BuilderPathForm(ctx context.Context, formID int64) string {
 	}
 
 	return fmt.Sprintf("%s/%d", base, formID)
+}
+
+// BuilderPathFormField returns the builder URL path for the provided form ID and field ID
+func BuilderPathFormField(ctx context.Context, formID int64, fieldID string, args ...string) string {
+	base, ok := ctx.Value(internal.BuilderMountPointContextKey).(string)
+	if !ok {
+		return "/"
+	}
+
+	additionalPath := ""
+	if len(args) > 0 {
+		additionalPath = args[0]
+	}
+
+	path := filepath.Clean(fmt.Sprintf("%s/%d/fields/%s/%s", base, formID, fieldID, additionalPath))
+	return path
 }
 
 // CollectorPathForm returns the collector URL path for the provided form ID

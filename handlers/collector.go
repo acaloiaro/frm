@@ -42,6 +42,37 @@ func View(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// ShortCode handles requsts for form short codes and renders the corresponding form
+//
+// When Forms are submitted via short URL, submissions are attributed to the subject with which the short code was
+// generated.
+func ShortURL(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	i, err := frm.Instance(ctx)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	formID, err := formID(ctx)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	f, err := internal.Q(ctx, i.DBArgs).GetForm(ctx, internal.GetFormParams{
+		WorkspaceID: i.WorkspaceID,
+		ID:          *formID,
+	})
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	// Render the form collector
+	err = ui.Viewer((frm.Form)(f)).Render(ctx, w)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+}
+
 // Collect handles collector form submissions
 func Collect(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()

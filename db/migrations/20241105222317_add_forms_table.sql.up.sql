@@ -15,14 +15,17 @@ CREATE TYPE form_status AS ENUM (
 CREATE TABLE IF NOT EXISTS forms (
     id BIGINT PRIMARY KEY DEFAULT nextval('form_ids'),
     form_id BIGINT REFERENCES forms(id) ON DELETE CASCADE,
-    workspace_id UUID NOT NULL,
-    name text not null,
+    workspace_id TEXT NOT NULL,
+    name TEXT not null,
     fields jsonb default '{}' NOT NULL,
     status form_status default 'draft' NOT NULL,
     created_at timestamptz not null default timezone('utc', now()),
     updated_at timestamptz not null default timezone('utc', now())
 );
 
+
+CREATE INDEX IF NOT EXISTS workspace_idx ON forms USING btree (workspace_id);
+CREATE INDEX IF NOT EXISTS form_idx ON forms USING btree (form_id);
 
 COMMENT ON table forms IS 'Form contains all the data necesary to render a form';
 COMMENT ON column forms.workspace_id IS 'a namespace for the form';

@@ -2016,9 +2016,9 @@ func fieldLogicConfiguration(form frm.Form, field types.FormField) templ.Compone
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var92 string
-		templ_7745c5c3_Var92, templ_7745c5c3_Err = templ.JoinStringErrs(frm.CollectorPath(ctx, fmt.Sprintf("/build/%d/logic_configurator/%s/step3", form.ID, field.ID.String())))
+		templ_7745c5c3_Var92, templ_7745c5c3_Err = templ.JoinStringErrs(frm.BuilderPathFormField(ctx, form.ID, field.ID.String(), "/logic/choices"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 624, Col: 122}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 624, Col: 93}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var92))
 		if templ_7745c5c3_Err != nil {
