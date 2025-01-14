@@ -108,19 +108,6 @@ func (f *Frm) ListForms(ctx context.Context, args ListFormsArgs) (forms []Form, 
 	return
 }
 
-// URLPath returns paths to frm endpoints
-//
-// This function takes into account where frm is mounted on an application's router.
-// e.g. If frm is mounted with `frmchi.Mount(chiRouter, "/frm", f)` then `Path(ctx, "/forms/100")` returns `/frm/forms/100`
-func URLPath(ctx context.Context, path string) string {
-	base, ok := ctx.Value(internal.CollectorMountPointContextKey).(string)
-	if !ok {
-		return "/"
-	}
-	urlPath := filepath.Clean(fmt.Sprintf("%s/%s", base, path))
-	return urlPath
-}
-
 // Instance returns the frm instance from the request context
 func Instance(ctx context.Context) (i *Frm, err error) {
 	var ok bool
@@ -131,13 +118,16 @@ func Instance(ctx context.Context) (i *Frm, err error) {
 	return
 }
 
-// BuilderBuildPathBase returns the builder /build base URL path
-func BuilderBuildPathBase(ctx context.Context) string {
-	base, ok := ctx.Value(internal.BuilderMountPointContextKey).(string)
+// CollectorPath returns paths to frm collector endpoints
+//
+// It uses the collector's mount point on the router to generate collector paths
+func CollectorPath(ctx context.Context, path string) string {
+	base, ok := ctx.Value(internal.CollectorMountPointContextKey).(string)
 	if !ok {
 		return "/"
 	}
-	return base
+	urlPath := filepath.Clean(fmt.Sprintf("%s/%s", base, path))
+	return urlPath
 }
 
 // BuilderPathForm returns the builder URL path for the provided form ID
@@ -148,15 +138,6 @@ func BuilderPathForm(ctx context.Context, formID int64) string {
 	}
 
 	return fmt.Sprintf("%s/%d", base, formID)
-}
-
-// BuilderPathFormField returns the URL path for the provided form ID's field
-func BuilderPathFormField(ctx context.Context, formID int, fieldID uuid.UUID) string {
-	i, err := Instance(ctx)
-	if err != nil {
-		return ""
-	}
-	return fmt.Sprintf("%s/build/%d/fields/%s", i.BuilderMountPoint, formID, fieldID)
 }
 
 // CollectorPathForm returns the collector URL path for the provided form ID

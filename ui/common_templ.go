@@ -369,7 +369,7 @@ func FormBuilderNav(form frm.Form) templ.Component {
 
 // SafePath returns mountpoint-aware SafeURL paths for the given path
 func SafePath(ctx context.Context, path string) templ.SafeURL {
-	return templ.SafeURL(frm.URLPath(ctx, path))
+	return templ.SafeURL(frm.CollectorPath(ctx, path))
 }
 
 // head simply provides the <head> element
@@ -441,9 +441,9 @@ func head(pageTitle string) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var19 string
-			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(frm.URLPath(ctx, "/static/css/styles.css"))
+			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(frm.CollectorPath(ctx, "/static/css/styles.css"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 139, Col: 58}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 139, Col: 64}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 			if templ_7745c5c3_Err != nil {
@@ -454,9 +454,9 @@ func head(pageTitle string) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var20 string
-			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(frm.URLPath(ctx, "/static/css/choices.min.css"))
+			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(frm.CollectorPath(ctx, "/static/css/choices.min.css"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 140, Col: 80}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 140, Col: 86}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 			if templ_7745c5c3_Err != nil {
@@ -469,7 +469,7 @@ func head(pageTitle string) templ.Component {
 			var templ_7745c5c3_Var21 string
 			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(templ.GetNonce(ctx))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 140, Col: 110}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 140, Col: 116}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 			if templ_7745c5c3_Err != nil {
@@ -480,9 +480,9 @@ func head(pageTitle string) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var22 string
-			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(frm.URLPath(ctx, "/static/js/htmx.js"))
+			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(frm.CollectorPath(ctx, "/static/js/htmx.js"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 141, Col: 78}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 141, Col: 84}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 			if templ_7745c5c3_Err != nil {
@@ -495,7 +495,7 @@ func head(pageTitle string) templ.Component {
 			var templ_7745c5c3_Var23 string
 			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(templ.GetNonce(ctx))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 141, Col: 108}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 141, Col: 114}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 			if templ_7745c5c3_Err != nil {
@@ -506,9 +506,9 @@ func head(pageTitle string) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var24 string
-			templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(frm.URLPath(ctx, "/static/js/htmx-response-targets.js"))
+			templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(frm.CollectorPath(ctx, "/static/js/htmx-response-targets.js"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 142, Col: 95}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 142, Col: 101}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 			if templ_7745c5c3_Err != nil {
@@ -521,7 +521,7 @@ func head(pageTitle string) templ.Component {
 			var templ_7745c5c3_Var25 string
 			templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(templ.GetNonce(ctx))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 142, Col: 125}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 142, Col: 131}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 			if templ_7745c5c3_Err != nil {
@@ -532,9 +532,9 @@ func head(pageTitle string) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var26 string
-			templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(frm.URLPath(ctx, "/static/js/hyperscript.js"))
+			templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(frm.CollectorPath(ctx, "/static/js/hyperscript.js"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 143, Col: 85}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 143, Col: 91}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 			if templ_7745c5c3_Err != nil {
@@ -547,7 +547,7 @@ func head(pageTitle string) templ.Component {
 			var templ_7745c5c3_Var27 string
 			templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(templ.GetNonce(ctx))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 143, Col: 115}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 143, Col: 121}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 			if templ_7745c5c3_Err != nil {
@@ -558,9 +558,9 @@ func head(pageTitle string) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var28 string
-			templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(frm.URLPath(ctx, "/static/js/choices.min.js"))
+			templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(frm.CollectorPath(ctx, "/static/js/choices.min.js"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 144, Col: 85}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 144, Col: 91}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 			if templ_7745c5c3_Err != nil {
@@ -573,7 +573,7 @@ func head(pageTitle string) templ.Component {
 			var templ_7745c5c3_Var29 string
 			templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(templ.GetNonce(ctx))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 144, Col: 115}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 144, Col: 121}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 			if templ_7745c5c3_Err != nil {
@@ -2016,9 +2016,9 @@ func fieldLogicConfiguration(form frm.Form, field types.FormField) templ.Compone
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var92 string
-		templ_7745c5c3_Var92, templ_7745c5c3_Err = templ.JoinStringErrs(frm.URLPath(ctx, fmt.Sprintf("/build/%d/logic_configurator/%s/step3", form.ID, field.ID.String())))
+		templ_7745c5c3_Var92, templ_7745c5c3_Err = templ.JoinStringErrs(frm.CollectorPath(ctx, fmt.Sprintf("/build/%d/logic_configurator/%s/step3", form.ID, field.ID.String())))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 624, Col: 116}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 624, Col: 122}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var92))
 		if templ_7745c5c3_Err != nil {
