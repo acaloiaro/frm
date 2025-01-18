@@ -85,3 +85,8 @@ SET updated_at = timezone('utc', now()),
     fields = @fields,
     status = @status RETURNING *;
 
+-- name: GetShortCode :one
+SELECT * FROM short_codes WHERE short_code = @short_code;
+
+-- name: SaveShortCode :one
+INSERT INTO short_codes (workspace_id, form_id, subject_id, short_code) VALUES (@workspace_id, @form_id, @subject_id, @short_code) RETURNING *;

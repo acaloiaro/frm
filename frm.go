@@ -36,7 +36,15 @@ type Args struct {
 	WorkspaceIDUrlParam string // named URL parameter that identifies the workspace, e.g. for route /{workspace_id}, the value would be "workspace_id"
 }
 
-type FormStatus internal.FormStatus
+// FormStatus is the status of a Form
+//
+// - Published forms are available to be used
+//
+// - Draft forms are in a draft state, yet to be published
+type FormStatus = internal.FormStatus
+
+const FormStatusPublished = internal.FormStatusPublished
+const FormStatusDraft = internal.FormStatusDraft
 
 // New initializes a new frm instance
 //
@@ -117,7 +125,24 @@ func Instance(ctx context.Context) (i *Frm, err error) {
 	return
 }
 
-// CollectorPath returns paths to frm collector endpoints
+type CreateShortCodeArgs struct {
+	FormID    int64
+	SubjectID string
+}
+
+// CreateShortCode creates short code for a given form and subject
+func (f *Frm) CreateShortCode(ctx context.Context, args CreateShortCodeArgs) (sc ShortCode, err error) {
+	var s internal.ShortCode
+	s, err = internal.Q(ctx, f.DBArgs).SaveShortCode(ctx, internal.SaveShortCodeParams{
+		WorkspaceID: f.WorkspaceID,
+		FormID:      &args.FormID,
+		ShortCode:   internal.GenCode(),
+		SubjectID:   args.SubjectID,
+	})
+	return (ShortCode)(s), err
+}
+
+// # CollectorPath returns paths to frm collector endpoints
 //
 // It uses the collector's mount point on the router to generate collector paths
 func CollectorPath(ctx context.Context, path string) string {

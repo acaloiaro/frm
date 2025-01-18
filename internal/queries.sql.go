@@ -107,6 +107,28 @@ func (q *Queries) GetForm(ctx context.Context, arg GetFormParams) (Form, error) 
 	return i, err
 }
 
+const getShortCode = `-- name: GetShortCode :one
+SELECT id, workspace_id, form_id, short_code, subject_id, created_at, updated_at FROM short_codes WHERE short_code = $1
+`
+
+// GetShortCode
+//
+//	SELECT id, workspace_id, form_id, short_code, subject_id, created_at, updated_at FROM short_codes WHERE short_code = $1
+func (q *Queries) GetShortCode(ctx context.Context, shortCode string) (ShortCode, error) {
+	row := q.db.QueryRow(ctx, getShortCode, shortCode)
+	var i ShortCode
+	err := row.Scan(
+		&i.ID,
+		&i.WorkspaceID,
+		&i.FormID,
+		&i.ShortCode,
+		&i.SubjectID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const listDrafts = `-- name: ListDrafts :many
 
 SELECT id, form_id, workspace_id, name, fields, status, created_at, updated_at
@@ -328,6 +350,40 @@ func (q *Queries) SaveDraft(ctx context.Context, arg SaveDraftParams) (Form, err
 		&i.Name,
 		&i.Fields,
 		&i.Status,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const saveShortCode = `-- name: SaveShortCode :one
+INSERT INTO short_codes (workspace_id, form_id, subject_id, short_code) VALUES ($1, $2, $3, $4) RETURNING id, workspace_id, form_id, short_code, subject_id, created_at, updated_at
+`
+
+type SaveShortCodeParams struct {
+	WorkspaceID string `json:"workspace_id"`
+	FormID      *int64 `json:"form_id"`
+	SubjectID   string `json:"subject_id"`
+	ShortCode   string `json:"short_code"`
+}
+
+// SaveShortCode
+//
+//	INSERT INTO short_codes (workspace_id, form_id, subject_id, short_code) VALUES ($1, $2, $3, $4) RETURNING id, workspace_id, form_id, short_code, subject_id, created_at, updated_at
+func (q *Queries) SaveShortCode(ctx context.Context, arg SaveShortCodeParams) (ShortCode, error) {
+	row := q.db.QueryRow(ctx, saveShortCode,
+		arg.WorkspaceID,
+		arg.FormID,
+		arg.SubjectID,
+		arg.ShortCode,
+	)
+	var i ShortCode
+	err := row.Scan(
+		&i.ID,
+		&i.WorkspaceID,
+		&i.FormID,
+		&i.ShortCode,
+		&i.SubjectID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)

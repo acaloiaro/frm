@@ -22,8 +22,9 @@ func View(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	formID, err := formID(ctx)
+	formID, err := formID(ctx, i)
 	if err != nil {
+		slog.Error("unable to view form!", "error", err)
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
@@ -32,6 +33,7 @@ func View(w http.ResponseWriter, r *http.Request) {
 		ID:          *formID,
 	})
 	if err != nil {
+		slog.Error("unable to view form!!", "error", err)
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
@@ -39,6 +41,7 @@ func View(w http.ResponseWriter, r *http.Request) {
 	err = ui.Viewer((frm.Form)(f)).Render(ctx, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 }
 
@@ -46,15 +49,16 @@ func View(w http.ResponseWriter, r *http.Request) {
 //
 // When Forms are submitted via short URL, submissions are attributed to the subject with which the short code was
 // generated.
-func ShortURL(w http.ResponseWriter, r *http.Request) {
+func ShortCode(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	i, err := frm.Instance(ctx)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	formID, err := formID(ctx)
+	formID, err := formID(ctx, i)
 	if err != nil {
+		slog.Error("unable to view form", "error", err)
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
@@ -63,6 +67,7 @@ func ShortURL(w http.ResponseWriter, r *http.Request) {
 		ID:          *formID,
 	})
 	if err != nil {
+		slog.Error("unable to view form", "error", err)
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
@@ -81,7 +86,7 @@ func Collect(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	formID, err := formID(ctx)
+	formID, err := formID(ctx, i)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return

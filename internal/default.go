@@ -2,9 +2,11 @@ package internal
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
+	"math/rand"
 	"strings"
 
 	"github.com/acaloiaro/frm/db/migrations"
@@ -20,13 +22,18 @@ type contextKey string
 const (
 	// BuilderMountPointContextKey is the context key representing frm's builder mount point on the request context
 	BuilderMountPointContextKey contextKey = "builder_mount_point_context_key"
+	// DefaultShortcodeLen is the default length for generating short codes
+	DefaultShortcodeLen = 6
 	// CollectorMountPointContextKey is the context key representing frm's collector mount point on the request context
 	CollectorMountPointContextKey contextKey = "collector_mount_point_context_key"
 	// FrmContextKey is the context key representing the frm instance on the request context
 	FrmContextKey contextKey = "frm_instance"
 )
 
-var pool *pgxpool.Pool
+var (
+	pool             *pgxpool.Pool
+	shortcodeCharset = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+)
 
 type Forms []Form
 
@@ -217,4 +224,24 @@ func pgConnectionString(args DBArgs) (connString string, err error) {
 
 	connString = fmt.Sprintf("postgres://%s:%s@%s:%d/%s?%s", cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.Database, strings.Join(options, "&"))
 	return
+}
+
+// JSON returns the form's JSON-seralized string representation
+func (f Form) JSON() string {
+	b, err := json.Marshal(f)
+	if err != nil {
+		return ""
+	}
+
+	return string(b)
+}
+
+// GenCode generates new shortcodes
+func GenCode() string {
+	b := make([]rune, DefaultShortcodeLen)
+	chsLen := len(shortcodeCharset)
+	for i := range b {
+		b[i] = shortcodeCharset[rand.Intn(chsLen)]
+	}
+	return string(b)
 }

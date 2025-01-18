@@ -55,7 +55,7 @@ func DraftEditor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := formID(ctx)
+	id, err := formID(ctx, f)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -89,7 +89,7 @@ func UpdateFieldOrder(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	formID, err := formID(ctx)
+	formID, err := formID(ctx, f)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -158,7 +158,7 @@ func LogicConfiguratorChoices(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	formID, err := formID(ctx)
+	formID, err := formID(ctx, f)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -216,7 +216,7 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	draftID, err := formID(ctx)
+	draftID, err := formID(ctx, f)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -293,7 +293,7 @@ func NewField(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	formID, err := formID(ctx)
+	formID, err := formID(ctx, f)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -380,7 +380,7 @@ func UpdateFields(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	formID, err := formID(ctx)
+	formID, err := formID(ctx, f)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -516,7 +516,7 @@ func DeleteField(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	formID, err := formID(ctx)
+	formID, err := formID(ctx, f)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -572,15 +572,17 @@ func DeleteField(w http.ResponseWriter, r *http.Request) {
 // NewDraft creates a new draft from scratch or an existing form
 func NewDraft(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	formID, _ := formID(ctx)
 	f, err := frm.Instance(ctx)
 	if err != nil {
 		slog.Error("unable to create draft", "error", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	q := internal.Q(ctx, f.DBArgs)
 
+	// dont check for errors here, because this endpoint handles both new drafts and drafts from existing forms
+	formID, _ := formID(ctx, f)
+
+	q := internal.Q(ctx, f.DBArgs)
 	draftParams := &internal.SaveDraftParams{
 		WorkspaceID: f.WorkspaceID,
 		Fields:      types.FormFields{},
@@ -624,7 +626,7 @@ func PublishDraft(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	draftID, err := formID(ctx)
+	draftID, err := formID(ctx, f)
 	if err != nil {
 		slog.Error("unable to publish draft", "error", err)
 		w.WriteHeader(http.StatusNotFound)
@@ -660,7 +662,7 @@ func DeleteForm(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	formID, err := formID(ctx)
+	formID, err := formID(ctx, f)
 	if err != nil {
 		slog.Error("unable to delete form", "error", err)
 		w.WriteHeader(http.StatusNotFound)
@@ -681,14 +683,17 @@ func DeleteForm(w http.ResponseWriter, r *http.Request) {
 }
 
 // formID gets the form ID from the request context
-func formID(ctx context.Context) (formID *int64, err error) {
+func formID(ctx context.Context, f *frm.Frm) (formID *int64, err error) {
 	var ok bool
 	formID, ok = ctx.Value(FormIDContextKey).(*int64)
 	if !ok {
-		// TODO lookup the short code from the db
-		// if shortCode, ok := ctx.Value(ShortCodeContextKey).(string); !ok {
-
-		// }
+		if shortCode, ok := ctx.Value(ShortCodeContextKey).(*string); ok {
+			s, err := internal.Q(ctx, f.DBArgs).GetShortCode(ctx, *shortCode)
+			if err != nil {
+				return nil, err
+			}
+			return s.FormID, nil
+		}
 		return nil, ErrFormIDNotFound
 	}
 	return

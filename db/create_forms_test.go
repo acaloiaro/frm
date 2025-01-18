@@ -63,8 +63,9 @@ func TestCreateAndUpdateForm(t *testing.T) {
 	}
 	ctx := context.Background()
 	frms, err := frm.New(frm.Args{
-		DBUrl:       os.Getenv("POSTGRES_URL"),
-		WorkspaceID: workspaceID,
+		PostgresURL:        os.Getenv("POSTGRES_URL"),
+		WorkspaceID:        workspaceID.String(),
+		PostgresDisableSSL: true,
 	})
 	if err != nil {
 		t.Error(err)
@@ -75,7 +76,7 @@ func TestCreateAndUpdateForm(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	f, err := internal.Q(ctx, frms.PostgresURL).SaveDraft(ctx, internal.SaveDraftParams{
+	f, err := internal.Q(ctx, frms.DBArgs).SaveDraft(ctx, internal.SaveDraftParams{
 		Name:        "hello world",
 		Fields:      fields,
 		WorkspaceID: frms.WorkspaceID,
@@ -85,7 +86,7 @@ func TestCreateAndUpdateForm(t *testing.T) {
 		return
 	}
 
-	f, err = internal.Q(ctx, frms.PostgresURL).SaveDraft(ctx, internal.SaveDraftParams{
+	f, err = internal.Q(ctx, frms.DBArgs).SaveDraft(ctx, internal.SaveDraftParams{
 		ID:          f.ID,
 		Name:        nameUpdate,
 		Fields:      updatedFields,

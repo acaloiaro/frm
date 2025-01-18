@@ -53,8 +53,8 @@ func Mount(router chi.Router, f *frm.Frm) {
 	collector := chi.NewRouter()
 	collector.Use(Middlware(f))
 	collector.NotFound(handlers.StaticAssetHandler)
-	collector.Route("/s", func(form chi.Router) {
-		form.Get("/{short_code}", handlers.View)
+	collector.With(addRequestContext).Route(fmt.Sprintf("/s/{%s}", UrlParamShortCode), func(sc chi.Router) {
+		sc.Get("/", handlers.ShortCode)
 	})
 	collector.Route(fmt.Sprintf("/{%s}", UrlParamFormID), func(form chi.Router) {
 		form = form.With(addRequestContext)
@@ -138,8 +138,8 @@ func addRequestContext(h http.Handler) http.Handler {
 					}
 					ctx = context.WithValue(ctx, handlers.FieldIDContextKey, &fieldID)
 				case string(UrlParamShortCode):
-					shortCode := chi.URLParam(r, string(UrlParamFieldID))
-					if shortCode != "" {
+					shortCode := chi.URLParam(r, string(UrlParamShortCode))
+					if shortCode == "" {
 						w.WriteHeader(http.StatusNotFound)
 						return
 					}
