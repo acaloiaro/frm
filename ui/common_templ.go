@@ -2677,7 +2677,7 @@ func FormView(form frm.Form, isPreview bool) templ.Component {
 				var templ_7745c5c3_Var118 string
 				templ_7745c5c3_Var118, templ_7745c5c3_Err = templ.JoinStringErrs(field.ID.String())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 866, Col: 30}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 867, Col: 30}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var118))
 				if templ_7745c5c3_Err != nil {
@@ -2690,7 +2690,7 @@ func FormView(form frm.Form, isPreview bool) templ.Component {
 				var templ_7745c5c3_Var119 string
 				templ_7745c5c3_Var119, templ_7745c5c3_Err = templ.JoinStringErrs(field.ID.String())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 867, Col: 32}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 868, Col: 32}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var119))
 				if templ_7745c5c3_Err != nil {
