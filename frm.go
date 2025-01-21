@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	"github.com/acaloiaro/frm/internal"
 )
@@ -55,8 +56,8 @@ func New(args Args) (f *Frm, err error) {
 	}
 
 	f = &Frm{
-		BuilderMountPoint:   args.BuilderMountPoint,
-		CollectorMountPoint: args.CollectorMountPoint,
+		BuilderMountPoint:   strings.TrimSuffix(args.BuilderMountPoint, "/"),
+		CollectorMountPoint: strings.TrimSuffix(args.CollectorMountPoint, "/"),
 		WorkspaceID:         args.WorkspaceID,
 		WorkspaceIDUrlParam: args.WorkspaceIDUrlParam,
 		DBArgs: internal.DBArgs{

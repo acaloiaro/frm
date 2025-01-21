@@ -41,8 +41,8 @@
 <!-- Middle Column -->
 <!-- Right Column -->
 </section></section>
-<section id=\"app-container\" class=\"container mx-auto\">
-</section>
+<div class=\"bg-sky-100 h-screen\"><section id=\"app-container\" class=\"container mx-auto\">
+</section></div>
 <div id=\"settings-main\" class=\"hidden\"><form id=\"settings-form\" data-hx-put=\"
 \" data-hx-trigger=\"
 \" data-hx-swap-oob=\"true\"><div class=\"pt-3\"><label for=\"form-name-field\" class=\"pr-1\">Form name</label>
@@ -157,8 +157,8 @@ Multi select
 \">
  
 </label>
-<div id=\"form-viewer\" class=\"flex flex-col w-1/2 mx-auto justify-top\" data-hx-swap-oob=\"true\"><div id=\"form-metadata\" data-data=\"
-\"></div><h1 class=\"hover:bg-gray-50 dark:hover:bg-gray-800 rounded cursor-pointer relative mb-2 font-black text-5xl\">
+<div id=\"form-viewer\" class=\"flex flex-col w-1/2 mx-auto justify-top pt-12\" data-hx-swap-oob=\"true\"><div id=\"form-metadata\" data-data=\"
+\"></div><h1 class=\"rounded relative mb-2 font-black text-5xl\">
 </h1><form _=\"on field_change(field_id, value) formValueChanged(field_id, value)\">
 <div id=\"
 \"

@@ -62,8 +62,8 @@ func Mount(router chi.Router, f *frm.Frm) {
 		form.Post("/", handlers.Collect)
 	})
 
-	router.Mount(f.CollectorMountPoint, collector)
 	router.Mount(f.BuilderMountPoint, builder)
+	router.Mount(f.CollectorMountPoint, collector)
 }
 
 // Middlware adds all the context necessary for frm's handlers and path helpers to function
@@ -107,7 +107,6 @@ func Middlware(f *frm.Frm) func(http.Handler) http.Handler {
 
 			// Add the frm instance to the request context, using the workspace ID extracted from the chi route context
 			f.WorkspaceID = workspaceID
-
 			ctx = context.WithValue(ctx, internal.FrmContextKey, f)
 
 			h.ServeHTTP(w, r.Clone(ctx))

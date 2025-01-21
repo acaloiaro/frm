@@ -269,9 +269,11 @@ templ Builder(form frm.Form) {
 // Builder is the primary form builder UI, surrounded by the app chrome
 templ Viewer(form frm.Form) {
 	@App("Form viewer") {
-		<section id="app-container" class="container mx-auto">
-			@FormView(form, false)
-		</section>
+		<div class="bg-sky-100 h-screen">
+			<section id="app-container" class="container mx-auto">
+				@FormView(form, false)
+			</section>
+		</div>
 	}
 }
 
@@ -825,12 +827,12 @@ func (v ViewerMetadata) JSON() string {
 
 // FormView renders forms
 templ FormView(form frm.Form, isPreview bool) {
-	<div id="form-viewer" class="flex flex-col w-1/2 mx-auto justify-top" data-hx-swap-oob="true">
+	<div id="form-viewer" class="flex flex-col w-1/2 mx-auto justify-top pt-12" data-hx-swap-oob="true">
 		<div
 			id="form-metadata"
 			data-data={ ViewerMetadata{Form: form}.JSON() }
 		></div>
-		<h1 class="hover:bg-gray-50 dark:hover:bg-gray-800 rounded cursor-pointer relative mb-2 font-black text-5xl">
+		<h1 class="rounded relative mb-2 font-black text-5xl">
 			{ form.Name }
 		</h1>
 		<form

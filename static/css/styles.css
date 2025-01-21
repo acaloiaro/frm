@@ -2785,6 +2785,10 @@ input.tab:checked + .tab-content,
   padding-right: 0.25rem;
 }
 
+.pt-12 {
+  padding-top: 3rem;
+}
+
 .pt-3 {
   padding-top: 0.75rem;
 }
