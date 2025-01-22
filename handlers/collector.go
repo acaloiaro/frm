@@ -112,11 +112,6 @@ func Collect(w http.ResponseWriter, r *http.Request) {
 	if errs.Any() {
 		slog.Info("[collector] failed validation", "errors", errs)
 		w.WriteHeader(http.StatusBadRequest)
-	} else {
-		// TODO Redirect to a thank-you page
-		w.Header().Add("hx-redirect", frm.CollectorPathForm(ctx, *formID))
-
-		w.WriteHeader(http.StatusOK)
 	}
 	sc := submission.Get("short_code")
 	submission.Del("short_code")
@@ -176,6 +171,11 @@ func Collect(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = ui.ThankYou().Render(ctx, w)
+	if err != nil {
+		slog.Error("[collector] unable to render thank you page", "error", err)
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 }
 
 // validate validates forms

@@ -133,7 +133,7 @@ func SafePath(ctx context.Context, path string) templ.SafeURL {
 // head simply provides the <head> element
 templ head(pageTitle string) {
 	<head>
-		<title>{ ApplicationName } :: { pageTitle }</title>
+		<title>{ pageTitle }</title>
 		<meta charset="UTF-8"/>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 		@loadDependenciesOnce.Once() {
@@ -269,7 +269,7 @@ templ Builder(form frm.Form) {
 
 // Builder is the primary form builder UI, surrounded by the app chrome
 templ Viewer(form frm.Form) {
-	@App("Form viewer") {
+	@App(form.Name) {
 		<div class="bg-sky-100 h-screen">
 			<section id="app-container" class="container mx-auto">
 				@FormView(form, false)
@@ -846,82 +846,94 @@ templ FormView(form frm.Form, isPreview bool) {
 		<h1 class="rounded relative mb-2 font-black text-slate-700 text-5xl">
 			{ form.Name }
 		</h1>
-		<form
-			_="on field_change(field_id, value) formValueChanged(field_id, value)"
-		>
-			<input name="submission_id" type="hidden" value="changeme!"/>
-			if sc := shortCode(ctx); sc != nil {
-				<input name="short_code" type="hidden" value={ *sc }/>
-			}
-			for _, field := range sortFields(form.Fields) {
-				<div
-					id={ fmt.Sprintf("field-container-%s", field.ID.String()) }
-					if field.Hidden {
-						class="flex flex-col py-3 hidden"
-					} else {
-						class="flex flex-col py-3"
-					}
-				>
+		<div id="form-input">
+			<form
+				_="on field_change(field_id, value) formValueChanged(field_id, value)"
+			>
+				<input name="submission_id" type="hidden" value="changeme!"/>
+				if sc := shortCode(ctx); sc != nil {
+					<input name="short_code" type="hidden" value={ *sc }/>
+				}
+				for _, field := range sortFields(form.Fields) {
 					<div
-						id={ fmt.Sprintf("errors-%s", field.ID.String()) }
-						class="text-red-400"
-					></div>
-					switch field.Type {
-						case types.FormFieldTypeTextSingle:
-							@fieldLabel(field)
-							<input
-								id={ field.ID.String() }
-								name={ field.ID.String() }
-								placeholder={ field.Placeholder }
-								type="text"
-								autocomplete="off"
-								_={ fmt.Sprintf("on keyup debounced at 250ms trigger field_change(field_id: '%s', value: my.value)", field.ID.String()) }
-								class="flex-1 appearance-none border border-gray-300 dark:border-gray-600 w-full text-gray-700 dark:bg-notion-dark-light dark:text-gray-300 dark:placeholder-gray-500 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:border-2 focus:ring-opacity-100 px-4 py-2 text-base resize-y block rounded-xl bg-sky-50"
-							/>
-						case types.FormFieldTypeTextMultiple:
-							@fieldLabel(field)
-							<textarea
-								id={ field.ID.String() }
-								name={ field.ID.String() }
-								class="flex-1 appearance-none border border-gray-300 dark:border-gray-600 w-full text-gray-700 dark:bg-notion-dark-light dark:text-gray-300 dark:placeholder-gray-500 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:border-transparent focus:ring-opacity-100 px-4 py-2 text-base resize-y block rounded-xl bg-sky-50"
-								placeholder={ field.Placeholder }
-								autocomplete="off"
-								_={ fmt.Sprintf("on keyup debounced at 250ms trigger field_change(field_id: '%s', value: my.value)", field.ID.String()) }
-								rows="3"
-							></textarea>
-						case types.FormFieldTypeSingleSelect, types.FormFieldTypeMultiSelect:
-							@selector.Selector(selector.SelectArgs{
-								ID:             field.ID.String(),
-								Name:           field.ID.String(),
-								Label:          field.Label,
-								LabelClass:     "text-slate-700 text-xl py-1",
-								Required:       field.Required,
-								Placeholder:    field.Placeholder,
-								Multiple:       field.Type == types.FormFieldTypeMultiSelect,
-								Options:        toSelectorOpts(field.Options, false),
-								SearchDisabled: true,
-								EditItems:      false,
-								Hyperscript:    fmt.Sprintf("on change trigger field_change(field_id: '%s', value: my.value)", field.ID.String()),
-							})
-					}
-				</div>
-			}
-			<div class="py-3"></div>
-			@button(buttonArgs{
-				Label:   "submit",
-				Type:    "submit",
-				Classes: []string{"flex-grow", "justify-center", "uppercase"},
-			}, templ.Attributes{
-				"type":               "submit",
-				"data-hx-post":       formCollectorUrl[string](ctx, form),
-				"data-hx-trigger":    "click",
-				"data-hx-swap":       "none",
-				"data-hx-target-400": "form",
-				"disabled":           isPreview,
-			},
-			)
-		</form>
+						id={ fmt.Sprintf("field-container-%s", field.ID.String()) }
+						if field.Hidden {
+							class="flex flex-col py-3 hidden"
+						} else {
+							class="flex flex-col py-3"
+						}
+					>
+						<div
+							id={ fmt.Sprintf("errors-%s", field.ID.String()) }
+							class="text-red-400"
+						></div>
+						switch field.Type {
+							case types.FormFieldTypeTextSingle:
+								@fieldLabel(field)
+								<input
+									id={ field.ID.String() }
+									name={ field.ID.String() }
+									placeholder={ field.Placeholder }
+									type="text"
+									autocomplete="off"
+									_={ fmt.Sprintf("on keyup debounced at 250ms trigger field_change(field_id: '%s', value: my.value)", field.ID.String()) }
+									class="flex-1 appearance-none border border-gray-300 dark:border-gray-600 w-full text-gray-700 dark:bg-notion-dark-light dark:text-gray-300 dark:placeholder-gray-500 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:border-2 focus:ring-opacity-100 px-4 py-2 text-base resize-y block rounded-xl bg-sky-50"
+								/>
+							case types.FormFieldTypeTextMultiple:
+								@fieldLabel(field)
+								<textarea
+									id={ field.ID.String() }
+									name={ field.ID.String() }
+									class="flex-1 appearance-none border border-gray-300 dark:border-gray-600 w-full text-gray-700 dark:bg-notion-dark-light dark:text-gray-300 dark:placeholder-gray-500 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:border-transparent focus:ring-opacity-100 px-4 py-2 text-base resize-y block rounded-xl bg-sky-50"
+									placeholder={ field.Placeholder }
+									autocomplete="off"
+									_={ fmt.Sprintf("on keyup debounced at 250ms trigger field_change(field_id: '%s', value: my.value)", field.ID.String()) }
+									rows="3"
+								></textarea>
+							case types.FormFieldTypeSingleSelect, types.FormFieldTypeMultiSelect:
+								@selector.Selector(selector.SelectArgs{
+									ID:             field.ID.String(),
+									Name:           field.ID.String(),
+									Label:          field.Label,
+									LabelClass:     "text-slate-700 text-xl py-1",
+									Required:       field.Required,
+									Placeholder:    field.Placeholder,
+									Multiple:       field.Type == types.FormFieldTypeMultiSelect,
+									Options:        toSelectorOpts(field.Options, false),
+									SearchDisabled: true,
+									EditItems:      false,
+									Hyperscript:    fmt.Sprintf("on change trigger field_change(field_id: '%s', value: my.value)", field.ID.String()),
+								})
+						}
+					</div>
+				}
+				<div class="py-3"></div>
+				@button(buttonArgs{
+					Label:   "submit",
+					Type:    "submit",
+					Classes: []string{"flex-grow", "justify-center", "uppercase"},
+				}, templ.Attributes{
+					"type":               "submit",
+					"data-hx-post":       formCollectorUrl[string](ctx, form),
+					"data-hx-trigger":    "click",
+					"data-hx-target":     "#form-input",
+					"data-hx-target-400": "form",
+					"disabled":           isPreview,
+				},
+				)
+			</form>
+		</div>
 	</div>
+}
+
+templ ThankYou() {
+	@App("Form viewer") {
+		<div class="bg-sky-100 h-screen">
+			<section id="app-container" class="container mx-auto">
+				<p class="text-4xl pt-9">Thank you!</p>
+			</section>
+		</div>
+	}
 }
 
 func toSelectorOpts(opts []types.Option, selectAll bool) (sopts []selector.Option) {
