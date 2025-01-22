@@ -115,6 +115,8 @@ type FormSubmission struct {
 	ID          int64  `json:"id"`
 	FormID      *int64 `json:"form_id"`
 	WorkspaceID string `json:"workspace_id"`
+	// identifies the subject/respondent who filled out the form
+	SubjectID *string `json:"subject_id"`
 	// all form submissions are serialized to JSON, see types.FormFieldValue for structure details
 	Fields    types.FormFieldValues `json:"fields"`
 	Status    SubmissionStatus      `json:"status"`

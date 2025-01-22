@@ -2505,7 +2505,7 @@ func (v ViewerMetadata) JSON() string {
 	return string(b)
 }
 
-// FormView renders forms
+// FormView is a view of Forms
 func FormView(form frm.Form, isPreview bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -2565,7 +2565,7 @@ func FormView(form frm.Form, isPreview bool) templ.Component {
 			var templ_7745c5c3_Var112 string
 			templ_7745c5c3_Var112, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("field-container-%s", field.ID.String()))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 843, Col: 62}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 844, Col: 62}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var112))
 			if templ_7745c5c3_Err != nil {
@@ -2593,7 +2593,7 @@ func FormView(form frm.Form, isPreview bool) templ.Component {
 			var templ_7745c5c3_Var113 string
 			templ_7745c5c3_Var113, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("errors-%s", field.ID.String()))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 851, Col: 54}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 852, Col: 54}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var113))
 			if templ_7745c5c3_Err != nil {
@@ -2616,7 +2616,7 @@ func FormView(form frm.Form, isPreview bool) templ.Component {
 				var templ_7745c5c3_Var114 string
 				templ_7745c5c3_Var114, templ_7745c5c3_Err = templ.JoinStringErrs(field.ID.String())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 858, Col: 30}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 859, Col: 30}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var114))
 				if templ_7745c5c3_Err != nil {
@@ -2629,7 +2629,7 @@ func FormView(form frm.Form, isPreview bool) templ.Component {
 				var templ_7745c5c3_Var115 string
 				templ_7745c5c3_Var115, templ_7745c5c3_Err = templ.JoinStringErrs(field.ID.String())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 859, Col: 32}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 860, Col: 32}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var115))
 				if templ_7745c5c3_Err != nil {
@@ -2642,7 +2642,7 @@ func FormView(form frm.Form, isPreview bool) templ.Component {
 				var templ_7745c5c3_Var116 string
 				templ_7745c5c3_Var116, templ_7745c5c3_Err = templ.JoinStringErrs(field.Placeholder)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 860, Col: 39}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 861, Col: 39}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var116))
 				if templ_7745c5c3_Err != nil {
@@ -2655,7 +2655,7 @@ func FormView(form frm.Form, isPreview bool) templ.Component {
 				var templ_7745c5c3_Var117 string
 				templ_7745c5c3_Var117, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("on keyup debounced at 250ms trigger field_change(field_id: '%s', value: my.value)", field.ID.String()))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 863, Col: 127}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 864, Col: 127}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var117))
 				if templ_7745c5c3_Err != nil {
@@ -2677,7 +2677,7 @@ func FormView(form frm.Form, isPreview bool) templ.Component {
 				var templ_7745c5c3_Var118 string
 				templ_7745c5c3_Var118, templ_7745c5c3_Err = templ.JoinStringErrs(field.ID.String())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 869, Col: 30}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 870, Col: 30}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var118))
 				if templ_7745c5c3_Err != nil {
@@ -2690,7 +2690,7 @@ func FormView(form frm.Form, isPreview bool) templ.Component {
 				var templ_7745c5c3_Var119 string
 				templ_7745c5c3_Var119, templ_7745c5c3_Err = templ.JoinStringErrs(field.ID.String())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 870, Col: 32}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 871, Col: 32}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var119))
 				if templ_7745c5c3_Err != nil {
@@ -2703,7 +2703,7 @@ func FormView(form frm.Form, isPreview bool) templ.Component {
 				var templ_7745c5c3_Var120 string
 				templ_7745c5c3_Var120, templ_7745c5c3_Err = templ.JoinStringErrs(field.Placeholder)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 872, Col: 39}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 873, Col: 39}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var120))
 				if templ_7745c5c3_Err != nil {
@@ -2731,6 +2731,7 @@ func FormView(form frm.Form, isPreview bool) templ.Component {
 					ID:             field.ID.String(),
 					Name:           field.ID.String(),
 					Label:          field.Label,
+					LabelClass:     "text-slate-700 text-xl py-1",
 					Required:       field.Required,
 					Placeholder:    field.Placeholder,
 					Multiple:       field.Type == types.FormFieldTypeMultiSelect,

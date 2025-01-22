@@ -317,7 +317,7 @@ templ builderColumnLeft(form frm.Form) {
 // FormPreview previews a frm.Form
 templ FormPreview(form frm.Form) {
 	<section id="builder-main-middle-col" class="w-full h-screen overflow-y-auto overscroll-auto p-4 bg-gray-50 border-y-1">
-		<div class="mockup-browser border-base-300 border">
+		<div class="mockup-browser border-base-300 border overflow-visible">
 			<div class="mockup-browser-toolbar">
 				<div class="input border-base-300 border">https://your-form-domain.com/form</div>
 			</div>
@@ -803,7 +803,7 @@ templ formFieldTypeLabel(fieldType types.FormFieldType) {
 }
 
 templ fieldLabel(field types.FormField) {
-	<label for={ field.ID.String() }>
+	<label for={ field.ID.String() } class="text-slate-700 text-xl py-1">
 		{ field.Label }
 		if field.Required {
 			@requiredFieldIndicator()
@@ -825,19 +825,20 @@ func (v ViewerMetadata) JSON() string {
 	return string(b)
 }
 
-// FormView renders forms
+// FormView is a view of Forms
 templ FormView(form frm.Form, isPreview bool) {
 	<div id="form-viewer" class="flex flex-col w-1/2 mx-auto justify-top pt-12" data-hx-swap-oob="true">
 		<div
 			id="form-metadata"
 			data-data={ ViewerMetadata{Form: form}.JSON() }
 		></div>
-		<h1 class="rounded relative mb-2 font-black text-5xl">
+		<h1 class="rounded relative mb-2 font-black text-slate-700 text-5xl">
 			{ form.Name }
 		</h1>
 		<form
 			_="on field_change(field_id, value) formValueChanged(field_id, value)"
 		>
+			<input name="subject_id" type="hidden"/>
 			for _, field := range sortFields(form.Fields) {
 				<div
 					id={ fmt.Sprintf("field-container-%s", field.ID.String()) }
@@ -861,7 +862,7 @@ templ FormView(form frm.Form, isPreview bool) {
 								type="text"
 								autocomplete="off"
 								_={ fmt.Sprintf("on keyup debounced at 250ms trigger field_change(field_id: '%s', value: my.value)", field.ID.String()) }
-								class="border-gray-300 dark:border-gray-600 rounded-full bg-sky-50"
+								class="flex-1 appearance-none border border-gray-300 dark:border-gray-600 w-full text-gray-700 dark:bg-notion-dark-light dark:text-gray-300 dark:placeholder-gray-500 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:border-2 focus:ring-opacity-100 px-4 py-2 text-base resize-y block rounded-xl bg-sky-50"
 							/>
 						case types.FormFieldTypeTextMultiple:
 							@fieldLabel(field)
@@ -871,7 +872,6 @@ templ FormView(form frm.Form, isPreview bool) {
 								class="flex-1 appearance-none border border-gray-300 dark:border-gray-600 w-full text-gray-700 dark:bg-notion-dark-light dark:text-gray-300 dark:placeholder-gray-500 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:border-transparent focus:ring-opacity-100 px-4 py-2 text-base resize-y block rounded-xl bg-sky-50"
 								placeholder={ field.Placeholder }
 								autocomplete="off"
-								style="--tw-ring-color: #3B82F6;"
 								_={ fmt.Sprintf("on keyup debounced at 250ms trigger field_change(field_id: '%s', value: my.value)", field.ID.String()) }
 								rows="3"
 							></textarea>
@@ -880,6 +880,7 @@ templ FormView(form frm.Form, isPreview bool) {
 								ID:             field.ID.String(),
 								Name:           field.ID.String(),
 								Label:          field.Label,
+								LabelClass:     "text-slate-700 text-xl py-1",
 								Required:       field.Required,
 								Placeholder:    field.Placeholder,
 								Multiple:       field.Type == types.FormFieldTypeMultiSelect,

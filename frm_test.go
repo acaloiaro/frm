@@ -17,6 +17,7 @@ func TestCreateShortCode(t *testing.T) {
 		PostgresDisableSSL:  true,
 		WorkspaceID:         "1",
 		WorkspaceIDUrlParam: "client_id",
+		PostgresSchema:      "frm_test",
 	})
 	if err != nil {
 		t.Error(err)

@@ -397,7 +397,7 @@ VALUES (coalesce(nullif($1, 0), nextval('submission_ids'))::bigint, $2, $3, $4, 
 UPDATE
 SET updated_at = timezone('utc', now()),
     fields = $4,
-    status = $5 RETURNING id, form_id, workspace_id, fields, status, created_at, updated_at
+    status = $5 RETURNING id, form_id, workspace_id, subject_id, fields, status, created_at, updated_at
 `
 
 type SaveSubmissionParams struct {
@@ -415,7 +415,7 @@ type SaveSubmissionParams struct {
 //	UPDATE
 //	SET updated_at = timezone('utc', now()),
 //	    fields = $4,
-//	    status = $5 RETURNING id, form_id, workspace_id, fields, status, created_at, updated_at
+//	    status = $5 RETURNING id, form_id, workspace_id, subject_id, fields, status, created_at, updated_at
 func (q *Queries) SaveSubmission(ctx context.Context, arg SaveSubmissionParams) (FormSubmission, error) {
 	row := q.db.QueryRow(ctx, saveSubmission,
 		arg.ID,
@@ -429,6 +429,7 @@ func (q *Queries) SaveSubmission(ctx context.Context, arg SaveSubmissionParams) 
 		&i.ID,
 		&i.FormID,
 		&i.WorkspaceID,
+		&i.SubjectID,
 		&i.Fields,
 		&i.Status,
 		&i.CreatedAt,

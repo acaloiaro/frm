@@ -51,7 +51,7 @@
 \"></form></div>
 <section id=\"builder-main-left-col\" class=\"flex flex-col gap-3 w-1/4 min-w-max h-full p-4 text-gray-800 rounded-md\">
 </section>
-<section id=\"builder-main-middle-col\" class=\"w-full h-screen overflow-y-auto overscroll-auto p-4 bg-gray-50 border-y-1\"><div class=\"mockup-browser border-base-300 border\"><div class=\"mockup-browser-toolbar\"><div class=\"input border-base-300 border\">https://your-form-domain.com/form</div></div><div class=\"flex h-full border-base-300 bg-sky-100 border-t px-4 py-8\">
+<section id=\"builder-main-middle-col\" class=\"w-full h-screen overflow-y-auto overscroll-auto p-4 bg-gray-50 border-y-1\"><div class=\"mockup-browser border-base-300 border overflow-visible\"><div class=\"mockup-browser-toolbar\"><div class=\"input border-base-300 border\">https://your-form-domain.com/form</div></div><div class=\"flex h-full border-base-300 bg-sky-100 border-t px-4 py-8\">
 </div></div></section>
 <div class=\"p-1 rounded-md flex items-center justify-center bg-blue-100 text-blue-900 ml-2\">
 </div>
@@ -154,12 +154,12 @@ Multi select
 <label class=\"w-full cursor-pointer truncate\">I unno</label>
 </label></div>
 <label for=\"
-\">
+\" class=\"text-slate-700 text-xl py-1\">
  
 </label>
 <div id=\"form-viewer\" class=\"flex flex-col w-1/2 mx-auto justify-top pt-12\" data-hx-swap-oob=\"true\"><div id=\"form-metadata\" data-data=\"
-\"></div><h1 class=\"rounded relative mb-2 font-black text-5xl\">
-</h1><form _=\"on field_change(field_id, value) formValueChanged(field_id, value)\">
+\"></div><h1 class=\"rounded relative mb-2 font-black text-slate-700 text-5xl\">
+</h1><form _=\"on field_change(field_id, value) formValueChanged(field_id, value)\"><input name=\"subject_id\" type=\"hidden\"> 
 <div id=\"
 \"
  class=\"flex flex-col py-3 hidden\"
@@ -170,11 +170,11 @@ Multi select
 \" name=\"
 \" placeholder=\"
 \" type=\"text\" autocomplete=\"off\" _=\"
-\" class=\"border-gray-300 dark:border-gray-600 rounded-full bg-sky-50\">
+\" class=\"flex-1 appearance-none border border-gray-300 dark:border-gray-600 w-full text-gray-700 dark:bg-notion-dark-light dark:text-gray-300 dark:placeholder-gray-500 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:border-2 focus:ring-opacity-100 px-4 py-2 text-base resize-y block rounded-xl bg-sky-50\">
  <textarea id=\"
 \" name=\"
 \" class=\"flex-1 appearance-none border border-gray-300 dark:border-gray-600 w-full text-gray-700 dark:bg-notion-dark-light dark:text-gray-300 dark:placeholder-gray-500 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:border-transparent focus:ring-opacity-100 px-4 py-2 text-base resize-y block rounded-xl bg-sky-50\" placeholder=\"
-\" autocomplete=\"off\" style=\"--tw-ring-color: #3B82F6;\" _=\"
+\" autocomplete=\"off\" _=\"
 \" rows=\"3\"></textarea>
 </div>
 <div class=\"py-3\"></div>
