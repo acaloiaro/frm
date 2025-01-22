@@ -18,12 +18,6 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-type contextKey string
-
-var FormIDContextKey contextKey = "frm_form_id"
-var FieldIDContextKey contextKey = "frm_field_id"
-var ShortCodeContextKey contextKey = "frm_short_code"
-
 var ErrFormIDNotFound = errors.New("a form ID was not found in the request context")
 var ErrFieldIDNotFound = errors.New("a field ID was not found in the request context")
 
@@ -685,10 +679,13 @@ func DeleteForm(w http.ResponseWriter, r *http.Request) {
 // formID gets the form ID from the request context
 func formID(ctx context.Context, f *frm.Frm) (formID *int64, err error) {
 	var ok bool
-	formID, ok = ctx.Value(FormIDContextKey).(*int64)
+	formID, ok = ctx.Value(internal.FormIDContextKey).(*int64)
 	if !ok {
-		if shortCode, ok := ctx.Value(ShortCodeContextKey).(*string); ok {
-			s, err := internal.Q(ctx, f.DBArgs).GetShortCode(ctx, *shortCode)
+		if shortCode, ok := ctx.Value(internal.ShortCodeContextKey).(*string); ok {
+			s, err := internal.Q(ctx, f.DBArgs).GetShortCode(ctx, internal.GetShortCodeParams{
+				WorkspaceID: f.WorkspaceID,
+				ShortCode:   *shortCode,
+			})
 			if err != nil {
 				return nil, err
 			}
@@ -702,7 +699,7 @@ func formID(ctx context.Context, f *frm.Frm) (formID *int64, err error) {
 // fieldID gets the field id from the request context
 func fieldID(ctx context.Context) (fieldID *uuid.UUID, err error) {
 	var ok bool
-	fieldID, ok = ctx.Value(FieldIDContextKey).(*uuid.UUID)
+	fieldID, ok = ctx.Value(internal.FieldIDContextKey).(*uuid.UUID)
 	if !ok {
 		return nil, ErrFieldIDNotFound
 	}

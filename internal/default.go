@@ -31,8 +31,11 @@ const (
 )
 
 var (
-	pool             *pgxpool.Pool
-	shortcodeCharset = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+	FormIDContextKey    contextKey = "frm_form_id"
+	FieldIDContextKey   contextKey = "frm_field_id"
+	ShortCodeContextKey contextKey = "frm_short_code"
+	pool                *pgxpool.Pool
+	shortcodeCharset    = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 )
 
 type Forms []Form

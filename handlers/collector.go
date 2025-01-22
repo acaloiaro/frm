@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"log/slog"
 	"maps"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 	"github.com/acaloiaro/frm/types"
 	"github.com/acaloiaro/frm/ui"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 )
 
 // View renders the form viewer for the collector
@@ -116,6 +118,23 @@ func Collect(w http.ResponseWriter, r *http.Request) {
 
 		w.WriteHeader(http.StatusOK)
 	}
+	sc := submission.Get("short_code")
+	submission.Del("short_code")
+	arg := internal.GetShortCodeParams{
+		WorkspaceID: i.WorkspaceID,
+		ShortCode:   sc,
+	}
+	// Submissions without short codes are anonymous, and valid
+	shortCode, err := internal.Q(ctx, i.DBArgs).GetShortCode(ctx, arg)
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+		slog.Info("[collector] unable to find provided short code for workspace", "errors", err, "params", arg)
+		w.WriteHeader(http.StatusInternalServerError)
+	} else if errors.Is(err, pgx.ErrNoRows) {
+		slog.Info("[collector] short code not found", "params", arg)
+	}
+
+	// TODO: Keep track of the submission id
+	// submissionID := r.Form.Get("id")
 
 	// Validation renders whether there are errors or not errors, so that non-erroneous fields can be cleared of error messages
 	// as the user corrects validation errors
@@ -123,10 +142,13 @@ func Collect(w http.ResponseWriter, r *http.Request) {
 	err = ui.Validation(allFields, errs).Render(ctx, w)
 	if err != nil {
 		slog.Error("[collector] error while reporting validation error", "error", err)
-		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
+	// submitted forms only have a submission id when they've been previously submitted and the subject has re-submitted
+	if submission.Has("submission_id") {
+		// TODO do something with the submission id
+		submission.Del("submission_id")
+	}
 	formFieldValues := types.FormFieldValues{}
 	for fieldID, fieldValue := range submission {
 		formFieldValues[fieldID] = types.FormFieldSubmission{
@@ -141,16 +163,19 @@ func Collect(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	_, err = internal.Q(ctx, i.DBArgs).SaveSubmission(ctx, internal.SaveSubmissionParams{
+		// ID:          submissionID, TODO save submission id
 		FormID:      formID,
 		WorkspaceID: i.WorkspaceID,
+		SubjectID:   &shortCode.SubjectID,
 		Status:      internal.SubmissionStatusPartial,
 		Fields:      formFieldValues,
 	})
 	if err != nil {
-		slog.Error("[collector] unable to save submission")
+		slog.Error("[collector] unable to save submission", "error", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
 }
 
 // validate validates forms

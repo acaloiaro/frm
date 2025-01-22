@@ -159,7 +159,9 @@ Multi select
 </label>
 <div id=\"form-viewer\" class=\"flex flex-col w-1/2 mx-auto justify-top pt-12\" data-hx-swap-oob=\"true\"><div id=\"form-metadata\" data-data=\"
 \"></div><h1 class=\"rounded relative mb-2 font-black text-slate-700 text-5xl\">
-</h1><form _=\"on field_change(field_id, value) formValueChanged(field_id, value)\"><input name=\"subject_id\" type=\"hidden\"> 
+</h1><form _=\"on field_change(field_id, value) formValueChanged(field_id, value)\"><input name=\"submission_id\" type=\"hidden\" value=\"changeme!\"> 
+<input name=\"short_code\" type=\"hidden\" value=\"
+\"> 
 <div id=\"
 \"
  class=\"flex flex-col py-3 hidden\"

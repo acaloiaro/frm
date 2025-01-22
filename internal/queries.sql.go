@@ -108,14 +108,26 @@ func (q *Queries) GetForm(ctx context.Context, arg GetFormParams) (Form, error) 
 }
 
 const getShortCode = `-- name: GetShortCode :one
-SELECT id, workspace_id, form_id, short_code, subject_id, created_at, updated_at FROM short_codes WHERE short_code = $1
+
+SELECT id, workspace_id, form_id, short_code, subject_id, created_at, updated_at
+FROM short_codes
+WHERE workspace_id = $1
+  AND short_code = $2
 `
+
+type GetShortCodeParams struct {
+	WorkspaceID string `json:"workspace_id"`
+	ShortCode   string `json:"short_code"`
+}
 
 // GetShortCode
 //
-//	SELECT id, workspace_id, form_id, short_code, subject_id, created_at, updated_at FROM short_codes WHERE short_code = $1
-func (q *Queries) GetShortCode(ctx context.Context, shortCode string) (ShortCode, error) {
-	row := q.db.QueryRow(ctx, getShortCode, shortCode)
+//	SELECT id, workspace_id, form_id, short_code, subject_id, created_at, updated_at
+//	FROM short_codes
+//	WHERE workspace_id = $1
+//	  AND short_code = $2
+func (q *Queries) GetShortCode(ctx context.Context, arg GetShortCodeParams) (ShortCode, error) {
+	row := q.db.QueryRow(ctx, getShortCode, arg.WorkspaceID, arg.ShortCode)
 	var i ShortCode
 	err := row.Scan(
 		&i.ID,
@@ -357,7 +369,9 @@ func (q *Queries) SaveDraft(ctx context.Context, arg SaveDraftParams) (Form, err
 }
 
 const saveShortCode = `-- name: SaveShortCode :one
-INSERT INTO short_codes (workspace_id, form_id, subject_id, short_code) VALUES ($1, $2, $3, $4) RETURNING id, workspace_id, form_id, short_code, subject_id, created_at, updated_at
+
+INSERT INTO short_codes (workspace_id, form_id, subject_id, short_code)
+VALUES ($1, $2, $3, $4) RETURNING id, workspace_id, form_id, short_code, subject_id, created_at, updated_at
 `
 
 type SaveShortCodeParams struct {
@@ -369,7 +383,8 @@ type SaveShortCodeParams struct {
 
 // SaveShortCode
 //
-//	INSERT INTO short_codes (workspace_id, form_id, subject_id, short_code) VALUES ($1, $2, $3, $4) RETURNING id, workspace_id, form_id, short_code, subject_id, created_at, updated_at
+//	INSERT INTO short_codes (workspace_id, form_id, subject_id, short_code)
+//	VALUES ($1, $2, $3, $4) RETURNING id, workspace_id, form_id, short_code, subject_id, created_at, updated_at
 func (q *Queries) SaveShortCode(ctx context.Context, arg SaveShortCodeParams) (ShortCode, error) {
 	row := q.db.QueryRow(ctx, saveShortCode,
 		arg.WorkspaceID,
@@ -392,35 +407,37 @@ func (q *Queries) SaveShortCode(ctx context.Context, arg SaveShortCodeParams) (S
 
 const saveSubmission = `-- name: SaveSubmission :one
 
-INSERT INTO form_submissions (id, form_id, workspace_id, fields, status)
-VALUES (coalesce(nullif($1, 0), nextval('submission_ids'))::bigint, $2, $3, $4, $5) ON conflict(id) DO
+INSERT INTO form_submissions (id, form_id, workspace_id, subject_id, fields, status)
+VALUES (coalesce(nullif($1, 0), nextval('submission_ids'))::bigint, $2, $3, $4, $5, $6) ON conflict(id) DO
 UPDATE
 SET updated_at = timezone('utc', now()),
-    fields = $4,
-    status = $5 RETURNING id, form_id, workspace_id, subject_id, fields, status, created_at, updated_at
+    fields = $5,
+    status = $6 RETURNING id, form_id, workspace_id, subject_id, fields, status, created_at, updated_at
 `
 
 type SaveSubmissionParams struct {
 	ID          interface{}           `json:"id"`
 	FormID      *int64                `json:"form_id"`
 	WorkspaceID string                `json:"workspace_id"`
+	SubjectID   *string               `json:"subject_id"`
 	Fields      types.FormFieldValues `json:"fields"`
 	Status      SubmissionStatus      `json:"status"`
 }
 
 // SaveSubmission
 //
-//	INSERT INTO form_submissions (id, form_id, workspace_id, fields, status)
-//	VALUES (coalesce(nullif($1, 0), nextval('submission_ids'))::bigint, $2, $3, $4, $5) ON conflict(id) DO
+//	INSERT INTO form_submissions (id, form_id, workspace_id, subject_id, fields, status)
+//	VALUES (coalesce(nullif($1, 0), nextval('submission_ids'))::bigint, $2, $3, $4, $5, $6) ON conflict(id) DO
 //	UPDATE
 //	SET updated_at = timezone('utc', now()),
-//	    fields = $4,
-//	    status = $5 RETURNING id, form_id, workspace_id, subject_id, fields, status, created_at, updated_at
+//	    fields = $5,
+//	    status = $6 RETURNING id, form_id, workspace_id, subject_id, fields, status, created_at, updated_at
 func (q *Queries) SaveSubmission(ctx context.Context, arg SaveSubmissionParams) (FormSubmission, error) {
 	row := q.db.QueryRow(ctx, saveSubmission,
 		arg.ID,
 		arg.FormID,
 		arg.WorkspaceID,
+		arg.SubjectID,
 		arg.Fields,
 		arg.Status,
 	)

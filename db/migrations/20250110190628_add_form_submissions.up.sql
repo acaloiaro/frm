@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS form_submissions (
     id BIGINT PRIMARY KEY DEFAULT nextval('submission_ids'),
     form_id BIGINT REFERENCES forms(id) ON DELETE CASCADE,
     workspace_id TEXT NOT NULL,
-    subject_id TEXT,
+    subject_id TEXT DEFAULT NULL,
     fields jsonb default '{}' NOT NULL,
     status submission_status default 'partial' NOT NULL,
     created_at timestamptz not null default timezone('utc', now()),

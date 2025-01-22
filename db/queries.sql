@@ -78,15 +78,21 @@ SET updated_at = timezone('utc', now()),
 
 -- name: SaveSubmission :one
 
-INSERT INTO form_submissions (id, form_id, workspace_id, fields, status)
-VALUES (coalesce(nullif(@id, 0), nextval('submission_ids'))::bigint, @form_id, @workspace_id, @fields, @status) ON conflict(id) DO
+INSERT INTO form_submissions (id, form_id, workspace_id, subject_id, fields, status)
+VALUES (coalesce(nullif(@id, 0), nextval('submission_ids'))::bigint, @form_id, @workspace_id, @subject_id, @fields, @status) ON conflict(id) DO
 UPDATE
 SET updated_at = timezone('utc', now()),
     fields = @fields,
     status = @status RETURNING *;
 
 -- name: GetShortCode :one
-SELECT * FROM short_codes WHERE short_code = @short_code;
+
+SELECT *
+FROM short_codes
+WHERE workspace_id = @workspace_id
+  AND short_code = @short_code ;
 
 -- name: SaveShortCode :one
-INSERT INTO short_codes (workspace_id, form_id, subject_id, short_code) VALUES (@workspace_id, @form_id, @subject_id, @short_code) RETURNING *;
+
+INSERT INTO short_codes (workspace_id, form_id, subject_id, short_code)
+VALUES (@workspace_id, @form_id, @subject_id, @short_code) RETURNING *;

@@ -128,21 +128,21 @@ func addRequestContext(h http.Handler) http.Handler {
 						w.WriteHeader(http.StatusNotFound)
 						return
 					}
-					ctx = context.WithValue(ctx, handlers.FormIDContextKey, &formID)
+					ctx = context.WithValue(ctx, internal.FormIDContextKey, &formID)
 				case string(UrlParamFieldID):
 					fieldID, err := uuid.Parse(chi.URLParam(r, string(UrlParamFieldID)))
 					if err != nil {
 						w.WriteHeader(http.StatusNotFound)
 						return
 					}
-					ctx = context.WithValue(ctx, handlers.FieldIDContextKey, &fieldID)
+					ctx = context.WithValue(ctx, internal.FieldIDContextKey, &fieldID)
 				case string(UrlParamShortCode):
 					shortCode := chi.URLParam(r, string(UrlParamShortCode))
 					if shortCode == "" {
 						w.WriteHeader(http.StatusNotFound)
 						return
 					}
-					ctx = context.WithValue(ctx, handlers.ShortCodeContextKey, &shortCode)
+					ctx = context.WithValue(ctx, internal.ShortCodeContextKey, &shortCode)
 				}
 			}
 		}

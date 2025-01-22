@@ -5,6 +5,7 @@ import (
 	"strings"
 	"context"
 	"github.com/acaloiaro/frm"
+	"github.com/acaloiaro/frm/internal"
 	"github.com/acaloiaro/frm/ui/selector"
 	"sort"
 	"github.com/acaloiaro/frm/types"
@@ -825,6 +826,16 @@ func (v ViewerMetadata) JSON() string {
 	return string(b)
 }
 
+// shortCode gets the short code from the request context, if present
+func shortCode(ctx context.Context) (shortCode *string) {
+	var ok bool
+	shortCode, ok = ctx.Value(internal.ShortCodeContextKey).(*string)
+	if !ok {
+		return
+	}
+	return
+}
+
 // FormView is a view of Forms
 templ FormView(form frm.Form, isPreview bool) {
 	<div id="form-viewer" class="flex flex-col w-1/2 mx-auto justify-top pt-12" data-hx-swap-oob="true">
@@ -838,7 +849,10 @@ templ FormView(form frm.Form, isPreview bool) {
 		<form
 			_="on field_change(field_id, value) formValueChanged(field_id, value)"
 		>
-			<input name="subject_id" type="hidden"/>
+			<input name="submission_id" type="hidden" value="changeme!"/>
+			if sc := shortCode(ctx); sc != nil {
+				<input name="short_code" type="hidden" value={ *sc }/>
+			}
 			for _, field := range sortFields(form.Fields) {
 				<div
 					id={ fmt.Sprintf("field-container-%s", field.ID.String()) }
