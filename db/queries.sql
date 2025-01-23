@@ -85,6 +85,13 @@ SET updated_at = timezone('utc', now()),
     fields = @fields,
     status = @status RETURNING *;
 
+-- name: GetFormSubmission :one
+
+SELECT *
+FROM form_submissions
+WHERE workspace_id = @workspace_id
+  AND id = @submission_id;
+
 -- name: GetShortCode :one
 
 SELECT *

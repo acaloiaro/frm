@@ -95,6 +95,21 @@ func (f *Frm) GetForm(ctx context.Context, id int64) (form Form, err error) {
 	return
 }
 
+// GetFormSubmission retrieves form submissions by ID
+func (f *Frm) GetFormSubmission(ctx context.Context, submissionID int64) (sub FormSubmission, err error) {
+	var s internal.FormSubmission
+	s, err = internal.Q(ctx, f.DBArgs).GetFormSubmission(ctx, internal.GetFormSubmissionParams{
+		WorkspaceID:  f.WorkspaceID,
+		SubmissionID: submissionID,
+	})
+	if err != nil {
+		return
+	}
+
+	sub = (FormSubmission)(s)
+	return
+}
+
 type ListFormsArgs struct {
 	Statuses []FormStatus
 }

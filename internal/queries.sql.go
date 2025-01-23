@@ -107,6 +107,41 @@ func (q *Queries) GetForm(ctx context.Context, arg GetFormParams) (Form, error) 
 	return i, err
 }
 
+const getFormSubmission = `-- name: GetFormSubmission :one
+
+SELECT id, form_id, workspace_id, subject_id, fields, status, created_at, updated_at
+FROM form_submissions
+WHERE workspace_id = $1
+  AND id = $2
+`
+
+type GetFormSubmissionParams struct {
+	WorkspaceID  string `json:"workspace_id"`
+	SubmissionID int64  `json:"submission_id"`
+}
+
+// GetFormSubmission
+//
+//	SELECT id, form_id, workspace_id, subject_id, fields, status, created_at, updated_at
+//	FROM form_submissions
+//	WHERE workspace_id = $1
+//	  AND id = $2
+func (q *Queries) GetFormSubmission(ctx context.Context, arg GetFormSubmissionParams) (FormSubmission, error) {
+	row := q.db.QueryRow(ctx, getFormSubmission, arg.WorkspaceID, arg.SubmissionID)
+	var i FormSubmission
+	err := row.Scan(
+		&i.ID,
+		&i.FormID,
+		&i.WorkspaceID,
+		&i.SubjectID,
+		&i.Fields,
+		&i.Status,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getShortCode = `-- name: GetShortCode :one
 
 SELECT id, workspace_id, form_id, short_code, subject_id, created_at, updated_at
