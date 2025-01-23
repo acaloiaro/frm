@@ -113,7 +113,7 @@ type Form struct {
 // Respondants submit forms/fields to the collector as form_submissions
 type FormSubmission struct {
 	ID          int64  `json:"id"`
-	FormID      *int64 `json:"form_id"`
+	FormID      int64  `json:"form_id"`
 	WorkspaceID string `json:"workspace_id"`
 	// identifies the subject/respondent who filled out the form
 	SubjectID *string `json:"subject_id"`

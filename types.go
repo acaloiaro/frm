@@ -10,5 +10,8 @@ type Form internal.Form
 // Forms is a slice of forms
 type Forms []internal.Form
 
+// FormSubmission is a form submission
+type FormSubmission internal.FormSubmission
+
 // ShortCode is a short code
 type ShortCode internal.ShortCode

@@ -10,7 +10,7 @@ CREATE TYPE submission_status AS ENUM (
 -- submissions of forms/fields to the collector
 CREATE TABLE IF NOT EXISTS form_submissions (
     id BIGINT PRIMARY KEY DEFAULT nextval('submission_ids'),
-    form_id BIGINT REFERENCES forms(id) ON DELETE CASCADE,
+    form_id BIGINT REFERENCES forms(id) ON DELETE CASCADE NOT NULL ,
     workspace_id TEXT NOT NULL,
     subject_id TEXT DEFAULT NULL,
     fields jsonb default '{}' NOT NULL,

@@ -19,23 +19,28 @@ var ErrNoInstanceAvailable = errors.New("no frm instance is available on the con
 
 // Frm is the primary API into frm
 type Frm struct {
-	BuilderMountPoint   string          // relative URL path where frm mounts the builder to your app's router
-	CollectorMountPoint string          // relative URL path where frm mounts the collector to your app's router
-	DBArgs              internal.DBArgs // database arguments
-	WorkspaceID         string          // ID of the workspace that frm acts on behalf of
-	WorkspaceIDUrlParam string          // name of the URL parameter that provides your workspace ID
+	BuilderMountPoint   string                 // relative URL path where frm mounts the builder to your app's router
+	CollectorMountPoint string                 // relative URL path where frm mounts the collector to your app's router
+	DBArgs              internal.DBArgs        // database arguments
+	Receiver            FormSubmissionReceiver // function that processes incoming form submissions
+	WorkspaceID         string                 // ID of the workspace that frm acts on behalf of
+	WorkspaceIDUrlParam string                 // name of the URL parameter that provides your workspace ID
 }
 
 // Args are arguments passed to Frm
 type Args struct {
-	BuilderMountPoint   string // path on the router to mount frm's builder
-	CollectorMountPoint string // path on the router to mount frm's collector
-	PostgresDisableSSL  bool   // disable ssl when connecting to postgres
-	PostgresURL         string // postgres database URL
-	PostgresSchema      string // postgres schema where frm stores data
-	WorkspaceID         string // ID of the workspace for which frm is being initialized
-	WorkspaceIDUrlParam string // named URL parameter that identifies the workspace, e.g. for route /{workspace_id}, the value would be "workspace_id"
+	BuilderMountPoint   string                 // path on the router to mount frm's builder
+	CollectorMountPoint string                 // path on the router to mount frm's collector
+	Reciever            FormSubmissionReceiver // function that processes incoming form submissions
+	PostgresDisableSSL  bool                   // disable ssl when connecting to postgres
+	PostgresURL         string                 // postgres database URL
+	PostgresSchema      string                 // postgres schema where frm stores data
+	WorkspaceID         string                 // ID of the workspace for which frm is being initialized
+	WorkspaceIDUrlParam string                 // named URL parameter that identifies the workspace, e.g. for route /{workspace_id}, the value would be "workspace_id"
 }
+
+// FormSubmissionReceiver processes form submissions
+type FormSubmissionReceiver = func(ctx context.Context, submission FormSubmission) (err error)
 
 // FormStatus is the status of a Form
 //
@@ -54,17 +59,17 @@ func New(args Args) (f *Frm, err error) {
 	if args.WorkspaceID == "" && args.WorkspaceIDUrlParam == "" {
 		return nil, ErrCannotDetermineWorkspace
 	}
-
 	f = &Frm{
 		BuilderMountPoint:   strings.TrimSuffix(args.BuilderMountPoint, "/"),
 		CollectorMountPoint: strings.TrimSuffix(args.CollectorMountPoint, "/"),
-		WorkspaceID:         args.WorkspaceID,
-		WorkspaceIDUrlParam: args.WorkspaceIDUrlParam,
 		DBArgs: internal.DBArgs{
 			URL:        args.PostgresURL,
 			DisableSSL: args.PostgresDisableSSL,
 			Schema:     args.PostgresSchema,
 		},
+		Receiver:            args.Reciever,
+		WorkspaceID:         args.WorkspaceID,
+		WorkspaceIDUrlParam: args.WorkspaceIDUrlParam,
 	}
 	return
 }
@@ -116,7 +121,7 @@ func (f *Frm) ListForms(ctx context.Context, args ListFormsArgs) (forms []Form, 
 	return
 }
 
-// Instance returns the frm instance from the request context
+// Instance returns the frm instance from the request context (if available)
 func Instance(ctx context.Context) (i *Frm, err error) {
 	var ok bool
 	i, ok = ctx.Value(internal.FrmContextKey).(*Frm)
@@ -137,7 +142,7 @@ func (f *Frm) CreateShortCode(ctx context.Context, args CreateShortCodeArgs) (sc
 	s, err = internal.Q(ctx, f.DBArgs).SaveShortCode(ctx, internal.SaveShortCodeParams{
 		WorkspaceID: f.WorkspaceID,
 		FormID:      &args.FormID,
-		ShortCode:   internal.GenCode(),
+		ShortCode:   internal.GenShortCode(),
 		SubjectID:   args.SubjectID,
 	})
 	return (ShortCode)(s), err

@@ -417,7 +417,7 @@ SET updated_at = timezone('utc', now()),
 
 type SaveSubmissionParams struct {
 	ID          interface{}           `json:"id"`
-	FormID      *int64                `json:"form_id"`
+	FormID      int64                 `json:"form_id"`
 	WorkspaceID string                `json:"workspace_id"`
 	SubjectID   *string               `json:"subject_id"`
 	Fields      types.FormFieldValues `json:"fields"`

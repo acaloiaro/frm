@@ -239,12 +239,27 @@ func (f Form) JSON() string {
 	return string(b)
 }
 
-// GenCode generates new shortcodes
-func GenCode() string {
+// GenShortCode generates new shortcodes
+func GenShortCode() string {
 	b := make([]rune, DefaultShortcodeLen)
 	chsLen := len(shortcodeCharset)
 	for i := range b {
 		b[i] = shortcodeCharset[rand.Intn(chsLen)]
 	}
 	return string(b)
+}
+
+// FormSubmissionMap converts a FormSubmission to its map[string]any representation (for queueing webhooks)
+func FormSubmissionMap(s FormSubmission) (m map[string]any) {
+	m = map[string]any{}
+	m["id"] = s.ID
+	m["form_id"] = s.FormID
+	m["workspace_id"] = s.WorkspaceID
+	if s.SubjectID != nil {
+		m["subject_id"] = *s.SubjectID
+	}
+	m["fields"] = s.Fields
+	m["created_at"] = s.CreatedAt
+	m["updated_at"] = s.UpdatedAt
+	return
 }

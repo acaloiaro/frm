@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"log/slog"
 	"net/http"
 	"os"
@@ -72,6 +73,10 @@ func main() {
 		WorkspaceIDUrlParam: workspaceParamName, // name of the chi URL parameter name
 		BuilderMountPoint:   fmt.Sprintf("/frm/{%s}/build", workspaceParamName),
 		CollectorMountPoint: fmt.Sprintf("/frm/{%s}/collect", workspaceParamName),
+		Reciever: func(ctx context.Context, submission frm.FormSubmission) (err error) {
+			log.Println("GOT SUBMISSION!", submission)
+			return
+		},
 	})
 	if err != nil {
 		panic(err)

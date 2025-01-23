@@ -89,7 +89,7 @@ func Collect(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	formID, err := formID(ctx, i)
-	if err != nil {
+	if err != nil || formID == nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
@@ -157,9 +157,10 @@ func Collect(w http.ResponseWriter, r *http.Request) {
 			Value:       fieldValue,
 		}
 	}
-	_, err = internal.Q(ctx, i.DBArgs).SaveSubmission(ctx, internal.SaveSubmissionParams{
+	var s internal.FormSubmission
+	s, err = internal.Q(ctx, i.DBArgs).SaveSubmission(ctx, internal.SaveSubmissionParams{
 		// ID:          submissionID, TODO save submission id
-		FormID:      formID,
+		FormID:      *formID,
 		WorkspaceID: i.WorkspaceID,
 		SubjectID:   &shortCode.SubjectID,
 		Status:      internal.SubmissionStatusPartial,
@@ -170,7 +171,12 @@ func Collect(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
+	if i.Receiver != nil {
+		err = i.Receiver(ctx, (frm.FormSubmission)(s))
+		if err != nil {
+			slog.Error("[collector] unable to execute submission receiver", "error", err)
+		}
+	}
 	err = ui.ThankYou().Render(ctx, w)
 	if err != nil {
 		slog.Error("[collector] unable to render thank you page", "error", err)
