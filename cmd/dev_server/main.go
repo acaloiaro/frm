@@ -66,6 +66,9 @@ func main() {
 	logger.Info("frm dev server started")
 	chiRouter := chi.NewRouter()
 	chiRouter.Use(httplog.RequestLogger(requestLogger))
+	chiRouter.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
 	const workspaceParamName = "frm_workspace_id"
 	f, err := frm.New(frm.Args{
 		PostgresURL:         os.Getenv("POSTGRES_URL"),

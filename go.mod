@@ -3,7 +3,7 @@ module github.com/acaloiaro/frm
 go 1.23.2
 
 require (
-	github.com/a-h/templ v0.2.793
+	github.com/a-h/templ v0.3.819
 	github.com/go-chi/chi/v5 v5.1.0
 	github.com/go-chi/httplog/v2 v2.1.1
 	github.com/golang-migrate/migrate/v4 v4.18.0

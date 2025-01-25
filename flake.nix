@@ -8,11 +8,7 @@
       url = "github:acaloiaro/ess/v2.13.0";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    air = {
-      url = "github:acaloiaro/air";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    templ.url = "github:a-h/templ/v0.2.793";
+    templ.url = "github:a-h/templ/v0.3.819";
   };
 
   outputs = {
@@ -20,7 +16,6 @@
     nixpkgs,
     devenv,
     systems,
-    air,
     tailwindcss,
     ...
   } @ inputs: let
@@ -49,9 +44,9 @@
             };
 
             packages = with pkgs; [
-              air.packages.${system}.default
               go-migrate
               nixpacks
+              reflex
               sqlc
               postgresql
               pre-commit
@@ -148,10 +143,10 @@
                 description = "Execute 'ess' with default parameters";
               };
 
-              server = {
+              frm-server = {
                 description = "Run the development server";
                 exec = ''
-                  tailwindcss -c ui/tailwind.config.js -i ./ui/css/tailwind.css -o ./static/css/styles.css && run-generate-models && go generate ./... && go build -o ./tmp/frm ./cmd/dev_server && ./tmp/frm
+                  bash -c 'pkill ./tmp/frm; exit 0' && go generate ./... && go build -o ./tmp/frm ./cmd/dev_server && ./tmp/frm
                 '';
               };
 
@@ -166,17 +161,61 @@
                   ${sqlc}/bin/sqlc generate && echo sqlc generate done
                 '';
               };
-            };
 
-            processes.air = {
-              exec = ''
-                ${air.packages.${system}.default}/bin/air -c .air.toml -build.bin server
-              '';
+              rebuild-tailwind = {
+                description = "rebuild tailwind's output and trigger a templ rebuild by touching a templ file";
+                # When tailwind updates CSS, we need to trigger a rebuild of the go application, hence the modification to main.go
+                exec = "tailwindcss -c ui/tailwind.config.js -i ./ui/css/tailwind.css -o ./static/css/styles.css && echo -e \"package frm\nimport \\x22fmt\\x22\nfunc main() { fmt.Println($(head -c2 /dev/urandom | od -An -vtu4)) }\" > ./trigger_restart.go";
+              };
             };
 
             processes.templ = {
               exec = ''
-                templ generate --watch --proxy="http://localhost:3000"
+                templ generate -cmd frm-server -watch -watch-pattern='(^(?:[^e]|e[^n]|en[^u]|enu[^m]|enum[^e]|enume[^r])*\.go$)|(.+\.templ$)|(.+_templ\.txt$)|(.+styles\.css$)'  -proxy 'http://localhost:3000' -v trace
+              '';
+              process-compose = {
+                availability = {
+                  restart = "on_failure";
+                };
+                readiness_probe = {
+                  http_get = {
+                    host = "127.0.0.1";
+                    scheme = "http";
+                    path = "/ping";
+                    port = "3000";
+                    initial_delay_seconds = 5;
+                    period_seconds = 2;
+                    timeout_seconds = 5;
+                    success_threshold = 1;
+                    failure_threshold = 3;
+                  };
+                };
+
+                depends_on = {
+                  postgres = {
+                    condition = "process_healthy";
+                  };
+                };
+              };
+            };
+
+            processes.tailwindcss = {
+              exec = ''
+                reflex \
+                    -v \
+                    --inverse-regex='\.devenv' \
+                    --inverse-regex='\.direnv' \
+                    --inverse-regex='.+trigger_rebuild.+' \
+                    -r '.+tailwind\.css$|.+\.templ$' \
+                    -- rebuild-tailwind
+              '';
+            };
+
+            processes.sqlc = {
+              exec = ''
+                reflex \
+                  -s -r '.+\.sql$' \
+                  -- run-generate-models
               '';
             };
 
