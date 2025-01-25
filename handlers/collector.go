@@ -26,7 +26,7 @@ func View(w http.ResponseWriter, r *http.Request) {
 	}
 	formID, err := formID(ctx, i)
 	if err != nil {
-		slog.Error("unable to view form!", "error", err)
+		slog.Error("unable to view form", "error", err)
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
@@ -35,7 +35,7 @@ func View(w http.ResponseWriter, r *http.Request) {
 		ID:          *formID,
 	})
 	if err != nil {
-		slog.Error("unable to view form!!", "error", err)
+		slog.Error("unable to view form", "error", err)
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}

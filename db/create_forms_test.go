@@ -66,6 +66,7 @@ func TestCreateAndUpdateForm(t *testing.T) {
 		PostgresURL:        os.Getenv("POSTGRES_URL"),
 		WorkspaceID:        workspaceID.String(),
 		PostgresDisableSSL: true,
+		PostgresSchema:     "frm_test",
 	})
 	if err != nil {
 		t.Error(err)
