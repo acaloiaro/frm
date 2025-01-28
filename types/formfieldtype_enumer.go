@@ -8,11 +8,11 @@ import (
 	"strings"
 )
 
-const _FormFieldTypeName = "text_singletext_multiplesingle_selectmulti_select"
+const _FormFieldTypeName = "text_singletext_multiplesingle_selectmulti_selectrating"
 
-var _FormFieldTypeIndex = [...]uint8{0, 11, 24, 37, 49}
+var _FormFieldTypeIndex = [...]uint8{0, 11, 24, 37, 49, 55}
 
-const _FormFieldTypeLowerName = "text_singletext_multiplesingle_selectmulti_select"
+const _FormFieldTypeLowerName = "text_singletext_multiplesingle_selectmulti_selectrating"
 
 func (i FormFieldType) String() string {
 	if i < 0 || i >= FormFieldType(len(_FormFieldTypeIndex)-1) {
@@ -29,9 +29,10 @@ func _FormFieldTypeNoOp() {
 	_ = x[FormFieldTypeTextMultiple-(1)]
 	_ = x[FormFieldTypeSingleSelect-(2)]
 	_ = x[FormFieldTypeMultiSelect-(3)]
+	_ = x[FormFieldTypeRating-(4)]
 }
 
-var _FormFieldTypeValues = []FormFieldType{FormFieldTypeTextSingle, FormFieldTypeTextMultiple, FormFieldTypeSingleSelect, FormFieldTypeMultiSelect}
+var _FormFieldTypeValues = []FormFieldType{FormFieldTypeTextSingle, FormFieldTypeTextMultiple, FormFieldTypeSingleSelect, FormFieldTypeMultiSelect, FormFieldTypeRating}
 
 var _FormFieldTypeNameToValueMap = map[string]FormFieldType{
 	_FormFieldTypeName[0:11]:       FormFieldTypeTextSingle,
@@ -42,6 +43,8 @@ var _FormFieldTypeNameToValueMap = map[string]FormFieldType{
 	_FormFieldTypeLowerName[24:37]: FormFieldTypeSingleSelect,
 	_FormFieldTypeName[37:49]:      FormFieldTypeMultiSelect,
 	_FormFieldTypeLowerName[37:49]: FormFieldTypeMultiSelect,
+	_FormFieldTypeName[49:55]:      FormFieldTypeRating,
+	_FormFieldTypeLowerName[49:55]: FormFieldTypeRating,
 }
 
 var _FormFieldTypeNames = []string{
@@ -49,6 +52,7 @@ var _FormFieldTypeNames = []string{
 	_FormFieldTypeName[11:24],
 	_FormFieldTypeName[24:37],
 	_FormFieldTypeName[37:49],
+	_FormFieldTypeName[49:55],
 }
 
 // FormFieldTypeString retrieves an enum value from the enum constants string name.

@@ -27,6 +27,7 @@ const (
 	FormFieldTypeTextMultiple                      // multiple lines of text
 	FormFieldTypeSingleSelect                      // single-select dropdown
 	FormFieldTypeMultiSelect                       // multi-select dropdown
+	FormFieldTypeRating                            // a rating within a range of numbers
 )
 
 // FormFieldDataType enum enumerates all possible data types for form fields
