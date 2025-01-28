@@ -66,11 +66,11 @@
 
 
                 ## Fetch dependenies
-                HTMX_VERSION=2.0.3
-                HYPERSCRIPT_VERSION=0.9.13
-                CHOICES_DOT_JS_VERSION=11.0.2
-                SVG_LOADER_VERISON=1.7.1
-                SORTABLE_VERSION=1.15.6
+                export HTMX_VERSION=2.0.3
+                export HYPERSCRIPT_VERSION=0.9.13
+                export CHOICES_DOT_JS_VERSION=11.0.2
+                export SVG_LOADER_VERSION=1.7.1
+                export SORTABLE_VERSION=1.15.6
 
                 if [ ! -f ./static/js/hyperscript.js ]; then
                   curl -sL --verbose "https://unpkg.com/hyperscript.org@$HYPERSCRIPT_VERSION" > ./static/js/hyperscript.js
@@ -89,11 +89,11 @@
                 fi
 
                 if [ ! -f ./static/js/svg-loader.min.js ]; then
-                  curl -sL --verbose "https://unpkg.com/external-svg-loader@$SVG_LOADER_VERSION/public/assets/scripts/svg-loader.min.js" > ./static/js/svg-loader.min.js
+                  curl -sL --verbose "https://unpkg.com/external-svg-loader@$SVG_LOADER_VERSION/svg-loader.min.js" > ./static/js/svg-loader.min.js
                 fi
 
                 if [ ! -f ./static/js/Sortable.min.js ]; then
-                  curl -sL --verbose "https://unpkg.com/sortablejs@$SVG_LOADER_VERSION/public/assets/scripts/Sortable.min.js" > ./static/js/Sortable.min.js
+                  curl -sL --verbose "https://unpkg.com/sortablejs@$SORTABLE_VERSION/Sortable.min.js" > ./static/js/Sortable.min.js
                 fi
 
                 if [ ! -f ./static/css/choices.min.css ]; then
