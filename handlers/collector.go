@@ -12,6 +12,7 @@ import (
 	"github.com/acaloiaro/frm/internal"
 	"github.com/acaloiaro/frm/types"
 	"github.com/acaloiaro/frm/ui"
+	"github.com/acaloiaro/frm/ui/collector"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
@@ -40,7 +41,7 @@ func View(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Render the form collector
-	err = ui.Viewer((frm.Form)(f)).Render(ctx, w)
+	err = collector.Viewer((frm.Form)(f)).Render(ctx, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -74,7 +75,7 @@ func ShortCode(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Render the form collector
-	err = ui.Viewer((frm.Form)(f)).Render(ctx, w)
+	err = collector.Viewer((frm.Form)(f)).Render(ctx, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
@@ -177,7 +178,7 @@ func Collect(w http.ResponseWriter, r *http.Request) {
 			slog.Error("[collector] unable to execute submission receiver", "error", err)
 		}
 	}
-	err = ui.ThankYou().Render(ctx, w)
+	err = collector.ThankYou().Render(ctx, w)
 	if err != nil {
 		slog.Error("[collector] unable to render thank you page", "error", err)
 		w.WriteHeader(http.StatusInternalServerError)

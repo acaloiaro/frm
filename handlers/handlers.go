@@ -13,7 +13,8 @@ import (
 	"github.com/acaloiaro/frm/internal"
 	"github.com/acaloiaro/frm/static"
 	"github.com/acaloiaro/frm/types"
-	"github.com/acaloiaro/frm/ui"
+	"github.com/acaloiaro/frm/ui/builder"
+	"github.com/acaloiaro/frm/ui/collector"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
@@ -68,7 +69,7 @@ func DraftEditor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = ui.Builder((frm.Form)(draft)).Render(r.Context(), w)
+	err = builder.Builder((frm.Form)(draft)).Render(r.Context(), w)
 	if err != nil {
 		slog.Error("unable to render builder", slog.Any("error", err))
 		w.WriteHeader(http.StatusInternalServerError)
@@ -130,12 +131,12 @@ func UpdateFieldOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Re-render the form fields form UI
-	err = ui.FormFieldsForm((frm.Form)(draft)).Render(ctx, w)
+	err = builder.FormFieldsForm((frm.Form)(draft)).Render(ctx, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
-	err = ui.FormView((frm.Form)(draft), true).Render(ctx, w)
+	err = collector.FormView((frm.Form)(draft), true).Render(ctx, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
@@ -194,7 +195,7 @@ func LogicConfiguratorChoices(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = ui.LogicConfiguratorStepThree((frm.Form)(draft), draft.Fields[fieldID.String()], targetField).Render(ctx, w)
+	err = builder.LogicConfiguratorStepThree((frm.Form)(draft), draft.Fields[fieldID.String()], targetField).Render(ctx, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
@@ -247,31 +248,31 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Re-render the form fields form UI
-	err = ui.FormFieldsForm((frm.Form)(form)).Render(ctx, w)
+	err = builder.FormFieldsForm((frm.Form)(form)).Render(ctx, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
 	// Re-render the form preview
-	err = ui.FormView((frm.Form)(form), true).Render(ctx, w)
+	err = collector.FormView((frm.Form)(form), true).Render(ctx, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
 	// Re-render the configurator form
-	err = ui.FormFieldConfigurator((frm.Form)(form)).Render(ctx, w)
+	err = builder.FormFieldConfigurator((frm.Form)(form)).Render(ctx, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
 	// Re-render the configurator form
-	err = ui.FormSettings((frm.Form)(form)).Render(ctx, w)
+	err = builder.FormSettings((frm.Form)(form)).Render(ctx, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
 	// Re-render nav, so the title of the form updates
-	err = ui.FormBuilderNavTitle((frm.Form)(form)).Render(ctx, w)
+	err = builder.FormBuilderNavTitle((frm.Form)(form)).Render(ctx, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
@@ -346,19 +347,19 @@ func NewField(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Re-render the form fields form UI
-	err = ui.FormFieldsForm((frm.Form)(draft)).Render(ctx, w)
+	err = builder.FormFieldsForm((frm.Form)(draft)).Render(ctx, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
 	// Re-render the form preview
-	err = ui.FormView((frm.Form)(draft), true).Render(ctx, w)
+	err = collector.FormView((frm.Form)(draft), true).Render(ctx, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
 	// Re-render the configurator form
-	err = ui.FormFieldConfigurator((frm.Form)(draft)).Render(ctx, w)
+	err = builder.FormFieldConfigurator((frm.Form)(draft)).Render(ctx, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
@@ -439,7 +440,7 @@ func UpdateFields(w http.ResponseWriter, r *http.Request) {
 			oldField := draft.Fields[fieldID]
 			oldField.Options = toFormFieldOption(oldField, fieldValues)
 			updatedFields[fieldID] = oldField
-		case fieldGroup == ui.FieldGroupLogic && fieldName == ui.FieldLogicTargetFieldID:
+		case fieldGroup == builder.FieldGroupLogic && fieldName == builder.FieldLogicTargetFieldID:
 			targetFieldID, err := uuid.Parse(fieldValues[0])
 			if err != nil {
 				continue
@@ -450,21 +451,21 @@ func UpdateFields(w http.ResponseWriter, r *http.Request) {
 			}
 			oldField.Logic.TargetFieldID = targetFieldID
 			updatedFields[fieldID] = oldField
-		case fieldGroup == ui.FieldGroupLogic && fieldName == ui.FieldLogicTargetFieldValue:
+		case fieldGroup == builder.FieldGroupLogic && fieldName == builder.FieldLogicTargetFieldValue:
 			oldField := draft.Fields[fieldID]
 			if oldField.Logic == nil {
 				oldField.Logic = &types.FieldLogic{}
 			}
 			oldField.Logic.TriggerValues = fieldValues
 			updatedFields[fieldID] = oldField
-		case fieldGroup == ui.FieldGroupLogic && fieldName == ui.FieldLogicComparator:
+		case fieldGroup == builder.FieldGroupLogic && fieldName == builder.FieldLogicComparator:
 			oldField := draft.Fields[fieldID]
 			if oldField.Logic == nil {
 				oldField.Logic = &types.FieldLogic{}
 			}
 			oldField.Logic.TriggerComparator, _ = types.FieldLogicComparatorString(fieldValues[0])
 			updatedFields[fieldID] = oldField
-		case fieldGroup == ui.FieldGroupLogic && fieldName == types.FieldLogicTriggerShow.String():
+		case fieldGroup == builder.FieldGroupLogic && fieldName == types.FieldLogicTriggerShow.String():
 			oldField := draft.Fields[fieldID]
 			if oldField.Logic == nil {
 				oldField.Logic = &types.FieldLogic{}
@@ -488,13 +489,13 @@ func UpdateFields(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Re-render the form fields form UI
-	err = ui.FormFieldsForm((frm.Form)(draft)).Render(ctx, w)
+	err = builder.FormFieldsForm((frm.Form)(draft)).Render(ctx, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
 	// Re-render the form preview
-	err = ui.FormView((frm.Form)(draft), true).Render(ctx, w)
+	err = collector.FormView((frm.Form)(draft), true).Render(ctx, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
@@ -543,19 +544,19 @@ func DeleteField(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Re-render the form fields form UI
-	err = ui.FormFieldsForm((frm.Form)(draft)).Render(ctx, w)
+	err = builder.FormFieldsForm((frm.Form)(draft)).Render(ctx, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
 	// Re-render the form preview
-	err = ui.FormView((frm.Form)(draft), true).Render(ctx, w)
+	err = collector.FormView((frm.Form)(draft), true).Render(ctx, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
 	// Re-render the configurator form
-	err = ui.FormFieldConfigurator((frm.Form)(draft)).Render(ctx, w)
+	err = builder.FormFieldConfigurator((frm.Form)(draft)).Render(ctx, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}

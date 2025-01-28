@@ -163,7 +163,19 @@ func (f *Frm) CreateShortCode(ctx context.Context, args CreateShortCodeArgs) (sc
 	return (ShortCode)(s), err
 }
 
-// # CollectorPath returns paths to frm collector endpoints
+// BuilderPath returns paths to frm builder endpoints
+//
+// It uses the builer's mount point on the router to generate builder paths
+func BuilderPath(ctx context.Context, path string) string {
+	base, ok := ctx.Value(internal.BuilderMountPointContextKey).(string)
+	if !ok {
+		return "/"
+	}
+
+	return fmt.Sprintf("%s/%s", base, path)
+}
+
+// CollectorPath returns paths to frm collector endpoints
 //
 // It uses the collector's mount point on the router to generate collector paths
 func CollectorPath(ctx context.Context, path string) string {
