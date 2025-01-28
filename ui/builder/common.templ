@@ -154,6 +154,7 @@ templ FormFields(form frm.Form) {
 	</div>
 }
 
+// FormFieldsForm is the list of fields on the left-hand side of the screen that displays a sorted list of form fields
 templ FormFieldsForm(form frm.Form) {
 	<div id="form-fields-form" data-hx-swap-oob="true" class="flex flex-col gap-3 w-full">
 		@ui.Button(ui.ButtonArgs{
@@ -236,6 +237,7 @@ templ builderColumnRight(form frm.Form) {
 	</section>
 }
 
+// FormFieldConfigurator is the view on the right-hand side of the screen for configuring individual fields
 templ FormFieldConfigurator(form frm.Form) {
 	<form
 		id="fields-form"
@@ -272,6 +274,8 @@ templ FormFieldConfigurator(form frm.Form) {
 	</form>
 }
 
+// fieldSettingsConfiguration configures the settings for a specific field
+// FIELD_TYPES: field types may be added/modified/removed below
 templ fieldSettingsConfiguration(form frm.Form, field types.FormField) {
 	<div id={ fmt.Sprintf("field-%s-settings", field.ID.String()) } class="active-configurator-section">
 		<input name={ fields.FieldName(field, "", "required") } type="hidden" value={ fmt.Sprint(field.Required) }/>
@@ -292,35 +296,37 @@ templ fieldSettingsConfiguration(form frm.Form, field types.FormField) {
 			autocomplete="off"
 			_={ fmt.Sprintf("on keyup debounced at 600ms trigger '%s'", FieldsFormUpdateEvent) }
 		/>
-		<div class="pt-3">
-			<label for={ fields.FieldName(field, "", "placeholder") } class="pr-1">
-				Placeholder
-			</label>
-		</div>
-		<input
-			id={ fields.FieldName(field, "", "placeholder") }
-			name={ fields.FieldName(field, "", "placeholder") }
-			type="text"
-			class="w-full rounded-md"
-			value={ field.Placeholder }
-			autocomplete="off"
-			_={ fmt.Sprintf("on keyup debounced at 600ms trigger '%s'", FieldsFormUpdateEvent) }
-		/>
-		if field.Type == types.FormFieldTypeSingleSelect || field.Type == types.FormFieldTypeMultiSelect {
-			<div class="pt-3">
-				<label for={ fields.FieldName(field, "", "options") } class="pr-1">
-					Options
-				</label>
-			</div>
-			@selector.Selector(selector.SelectArgs{
-				ID:                   fields.FieldName(field, "", "options"),
-				Name:                 fields.FieldName(field, "", "options"),
-				Placeholder:          "Add, remove, or create new options",
-				Multiple:             true,
-				EditItems:            true,
-				Options:              fields.ToSelectorOpts(field.Options, true),
-				SelectionChangeEvent: FieldsFormUpdateEvent,
-			})
+		switch field.Type {
+			case types.FormFieldTypeTextSingle, types.FormFieldTypeTextMultiple:
+				<div class="pt-3">
+					<label for={ fields.FieldName(field, "", "placeholder") } class="pr-1">
+						Placeholder
+					</label>
+				</div>
+				<input
+					id={ fields.FieldName(field, "", "placeholder") }
+					name={ fields.FieldName(field, "", "placeholder") }
+					type="text"
+					class="w-full rounded-md"
+					value={ field.Placeholder }
+					autocomplete="off"
+					_={ fmt.Sprintf("on keyup debounced at 600ms trigger '%s'", FieldsFormUpdateEvent) }
+				/>
+			case types.FormFieldTypeMultiSelect, types.FormFieldTypeSingleSelect, types.FormFieldTypeRating:
+				<div class="pt-3">
+					<label for={ fields.FieldName(field, "", "options") } class="pr-1">
+						Options
+					</label>
+				</div>
+				@selector.Selector(selector.SelectArgs{
+					ID:                   fields.FieldName(field, "", "options"),
+					Name:                 fields.FieldName(field, "", "options"),
+					Placeholder:          "Add, remove, or create new options",
+					Multiple:             true,
+					EditItems:            true,
+					Options:              fields.ToSelectorOpts(field.Options, true),
+					SelectionChangeEvent: FieldsFormUpdateEvent,
+				})
 		}
 		<div class="pt-3">
 			<label for={ fields.FieldName(field, "", "required") } class="pr-1">

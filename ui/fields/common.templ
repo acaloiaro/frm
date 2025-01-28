@@ -53,42 +53,60 @@ templ FieldTypeIcon(fieldType types.FormFieldType) {
 templ View(field types.FormField) {
 	switch field.Type {
 		case types.FormFieldTypeTextSingle:
-			@FieldLabel(field)
-			<input
-				id={ field.ID.String() }
-				name={ field.ID.String() }
-				placeholder={ field.Placeholder }
-				type="text"
-				autocomplete="off"
-				_={ fmt.Sprintf("on keyup debounced at 250ms trigger field_change(field_id: '%s', value: my.value)", field.ID.String()) }
-				class="flex-1 appearance-none border border-gray-300 dark:border-gray-600 w-full text-gray-700 dark:bg-notion-dark-light dark:text-gray-300 dark:placeholder-gray-500 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:border-2 focus:ring-opacity-100 px-4 py-2 text-base resize-y block rounded-xl bg-sky-50"
-			/>
+			@singleLineTextView(field)
 		case types.FormFieldTypeTextMultiple:
-			@FieldLabel(field)
-			<textarea
-				id={ field.ID.String() }
-				name={ field.ID.String() }
-				class="flex-1 appearance-none border border-gray-300 dark:border-gray-600 w-full text-gray-700 dark:bg-notion-dark-light dark:text-gray-300 dark:placeholder-gray-500 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:border-transparent focus:ring-opacity-100 px-4 py-2 text-base resize-y block rounded-xl bg-sky-50"
-				placeholder={ field.Placeholder }
-				autocomplete="off"
-				_={ fmt.Sprintf("on keyup debounced at 250ms trigger field_change(field_id: '%s', value: my.value)", field.ID.String()) }
-				rows="3"
-			></textarea>
+			@multiLineTextView(field)
 		case types.FormFieldTypeSingleSelect, types.FormFieldTypeMultiSelect:
-			@selector.Selector(selector.SelectArgs{
-				ID:             field.ID.String(),
-				Name:           field.ID.String(),
-				Label:          field.Label,
-				LabelClass:     "text-slate-700 text-xl py-1",
-				Required:       field.Required,
-				Placeholder:    field.Placeholder,
-				Multiple:       field.Type == types.FormFieldTypeMultiSelect,
-				Options:        ToSelectorOpts(field.Options, false),
-				SearchDisabled: true,
-				EditItems:      false,
-				Hyperscript:    fmt.Sprintf("on change trigger field_change(field_id: '%s', value: my.value)", field.ID.String()),
-			})
+			@selectView(field)
+		case types.FormFieldTypeRating:
+			@Rating(field)
 	}
+}
+
+templ singleLineTextView(field types.FormField) {
+	@FieldLabel(field)
+	<input
+		id={ field.ID.String() }
+		name={ field.ID.String() }
+		placeholder={ field.Placeholder }
+		type="text"
+		autocomplete="off"
+		_={ fmt.Sprintf("on keyup debounced at 250ms trigger field_change(field_id: '%s', value: my.value)", field.ID.String()) }
+		class="flex-1 appearance-none border border-gray-300 dark:border-gray-600 w-full text-gray-700 dark:bg-notion-dark-light dark:text-gray-300 dark:placeholder-gray-500 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:border-2 focus:ring-opacity-100 px-4 py-2 text-base resize-y block rounded-xl bg-sky-50"
+	/>
+}
+
+templ multiLineTextView(field types.FormField) {
+	@FieldLabel(field)
+	<textarea
+		id={ field.ID.String() }
+		name={ field.ID.String() }
+		class="flex-1 appearance-none border border-gray-300 dark:border-gray-600 w-full text-gray-700 dark:bg-notion-dark-light dark:text-gray-300 dark:placeholder-gray-500 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:border-transparent focus:ring-opacity-100 px-4 py-2 text-base resize-y block rounded-xl bg-sky-50"
+		placeholder={ field.Placeholder }
+		autocomplete="off"
+		_={ fmt.Sprintf("on keyup debounced at 250ms trigger field_change(field_id: '%s', value: my.value)", field.ID.String()) }
+		rows="3"
+	></textarea>
+}
+
+templ selectView(field types.FormField) {
+	@selector.Selector(selector.SelectArgs{
+		ID:             field.ID.String(),
+		Name:           field.ID.String(),
+		Label:          field.Label,
+		LabelClass:     "text-slate-700 text-xl py-1",
+		Required:       field.Required,
+		Placeholder:    field.Placeholder,
+		Multiple:       field.Type == types.FormFieldTypeMultiSelect,
+		Options:        ToSelectorOpts(field.Options, false),
+		SearchDisabled: true,
+		EditItems:      false,
+		Hyperscript:    fmt.Sprintf("on change trigger field_change(field_id: '%s', value: my.value)", field.ID.String()),
+	})
+}
+
+templ ratingView(field types.FormField) {
+	@FieldLabel(field)
 }
 
 // FormFieldTypeLabel is the UI label for FormFieldTypes, e.g. 'text_single' -> "Single line text"
@@ -98,6 +116,7 @@ templ FormFieldTypeLabel(fieldType types.FormFieldType) {
 		<label class="w-full cursor-pointer truncate">
 			// TODO: this int conversion is a janky artifact of keeping the public `frm` interface unpolluted by the 
 			// `db` package. Something should be done to correct this.
+			// FIELD_TYPES: field types may be added/modified/removed below
 			switch int(fieldType) {
 				case int(types.FormFieldTypeTextSingle):
 					Single-line text

@@ -62,12 +62,13 @@
 \" name=\"
 \" type=\"text\" class=\"w-full rounded-md\" value=\"
 \" autocomplete=\"off\" _=\"
-\"><div class=\"pt-3\"><label for=\"
+\"> 
+<div class=\"pt-3\"><label for=\"
 \" class=\"pr-1\">Placeholder</label></div><input id=\"
 \" name=\"
 \" type=\"text\" class=\"w-full rounded-md\" value=\"
 \" autocomplete=\"off\" _=\"
-\"> 
+\">
 <div class=\"pt-3\"><label for=\"
 \" class=\"pr-1\">Options</label></div>
 <div class=\"pt-3\"><label for=\"

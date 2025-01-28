@@ -319,6 +319,8 @@ func NewField(w http.ResponseWriter, r *http.Request) {
 	order := len(fields) + 1 // place the new field at the end of the field list
 	fieldID := uuid.New()
 	newField := &types.FormField{ID: fieldID, Type: fieldType, Order: order}
+
+	// FIELD_TYPES: field types may be added/modified/removed below
 	switch fieldType {
 	case types.FormFieldTypeTextSingle:
 		newField.Label = "New text field"
@@ -331,7 +333,9 @@ func NewField(w http.ResponseWriter, r *http.Request) {
 		newField.Placeholder = "Choose an item"
 	case types.FormFieldTypeMultiSelect:
 		newField.Label = "New multi select field"
-		newField.Placeholder = "Choose items item"
+		newField.Placeholder = "Choose items"
+	case types.FormFieldTypeRating:
+		newField.Label = "New rating field"
 	}
 
 	fields[fieldID.String()] = *newField

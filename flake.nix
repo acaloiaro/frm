@@ -162,6 +162,14 @@
                 '';
               };
 
+              frm-templ = {
+                exec = ''
+                  templ generate -cmd frm-server -watch -watch-pattern='(^(?:[^e]|e[^n]|en[^u]|enu[^m]|enum[^e]|enume[^r])*\.go$)|(.+\.templ$)|(.+_templ\.txt$)|(.+styles\.css$)'  -proxy 'http://localhost:3000' -v trace
+
+                '';
+                description = "run the frm dev server and templ";
+              };
+
               rebuild-tailwind = {
                 description = "rebuild tailwind's output and trigger a templ rebuild by touching a templ file";
                 # When tailwind updates CSS, we need to trigger a rebuild of the go application, hence the modification to main.go
@@ -169,9 +177,9 @@
               };
             };
 
-            processes.templ = {
+            processes."1frm-templ" = {
               exec = ''
-                templ generate -cmd frm-server -watch -watch-pattern='(^(?:[^e]|e[^n]|en[^u]|enu[^m]|enum[^e]|enume[^r])*\.go$)|(.+\.templ$)|(.+_templ\.txt$)|(.+styles\.css$)'  -proxy 'http://localhost:3000' -v trace
+                frm-templ
               '';
               process-compose = {
                 availability = {

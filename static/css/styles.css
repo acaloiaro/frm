@@ -2792,6 +2792,11 @@ input.tab:checked + .tab-content,
   border-width: 1px;
 }
 
+.border-y-0 {
+  border-top-width: 0px;
+  border-bottom-width: 0px;
+}
+
 .border-b {
   border-bottom-width: 1px;
 }
@@ -2803,6 +2808,11 @@ input.tab:checked + .tab-content,
 .border-base-300 {
   --tw-border-opacity: 1;
   border-color: var(--fallback-b3,oklch(var(--b3)/var(--tw-border-opacity)));
+}
+
+.border-black {
+  --tw-border-opacity: 1;
+  border-color: rgb(0 0 0 / var(--tw-border-opacity));
 }
 
 .border-gray-300 {
@@ -3018,6 +3028,11 @@ input.tab:checked + .tab-content,
   color: rgb(30 58 138 / var(--tw-text-opacity));
 }
 
+.text-gray-400 {
+  --tw-text-opacity: 1;
+  color: rgb(136 136 136 / var(--tw-text-opacity));
+}
+
 .text-gray-500 {
   --tw-text-opacity: 1;
   color: rgb(109 109 109 / var(--tw-text-opacity));
@@ -3101,6 +3116,27 @@ globally kill the tailwind ring by default
 
 input {
   --tw-ring-shadow: 0 0 #000 !important;
+}
+
+.first\:border-x-0:first-child {
+  border-left-width: 0px;
+  border-right-width: 0px;
+}
+
+.first\:text-left:first-child {
+  text-align: left;
+}
+
+.last\:border-r-0:last-child {
+  border-right-width: 0px;
+}
+
+.last\:text-right:last-child {
+  text-align: right;
+}
+
+.checked\:bg-none:checked {
+  background-image: none;
 }
 
 .hover\:bg-gray-100:hover {
