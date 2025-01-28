@@ -1,0 +1,29 @@
+<div class=\"bg-sky-100 h-screen\"><section id=\"app-container\" class=\"container mx-auto\">
+</section></div>
+<section id=\"builder-main-middle-col\" class=\"w-full h-screen overflow-y-auto overscroll-auto p-4 bg-gray-50 border-y-1\"><div class=\"mockup-browser border-base-300 border overflow-visible\"><div class=\"mockup-browser-toolbar\"><div class=\"input border-base-300 border\">https://your-form-domain.com/form</div></div><div class=\"flex h-full border-base-300 bg-sky-100 border-t px-4 py-8\">
+</div></div></section>
+<div id=\"form-viewer\" class=\"flex flex-col w-1/2 mx-auto justify-top pt-12\" data-hx-swap-oob=\"true\"><div id=\"form-metadata\" data-data=\"
+\"></div><h1 class=\"rounded relative mb-2 font-black text-slate-700 text-5xl\">
+</h1><div id=\"form-input\"><form _=\"on field_change(field_id, value) formValueChanged(field_id, value)\"><input name=\"submission_id\" type=\"hidden\" value=\"changeme!\"> 
+<input name=\"short_code\" type=\"hidden\" value=\"
+\"> 
+<div id=\"
+\"
+ class=\"flex flex-col py-3 hidden\"
+ class=\"flex flex-col py-3\"
+><div id=\"
+\" class=\"text-red-400\"></div>
+ <input id=\"
+\" name=\"
+\" placeholder=\"
+\" type=\"text\" autocomplete=\"off\" _=\"
+\" class=\"flex-1 appearance-none border border-gray-300 dark:border-gray-600 w-full text-gray-700 dark:bg-notion-dark-light dark:text-gray-300 dark:placeholder-gray-500 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:border-2 focus:ring-opacity-100 px-4 py-2 text-base resize-y block rounded-xl bg-sky-50\">
+ <textarea id=\"
+\" name=\"
+\" class=\"flex-1 appearance-none border border-gray-300 dark:border-gray-600 w-full text-gray-700 dark:bg-notion-dark-light dark:text-gray-300 dark:placeholder-gray-500 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:border-transparent focus:ring-opacity-100 px-4 py-2 text-base resize-y block rounded-xl bg-sky-50\" placeholder=\"
+\" autocomplete=\"off\" _=\"
+\" rows=\"3\"></textarea>
+</div>
+<div class=\"py-3\"></div>
+</form></div></div>
+<div class=\"bg-sky-100 h-screen\"><section id=\"app-container\" class=\"container mx-auto\"><p class=\"text-4xl pt-9\">Thank you!</p></section></div>

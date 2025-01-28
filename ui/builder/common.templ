@@ -1,0 +1,488 @@
+package builder
+
+import (
+	"fmt"
+
+	"github.com/acaloiaro/frm"
+	"github.com/acaloiaro/frm/types"
+	"github.com/acaloiaro/frm/ui"
+	"github.com/acaloiaro/frm/ui/collector"
+	"github.com/acaloiaro/frm/ui/fields"
+	"github.com/acaloiaro/frm/ui/selector"
+
+	"github.com/google/uuid"
+)
+
+// Application DOM events
+const (
+	// FieldsFormEvent is the event triggered when any of a form's fields have been updated in the UI. When triggered,
+	// the fields form pushes updates from the UI to the draft form on the backend.
+	FieldsFormUpdateEvent = "fields-form-updated"
+	// FormSettingsEvent is the event triggered when any of a form's settings have been updated in the UI. When triggered,
+	// the fields form pushes updates from the UI to the draft form on the backend.
+	FormSettingsUpdateEvent = "form-settings-updated"
+	// LogicConfiguratorTargetFieldSelected is the event triggered when a form field is selected as a the target for field logic
+	LogicConfiguratorTargetFieldSelected = "logic-configurator-target-field-selected"
+)
+
+// Logic field group form field names
+const (
+	// FieldLogicChosenFieldID is the name of a HTML form field. The value of the form field with this name represents the field that was chosen as the target for field-specific logic.
+	//
+	// TODO: provide an example
+	FieldLogicTargetFieldID = "target_field_id"
+	// FieldLogicChosenField is the name of a HTML form field. The value of the form field represents the boolean comparator to be used to evaluate the chosen field against its field value.
+	//
+	// TODO: provide an example
+	FieldLogicComparator = "comparator"
+	// FieldLogicChosenFieldValue is the name of a HTML Form field. The value of the form field represents the value that the target field's value is compared against when deciding whether or not to display a field in the UI.
+	//
+	// TODO: provide an example
+	FieldLogicTargetFieldValue = "target_field_value"
+)
+
+// Field groups within the the form field configuration screen
+const (
+	FieldGroupLogic = "logic"
+)
+
+// Builder is the primary form builder UI, surrounded by the app chrome
+templ Builder(form frm.Form) {
+	@ui.App("Form builder") {
+		<section id="app-container">
+			@FormBuilderNav(form)
+			<section id="builder-main" class="flex w-full">
+				<!-- Left column -->
+				@builderColumnLeft(form)
+				<!-- Middle Column -->
+				@collector.FormPreview(form)
+				<!-- Right Column -->
+				@builderColumnRight(form)
+			</section>
+		</section>
+	}
+}
+
+// FormBuilderNavTitle renders the title of the form in the nav bar. This is a separate template so that the title can be updated when settings change, without updating, and losing the state of, the rest of the nav bar
+templ FormBuilderNavTitle(form frm.Form) {
+	<div id="form-builder-nav-title" data-hx-swap-oob="true" class="flex-grow flex justify-center">
+		<h3 tabindex="0" class="hover:bg-gray-100 dark:hover:bg-gray-800 rounded px-2 cursor-pointer relative font-medium py-1 text-md w-1/3 text-gray-500 truncate form-editor-title" style="height: auto;" id="form-editor-title">
+			{ form.Name }
+		</h3>
+	</div>
+}
+
+// FormBuilderNav is the top-of-the-page navigation bar
+templ FormBuilderNav(form frm.Form) {
+	<div id="form-builder-nav" data-hx-swap-oob="true" class="w-full border-b p-2 flex gap-x-2 items-center bg-white">
+		<div id="form-editor-navbar-tabs">
+			<div role="tablist" aria-orientation="horizontal" class="tabs tabs-boxed bg-gray-50 dark:bg-gray-800 rounded-lg p-1 h-auto grid grid-cols-2 items-center gap-x-1.5 px-2">
+				@ui.MutedButton(ui.ButtonArgs{Label: "Build", Classes: []string{"cursor-pointer tab-active [--fallback-p:white] [--fallback-pc:black] place-self-center"}}, templ.Attributes{
+					"role":     "tab",
+					"tabindex": 0,
+					"_":        "on click take .tab-active from .tab-active then add .hidden to .active-section then take .active-section for #form-fields then remove .hidden from #form-fields",
+				})
+				@ui.MutedButton(ui.ButtonArgs{Label: "Settings", Classes: []string{"cursor-pointer [--fallback-p:white] [--fallback-pc:black] place-self-center"}}, templ.Attributes{
+					"role":     "tab",
+					"tabindex": 2,
+					"_":        "on click take .tab-active from .tab-active then add .hidden to .active-section take .active-section for #settings-main then remove .hidden from #settings-main",
+				})
+			</div>
+		</div>
+		@FormBuilderNavTitle(form)
+		<div class="flex items-stretch gap-x-2">
+			<div class="inline-flex items-center relative">
+				<a href="#" class="text-sm p-2 hover:bg-gray-100 cursor-pointer rounded-lg text-gray-500 hover:text-gray-800 cursor-pointer"><span class="iconify i-heroicons:question-mark-circle w-5 h-5" aria-hidden="true"></span></a><!---->
+			</div>
+			<div class="relative inline-flex">
+				<button
+					type="button"
+					class="focus:outline-none disabled:cursor-not-allowed disabled:opacity-75 aria-disabled:cursor-not-allowed aria-disabled:opacity-75 flex-shrink-0 font-medium rounded-md text-sm gap-x-1.5 shadow-sm text-white dark:text-gray-900 bg-primary-500 hover:bg-primary-600 disabled:bg-primary-500 aria-disabled:bg-primary-500 dark:bg-primary-400 dark:hover:bg-primary-500 dark:disabled:bg-primary-400 dark:aria-disabled:bg-primary-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 dark:focus-visible:outline-primary-400 inline-flex items-center px-8 md:px-4 py-2"
+					data-hx-put={ ui.FormUrl[string](ctx, form, "/publish") }
+					data-hx-trigger="click"
+					data-hx-swap="none"
+				>
+					<!---->
+					<svg class="w-4 h-4 text-white inline mr-1 -mt-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17 21V13H7V21M7 3V8H15M19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16L21 8V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg> Save Form <!---->
+				</button><!---->
+			</div>
+		</div>
+	</div>
+}
+
+// FormSettings is the UI for configuring form-level settings.
+templ FormSettings(form frm.Form) {
+	<div id="settings-main" class="hidden">
+		<form
+			id="settings-form"
+			data-hx-put={ ui.FormUrl[string](ctx, form, "/settings") }
+			data-hx-trigger={ FormSettingsUpdateEvent }
+			data-hx-swap-oob="true"
+		>
+			<div class="pt-3">
+				<label for="form-name-field" class="pr-1">
+					Form name
+				</label>
+				@fields.RequiredFieldIndicator()
+			</div>
+			<input
+				id="form-name-field"
+				name="name"
+				type="text"
+				class="w-full rounded-md"
+				value={ form.Name }
+				placeholder="Enter a good name for your form"
+				autocomplete="off"
+				_={ fmt.Sprintf("on keyup debounced at 600ms trigger '%s'", FormSettingsUpdateEvent) }
+			/>
+		</form>
+	</div>
+}
+
+// builderColumnLeft is the left-hand panel of the form builder UI
+templ builderColumnLeft(form frm.Form) {
+	<section id="builder-main-left-col" class="flex flex-col gap-3 w-1/4 min-w-max h-full p-4 text-gray-800 rounded-md">
+		@FormFields(form)
+		@FormSettings(form)
+	</section>
+}
+
+// FormFields lists a form's fields as a sortable list, that when re-sorted, updates the fields' sort order in the form
+templ FormFields(form frm.Form) {
+	<div id="form-fields" class="active-section">
+		@FormFieldsForm(form)
+	</div>
+}
+
+templ FormFieldsForm(form frm.Form) {
+	<div id="form-fields-form" data-hx-swap-oob="true" class="flex flex-col gap-3 w-full">
+		@ui.Button(ui.ButtonArgs{
+			Label:   "Add field",
+			Classes: []string{"flex-grow", "justify-center", "uppercase"},
+		}, templ.Attributes{
+			"_": "on click toggle .hidden on .active-configurator then take .active-configurator from .active-configurator for #configure-add-field then remove .hidden from #configure-add-field",
+		}) {
+			@ui.HeroIcon("solid", "plus")
+		}
+		<div class="w-full border-b pb-2"></div>
+		<form
+			data-hx-put={ ui.FormUrl[string](ctx, form, "/fields/order") }
+			data-hx-trigger="end"
+			data-hx-swap="outerHTML"
+			data-hx-target="#form-fields-form"
+			data-hx-indidcator="#ind"
+		>
+			<div class="flex flex-col gap-1 sortable">
+				for _, field := range fields.SortFields(form.Fields) {
+					<div class="mx-auto w-full border-gray-300 transition-colors bg-gray-50 hover:bg-gray-100 rounded-lg sortme max-w-84 field-row">
+						<input name="order" type="hidden" value={ field.ID.String() }/>
+						<div class="group flex items-center gap-x-0.5 py-1.5 pr-1">
+							<!-- field item -->
+							<a
+								href="#"
+								class="w-full"
+								_={ fmt.Sprintf("on click add .hidden to .active-configurator then take .active-configurator from .active-configurator for #configure-%s then remove .hidden from #configure-%s", field.ID.String(), field.ID.String()) }
+							>
+								<div class="flex flex-col cursor-pointer">
+									<div tabindex="0" class="dark:hover:bg-gray-800 rounded px-2 relative text-gray-700 max-w-72 min-h-6" style="height: auto;">
+										<p class="w-full cursor-pointer truncate">{ field.Label }</p>
+									</div>
+								</div>
+							</a>
+							if field.Required {
+								<div class="relative inline-flex">
+									<button class="hidden rounded p-0.5 transition-colors hover:bg-nt-blue-lighter items-center px-1 justify-center md:flex text-red-500">
+										<div class="h-6 text-center text-2xl font-bold text-inherit -mt-0.5">* </div>
+									</button>
+								</div>
+							}
+							<div class="cursor-move">
+								@ui.HeroIcon("solid", "bars-3")
+							</div>
+						</div>
+					</div>
+				}
+			</div>
+		</form>
+	</div>
+}
+
+// builerColumnRight is the right-hand panel of the form build UI, used for adding and configuring fields
+templ builderColumnRight(form frm.Form) {
+	<section id="builder-main-right-col" class="w-1/4 h-full p-4 text-gray-800 rounded-md">
+		<div id="configure-add-field" class="hidden">
+			<div class="h-12 border-b text-lg text-center uppercase">Add field</div>
+			for i, fieldType := range types.FormFieldTypeValues() {
+				<div class="group flex items-center my-1.5 pr-1">
+					<a href="#" class="w-full">
+						<div class="flex flex-col">
+							<div
+								tabindex={ fmt.Sprint(i) }
+								class="hover:bg-gray-50 dark:hover:bg-gray-800 rounded cursor-pointer relative truncate text-gray-700 min-w-16 min-h-6"
+								style="height: auto;"
+								data-hx-post={ ui.FormUrl[string](ctx, form, "/fields") }
+								data-hx-trigger="click"
+								data-hx-vals={ fmt.Sprintf(`{"field_type": "%s"}`, fieldType) }
+								data-hx-swap="none"
+							>
+								@fields.FormFieldTypeLabel(types.FormFieldType(fieldType))
+							</div>
+						</div>
+					</a>
+				</div>
+			}
+		</div>
+		@FormFieldConfigurator(form)
+	</section>
+}
+
+templ FormFieldConfigurator(form frm.Form) {
+	<form
+		id="fields-form"
+		data-hx-put={ ui.FormUrl[string](ctx, form, "/fields") }
+		data-hx-trigger={ FieldsFormUpdateEvent }
+		data-hx-swap="none"
+		data-hx-swap-oob="true"
+	>
+		for _, field := range fields.SortFields(form.Fields) {
+			<div id={ fmt.Sprintf("configure-%s", field.ID.String()) } class="hidden">
+				<div class="mx-auto w-full border-gray-300 transition-colors pb-3">
+					@fields.FormFieldTypeLabel(types.FormFieldType(field.Type))
+				</div>
+				<div id={ fmt.Sprintf("configurator-tabs-%s", field.ID.String()) } class="border-b pb-4">
+					<div role="tablist" aria-orientation="horizontal" class="tabs tabs-boxed bg-gray-50 dark:bg-gray-800 rounded-lg h-auto flex gap-2">
+						@ui.MutedButton(ui.ButtonArgs{Label: "Settings", Classes: []string{"cursor-pointer tab-active [--fallback-p:white] [--fallback-pc:black] place-self-center w-1/2"}}, templ.Attributes{
+							"role":     "tab",
+							"tabindex": 1,
+							"_":        fmt.Sprintf("on click take .tab-active from <#configurator-tabs-%s .tab-active/> then add .hidden to #field-%s-logic then take .active-configurator-section from #field-%s-logic for #%s then remove .hidden from #%s", field.ID.String(), field.ID.String(), field.ID.String(), fmt.Sprintf("field-%s-settings", field.ID.String()), fmt.Sprintf("field-%s-settings", field.ID.String())),
+						})
+						@ui.MutedButton(ui.ButtonArgs{Label: "Logic", Classes: []string{"cursor-pointer [--fallback-p:white] [--fallback-pc:black] place-self-center w-1/2"}}, templ.Attributes{
+							"role":     "tab",
+							"tabindex": 2,
+							"_":        fmt.Sprintf("on click take .tab-active from <#configurator-tabs-%s .tab-active/> then add .hidden to #field-%s-settings then take .active-configurator-section from #field-%s-settings for #%s then remove .hidden from #%s", field.ID.String(), field.ID.String(), field.ID.String(), fmt.Sprintf("field-%s-logic", field.ID.String()), fmt.Sprintf("field-%s-logic", field.ID.String())),
+						})
+					</div>
+				</div>
+				<!-- Form fields settings configurations -->
+				@fieldSettingsConfiguration(form, field)
+				<!-- Form fields logic configurations -->
+				@fieldLogicConfiguration(form, field)
+			</div>
+		}
+	</form>
+}
+
+templ fieldSettingsConfiguration(form frm.Form, field types.FormField) {
+	<div id={ fmt.Sprintf("field-%s-settings", field.ID.String()) } class="active-configurator-section">
+		<input name={ fields.FieldName(field, "", "required") } type="hidden" value={ fmt.Sprint(field.Required) }/>
+		<input name={ fields.FieldName(field, "", "hidden") } type="hidden" value={ fmt.Sprint(field.Hidden) }/>
+		<input name={ fields.FieldName(field, "", "field_type") } type="hidden" value={ fmt.Sprint(field.Type) }/>
+		<div class="pt-3">
+			<label for={ fields.FieldName(field, "", "label") } class="pr-1">
+				Field label
+			</label>
+			@fields.RequiredFieldIndicator()
+		</div>
+		<input
+			id={ fields.FieldName(field, "", "label") }
+			name={ fields.FieldName(field, "", "label") }
+			type="text"
+			class="w-full rounded-md"
+			value={ field.Label }
+			autocomplete="off"
+			_={ fmt.Sprintf("on keyup debounced at 600ms trigger '%s'", FieldsFormUpdateEvent) }
+		/>
+		<div class="pt-3">
+			<label for={ fields.FieldName(field, "", "placeholder") } class="pr-1">
+				Placeholder
+			</label>
+		</div>
+		<input
+			id={ fields.FieldName(field, "", "placeholder") }
+			name={ fields.FieldName(field, "", "placeholder") }
+			type="text"
+			class="w-full rounded-md"
+			value={ field.Placeholder }
+			autocomplete="off"
+			_={ fmt.Sprintf("on keyup debounced at 600ms trigger '%s'", FieldsFormUpdateEvent) }
+		/>
+		if field.Type == types.FormFieldTypeSingleSelect || field.Type == types.FormFieldTypeMultiSelect {
+			<div class="pt-3">
+				<label for={ fields.FieldName(field, "", "options") } class="pr-1">
+					Options
+				</label>
+			</div>
+			@selector.Selector(selector.SelectArgs{
+				ID:                   fields.FieldName(field, "", "options"),
+				Name:                 fields.FieldName(field, "", "options"),
+				Placeholder:          "Add, remove, or create new options",
+				Multiple:             true,
+				EditItems:            true,
+				Options:              fields.ToSelectorOpts(field.Options, true),
+				SelectionChangeEvent: FieldsFormUpdateEvent,
+			})
+		}
+		<div class="pt-3">
+			<label for={ fields.FieldName(field, "", "required") } class="pr-1">
+				Required
+			</label>
+		</div>
+		<input
+			id={ fields.FieldName(field, "", "required") }
+			name={ fields.FieldName(field, "", "required") }
+			type="checkbox"
+			class="checkbox checkbox-primary"
+			if field.Required {
+				checked
+			}
+			_={ fmt.Sprintf(`
+						on click 
+						if my.checked 
+							set <input[name='%s']/>'s checked to false 
+						end  
+						then trigger '%s'`, 
+						fields.FieldName(field, "","hidden"), FieldsFormUpdateEvent) }
+		/>
+		<div class="pt-3">
+			<label for={ fields.FieldName(field, "", "hidden") } class="pr-1">
+				Hidden
+			</label>
+		</div>
+		<input
+			id={ fields.FieldName(field, "", "hidden") }
+			name={ fields.FieldName(field, "", "hidden") }
+			type="checkbox"
+			class="checkbox checkbox-primary"
+			if field.Hidden {
+				checked
+			}
+			_={ fmt.Sprintf(`
+						on click 
+						if my.checked 
+							set <input[name='%s']/>'s checked to false 
+						end  
+						then trigger '%s'`, 
+						fields.FieldName(field, "","required"), FieldsFormUpdateEvent) }
+		/>
+		<div class="py-3 divide-y">
+			<label for="delete-field" class="pr-1">
+				Danger zone
+			</label>
+		</div>
+		@ui.Button(ui.ButtonArgs{Type: "button", Label: "Delete field"}, templ.Attributes{
+			"data-hx-delete":  ui.FormUrl[string](ctx, form, fmt.Sprintf("/fields/%s", field.ID)),
+			"data-hx-trigger": "click",
+			"data-hx-confirm": "Are you sure?",
+		})
+	</div>
+}
+
+templ fieldLogicConfiguration(form frm.Form, field types.FormField) {
+	<div id={ fmt.Sprintf("field-%s-logic", field.ID.String()) } class="flex flex-col gap-5 hidden">
+		<div>
+			<div
+				data-hx-get={ frm.BuilderPathFormField(ctx, form.ID, field.ID.String(), "/logic/choices") }
+				data-hx-trigger={ LogicConfiguratorTargetFieldSelected }
+				data-hx-swap="innerHTML"
+				data-hx-target={ fmt.Sprintf("#logic-field-value-chooser-%s", field.ID.String()) }
+				data-hx-on:htmx:config-request="event.detail.parameters['id'] = event.detail.triggeringEvent.detail.value"
+			>
+				@selector.Selector(selector.SelectArgs{
+					ID:                   fmt.Sprintf("field-%s-logic-config-field-chooser", field.ID.String()),
+					Name:                 fields.FieldName(field, FieldGroupLogic, FieldLogicTargetFieldID),
+					Placeholder:          "Choose a field",
+					Options:              fields.FieldsAsSelectorOptions(form, field.ID),
+					SearchDisabled:       true,
+					SelectionChangeEvent: LogicConfiguratorTargetFieldSelected,
+				})
+			</div>
+		</div>
+		<div>
+			@selector.Selector(selector.SelectArgs{
+				ID:                   fmt.Sprintf("field-%s-logic-config-condition-chooser", field.ID.String()),
+				Name:                 fields.FieldName(field, FieldGroupLogic, FieldLogicComparator),
+				Placeholder:          "Choose a condition",
+				Options:              comparatorOptionsFor(field),
+				SearchDisabled:       true,
+				SelectionChangeEvent: FieldsFormUpdateEvent,
+			})
+		</div>
+		<div>
+			<div
+				id={ fmt.Sprintf("logic-field-value-chooser-%s", field.ID.String()) }
+			>
+				if field.Logic != nil && field.Logic.TargetFieldID != uuid.Nil {
+					@LogicConfiguratorStepThree(form, field, form.Fields[field.Logic.TargetFieldID.String()])
+				}
+			</div>
+		</div>
+		<div>
+			<p class="pb-3">Choose an action</p>
+			<input
+				id={ fmt.Sprintf("%s-logic-action", field.ID.String()) }
+				type="checkbox"
+				class="checkbox"
+				name={ fields.FieldName(field, FieldGroupLogic, types.FieldLogicTriggerShow.String()) }
+				if field.Logic != nil && field.Logic.TriggerActions.Contains(types.FieldLogicTriggerShow) {
+					checked
+				}
+				_={ fmt.Sprintf(`
+						on click 
+						trigger '%s'`, 
+						FieldsFormUpdateEvent) }
+			/>
+			<label for={ fmt.Sprintf("%s-logic-action", field.ID.String()) }>Show this field</label>
+		</div>
+	</div>
+}
+
+// comparatorOptionsFor returns the comparators available for a logic field given its Type
+func comparatorOptionsFor(field types.FormField) (options selector.FieldOptions) {
+	switch field.Type {
+	default:
+		options = selector.FieldOptions{
+			selector.Option{
+				Value:    fmt.Sprint(types.FieldLogicComparatorEqual),
+				Label:    "Equal to =",
+				Selected: field.Logic != nil && field.Logic.TriggerComparator == types.FieldLogicComparatorEqual,
+			},
+			selector.Option{
+				Value:    fmt.Sprint(types.FieldLogicComparatorContains),
+				Label:    "Contains",
+				Selected: field.Logic != nil && field.Logic.TriggerComparator == types.FieldLogicComparatorContains,
+			},
+		}
+	}
+
+	return
+}
+
+// LogicConfiguratorStepThree returns HTML input elments appropriate for choosing values for `targetField` in the logic configurator.
+//
+// field: the field being configured
+// targetField: the target field chosen as the logic target
+templ LogicConfiguratorStepThree(form frm.Form, field types.FormField, targetField types.FormField) {
+	switch targetField.Type {
+		case types.FormFieldTypeMultiSelect, types.FormFieldTypeSingleSelect:
+			@selector.Selector(selector.SelectArgs{
+				ID:                   fmt.Sprintf("%s-logic-chosen-field-value", field.ID.String()),
+				Label:                "",
+				Name:                 fields.FieldName(field, FieldGroupLogic, FieldLogicTargetFieldValue),
+				Options:              ui.FieldOptionsAsSelectorOptions(form, targetField),
+				Placeholder:          "Choose a value",
+				SelectionChangeEvent: FieldsFormUpdateEvent,
+			})
+		case types.FormFieldTypeTextSingle, types.FormFieldTypeTextMultiple:
+			<input
+				id={ fmt.Sprintf("%s-logic-chosen-field-value", field.ID.String()) }
+				name={ fields.FieldName(field, FieldGroupLogic, FieldLogicTargetFieldValue) }
+				type="text"
+				class="bg-gray-50"
+				placeholder="Enter a value"
+				if field.Logic != nil && field.Logic.TriggerValues[0] != "" {
+					value={ field.Logic.TriggerValues[0] }
+				}
+				_={ fmt.Sprintf("on keyup debounced at 600ms trigger '%s'", FieldsFormUpdateEvent) }
+			/>
+	}
+}
