@@ -146,7 +146,7 @@
               frm-server = {
                 description = "Run the development server";
                 exec = ''
-                  bash -c 'pkill ./tmp/frm; exit 0' && go generate ./... && go build -o ./tmp/frm ./cmd/dev_server && ./tmp/frm
+                  go generate ./... && go run ./cmd/dev_server
                 '';
               };
 
@@ -162,9 +162,9 @@
                 '';
               };
 
-              frm-templ = {
+              templ-watcher = {
                 exec = ''
-                  templ generate -cmd frm-server -watch -watch-pattern='(^(?:[^e]|e[^n]|en[^u]|enu[^m]|enum[^e]|enume[^r])*\.go$)|(.+\.templ$)|(.+_templ\.txt$)|(.+styles\.css$)'  -proxy 'http://localhost:3000' -v trace
+                  templ generate -watch -watch-pattern='(^(?:[^e]|e[^n]|en[^u]|enu[^m]|enum[^e]|enume[^r])*\.go$)|(.+\.templ$)|(.+_templ\.txt$)|(.+styles\.css$)'  -proxy 'http://localhost:3000'
 
                 '';
                 description = "run the frm dev server and templ";
@@ -177,9 +177,19 @@
               };
             };
 
-            processes."1frm-templ" = {
+            processes.templ-watcher = {
+              exec = "templ-watcher";
+            };
+            processes."frm-server" = {
               exec = ''
-                frm-templ
+                reflex \
+                  -v \
+                  -s \
+                  --inverse-regex='.+enumer\.go$' \
+                  --inverse-regex='^\.devenv' \
+                  --inverse-regex='^\.direnv' \
+                  -r '.+\.go$' \
+                  -- frm-server
               '';
               process-compose = {
                 availability = {
