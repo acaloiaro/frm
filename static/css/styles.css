@@ -2468,6 +2468,10 @@ input.tab:checked + .tab-content,
   bottom: 0px;
 }
 
+.z-50 {
+  z-index: 50;
+}
+
 .mx-auto {
   margin-left: auto;
   margin-right: auto;
@@ -2538,6 +2542,10 @@ input.tab:checked + .tab-content,
 
 .h-12 {
   height: 3rem;
+}
+
+.h-2\/3 {
+  height: 66.666667%;
 }
 
 .h-4 {
@@ -2710,8 +2718,8 @@ input.tab:checked + .tab-content,
   overflow: visible;
 }
 
-.overflow-y-auto {
-  overflow-y: auto;
+.overflow-y-scroll {
+  overflow-y: scroll;
 }
 
 .overscroll-auto {
