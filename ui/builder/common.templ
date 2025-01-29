@@ -51,7 +51,7 @@ templ Builder(form frm.Form) {
 	@ui.App("Form builder") {
 		<section id="app-container h-2/3 max-h-1/3">
 			@FormBuilderNav(form)
-			<section id="builder-main" class="flex">
+			<section id="builder-main" class="flex pt-20">
 				<!-- Left column -->
 				@builderColumnLeft(form)
 				<!-- Middle Column -->
@@ -74,7 +74,7 @@ templ FormBuilderNavTitle(form frm.Form) {
 
 // FormBuilderNav is the top-of-the-page navigation bar
 templ FormBuilderNav(form frm.Form) {
-	<div id="form-builder-nav" data-hx-swap-oob="true" class="p-2 flex gap-x-2 items-center bg-white z-50">
+	<div id="form-builder-nav" data-hx-swap-oob="true" class="fixed w-full p-2 flex gap-x-2 items-center bg-white z-50">
 		<div id="form-editor-navbar-tabs">
 			<div role="tablist" aria-orientation="horizontal" class="tabs tabs-boxed bg-gray-50 dark:bg-gray-800 rounded-lg p-1 h-auto grid grid-cols-2 items-center gap-x-1.5 px-2">
 				@ui.MutedButton(ui.ButtonArgs{Label: "Build", Classes: []string{"cursor-pointer tab-active [--fallback-p:white] [--fallback-pc:black] place-self-center"}}, templ.Attributes{
