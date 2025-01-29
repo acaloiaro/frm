@@ -1,6 +1,6 @@
 <span class=\"text-red-500 required-dot\">*</span>
 <label for=\"
-\" class=\"text-slate-700 text-xl py-1\">
+\" class=\"text-slate-700 text-xl pb-5\">
  
 </label>
 <div class=\"p-1 rounded-md flex items-center justify-center bg-blue-100 text-blue-900 ml-2\">
@@ -24,5 +24,5 @@ Single-line text
 Multi-line text
 Single select
 Multi select
-Rating
+Single Choice
 </label></div>

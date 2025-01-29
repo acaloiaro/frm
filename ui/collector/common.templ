@@ -42,12 +42,13 @@ templ FormView(form frm.Form, isPreview bool) {
 			id="form-metadata"
 			data-data={ ui.ViewerMetadata{Form: form}.JSON() }
 		></div>
-		<h1 class="rounded relative mb-2 font-black text-slate-700 text-5xl">
+		<h1 class="rounded relative mb-8 font-black text-slate-700 text-5xl">
 			{ form.Name }
 		</h1>
 		<div id="form-input">
 			<form
 				_="on field_change(field_id, value) formValueChanged(field_id, value)"
+				class="flex flex-col gap-3"
 			>
 				<input name="submission_id" type="hidden" value="changeme!"/>
 				if sc := shortCode(ctx); sc != nil {
@@ -57,9 +58,9 @@ templ FormView(form frm.Form, isPreview bool) {
 					<div
 						id={ fmt.Sprintf("field-container-%s", field.ID.String()) }
 						if field.Hidden {
-							class="flex flex-col py-3 hidden"
+							class="flex flex-col bg-sky-200 rounded-xl p-6 hidden"
 						} else {
-							class="flex flex-col py-3"
+							class="flex flex-col bg-sky-200 rounded-xl p-6"
 						}
 					>
 						<div

@@ -85,7 +85,7 @@ func FieldLabel(field types.FormField) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" class=\"text-slate-700 text-xl py-1\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" class=\"text-slate-700 text-xl pb-5\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -152,7 +152,7 @@ func FieldTypeIcon(fieldType types.FormFieldType) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case int(types.FormFieldTypeRating):
+		case int(types.FormFieldTypeSingleChoice):
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<!-- heroicons: outline star --> <svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\" class=\"size-6\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z\"></path></svg>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -204,8 +204,8 @@ func View(field types.FormField) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case types.FormFieldTypeRating:
-			templ_7745c5c3_Err = Rating(field).Render(ctx, templ_7745c5c3_Buffer)
+		case types.FormFieldTypeSingleChoice:
+			templ_7745c5c3_Err = SingleChoice(field).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -425,7 +425,8 @@ func selectView(field types.FormField) templ.Component {
 	})
 }
 
-func ratingView(field types.FormField) templ.Component {
+// FormFieldTypeLabel is the UI label for FormFieldTypes, e.g. 'text_single' -> "Single line text"
+func FormFieldTypeLabel(fieldType types.FormFieldType) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -444,36 +445,6 @@ func ratingView(field types.FormField) templ.Component {
 		templ_7745c5c3_Var18 := templ.GetChildren(ctx)
 		if templ_7745c5c3_Var18 == nil {
 			templ_7745c5c3_Var18 = templ.NopComponent
-		}
-		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = FieldLabel(field).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		return nil
-	})
-}
-
-// FormFieldTypeLabel is the UI label for FormFieldTypes, e.g. 'text_single' -> "Single line text"
-func FormFieldTypeLabel(fieldType types.FormFieldType) templ.Component {
-	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
-		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
-		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
-			return templ_7745c5c3_CtxErr
-		}
-		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
-		if !templ_7745c5c3_IsBuffer {
-			defer func() {
-				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
-				if templ_7745c5c3_Err == nil {
-					templ_7745c5c3_Err = templ_7745c5c3_BufErr
-				}
-			}()
-		}
-		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var19 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var19 == nil {
-			templ_7745c5c3_Var19 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<div class=\"flex gap-3\">")
@@ -509,8 +480,8 @@ func FormFieldTypeLabel(fieldType types.FormFieldType) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case int(types.FormFieldTypeRating):
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "Rating")
+		case int(types.FormFieldTypeSingleChoice):
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "Single Choice")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -534,6 +505,23 @@ func ToSelectorOpts(opts []types.Option, selectAll bool) (sopts []selector.Optio
 			opt.Selected = true
 		}
 		sopts = append(sopts, (selector.Option)(opt))
+	}
+
+	return
+}
+
+// ToSelectorOptsStr converts a slices of types.Option to a slice of selector.Option
+func ToSelectorOptsStr(opts []string, selectAll bool) (sopts []selector.Option) {
+	// TODO: Fix -- adding an empty option because the first select <option> is selected by default, for some reason
+	sopts = append(sopts, (selector.Option)(selector.Option{
+		Value: "",
+	}))
+	for _, opt := range opts {
+		sopts = append(sopts, selector.Option{
+			Label:    opt,
+			Value:    opt,
+			Selected: selectAll,
+		})
 	}
 
 	return

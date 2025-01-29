@@ -334,8 +334,8 @@ func NewField(w http.ResponseWriter, r *http.Request) {
 	case types.FormFieldTypeMultiSelect:
 		newField.Label = "New multi select field"
 		newField.Placeholder = "Choose items"
-	case types.FormFieldTypeRating:
-		newField.Label = "New rating field"
+	case types.FormFieldTypeSingleChoice:
+		newField.Label = "New single choice field"
 	}
 
 	fields[fieldID.String()] = *newField
@@ -443,6 +443,10 @@ func UpdateFields(w http.ResponseWriter, r *http.Request) {
 		case fieldName == "options":
 			oldField := draft.Fields[fieldID]
 			oldField.Options = toFormFieldOption(oldField, fieldValues)
+			updatedFields[fieldID] = oldField
+		case fieldName == "option_labels":
+			oldField := draft.Fields[fieldID]
+			oldField.OptionLabels = fieldValues
 			updatedFields[fieldID] = oldField
 		case fieldGroup == builder.FieldGroupLogic && fieldName == builder.FieldLogicTargetFieldID:
 			targetFieldID, err := uuid.Parse(fieldValues[0])
@@ -720,7 +724,7 @@ func fieldID(ctx context.Context) (fieldID *uuid.UUID, err error) {
 // Example: [2ad1591d-c852-47b5-a16d-0b90892421c8][logic]target_field_id
 var formFieldIDExtractor = regexp.MustCompile(`^\[([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12})\](\[(.+)\]){0,1}(.+){1}?$`)
 
-// toFormFieldOption takes a list of options sa strings and determines whether the string options represent new options
+// toFormFieldOption takes a list of options as strings and determines whether the string options represent new options
 // being created, in which case an ID/value must be generated for the option, or if the option is amongst the existing
 // options for the field being updated.
 func toFormFieldOption(field types.FormField, options []string) types.FieldOptions {

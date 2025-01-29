@@ -312,7 +312,7 @@ templ fieldSettingsConfiguration(form frm.Form, field types.FormField) {
 					autocomplete="off"
 					_={ fmt.Sprintf("on keyup debounced at 600ms trigger '%s'", FieldsFormUpdateEvent) }
 				/>
-			case types.FormFieldTypeMultiSelect, types.FormFieldTypeSingleSelect, types.FormFieldTypeRating:
+			case types.FormFieldTypeMultiSelect, types.FormFieldTypeSingleSelect, types.FormFieldTypeSingleChoice:
 				<div class="pt-3">
 					<label for={ fields.FieldName(field, "", "options") } class="pr-1">
 						Options
@@ -327,6 +327,22 @@ templ fieldSettingsConfiguration(form frm.Form, field types.FormField) {
 					Options:              fields.ToSelectorOpts(field.Options, true),
 					SelectionChangeEvent: FieldsFormUpdateEvent,
 				})
+				if field.Type == types.FormFieldTypeSingleChoice {
+					<div class="pt-3">
+						<label for={ fields.FieldName(field, "", "option_labels") } class="pr-1">
+							Option labels
+						</label>
+					</div>
+					@selector.Selector(selector.SelectArgs{
+						ID:                   fields.FieldName(field, "", "option_labels"),
+						Name:                 fields.FieldName(field, "", "option_labels"),
+						Placeholder:          "Create labels for your options",
+						Multiple:             true,
+						EditItems:            true,
+						Options:              fields.ToSelectorOptsStr(field.OptionLabels, true),
+						SelectionChangeEvent: FieldsFormUpdateEvent,
+					})
+				}
 		}
 		<div class="pt-3">
 			<label for={ fields.FieldName(field, "", "required") } class="pr-1">
@@ -469,7 +485,7 @@ func comparatorOptionsFor(field types.FormField) (options selector.FieldOptions)
 // targetField: the target field chosen as the logic target
 templ LogicConfiguratorStepThree(form frm.Form, field types.FormField, targetField types.FormField) {
 	switch targetField.Type {
-		case types.FormFieldTypeMultiSelect, types.FormFieldTypeSingleSelect:
+		case types.FormFieldTypeMultiSelect, types.FormFieldTypeSingleSelect, types.FormFieldTypeSingleChoice:
 			@selector.Selector(selector.SelectArgs{
 				ID:                   fmt.Sprintf("%s-logic-chosen-field-value", field.ID.String()),
 				Label:                "",

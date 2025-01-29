@@ -1,0 +1,39 @@
+package fields
+
+import (
+	"fmt"
+
+	"github.com/acaloiaro/frm/types"
+)
+
+// SingleChoice is a form input type allowing only a ingle option to be chosen
+templ SingleChoice(field types.FormField) {
+	@FieldLabel(field)
+	<div class="w-full">
+		<div>
+			<div class="flex join">
+				for _, option := range field.Options {
+					<input
+						class="join-item btn checked:bg-none flex-grow first:border-x-0 last:border-r-0 border-y-0 border-black bg-sky-50"
+						type="radio"
+						id={ field.ID.String() }
+						name={ field.ID.String() }
+						aria-label={ option.Label }
+						value={ option.Value }
+						if field.Required {
+							required
+						}
+						_={ fmt.Sprintf("on change trigger field_change(field_id: '%s', value: my.value)", field.ID.String()) }
+					/>
+				}
+			</div>
+			if len(field.OptionLabels) > 0 {
+				<div class="flex flex-grow w-full text-center text-gray-400">
+					for _, label := range field.OptionLabels {
+						<div class="w-full first:text-left last:text-right">{ label }</div>
+					}
+				</div>
+			}
+		</div>
+	</div>
+}

@@ -1,9 +1,0 @@
-<div class=\"w-full\"><div><div class=\"flex join\">
-<input class=\"join-item btn checked:bg-none flex-grow first:border-x-0 last:border-r-0 border-y-0 border-black\" type=\"radio\" id=\"
-\" name=\"
-\" aria-label=\"
-\" value=\"
-\"
- required
->
-</div><div class=\"flex flex-grow w-full text-center text-gray-400\"><div class=\"w-full first:text-left last:text-right\">Least</div><div class=\"w-full first:text-left last:text-right\">Neutral</div><div class=\"w-full first:text-left last:text-right\">Most</div></div></div></div>

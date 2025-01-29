@@ -27,7 +27,7 @@ const (
 	FormFieldTypeTextMultiple                      // multiple lines of text
 	FormFieldTypeSingleSelect                      // single-select dropdown
 	FormFieldTypeMultiSelect                       // multi-select dropdown
-	FormFieldTypeRating                            // a rating within a range of numbers
+	FormFieldTypeSingleChoice
 )
 
 // FormFieldDataType enum enumerates all possible data types for form fields
@@ -74,16 +74,17 @@ type FieldOptions []Option
 
 // FormField is a field associated with a form
 type FormField struct {
-	ID          uuid.UUID         `json:"id"`          // field's unique id
-	Order       int               `json:"order"`       // order in which the field appears on forms
-	Label       string            `json:"label"`       // field's label (name)
-	Logic       *FieldLogic       `json:"logic"`       // UI logic for this field
-	Options     FieldOptions      `json:"options"`     // single/multi-select options
-	Placeholder string            `json:"placeholder"` // placeholder value
-	Required    bool              `json:"required"`    // whether the field is required
-	Hidden      bool              `json:"hidden"`      // whether the field is hidden
-	Type        FormFieldType     `json:"type"`        // field type
-	DataType    FormFieldDataType `json:"data_type"`   // the data type for form submissions to this field
+	ID           uuid.UUID         `json:"id"`            // field's unique id
+	Order        int               `json:"order"`         // order in which the field appears on forms
+	Label        string            `json:"label"`         // field's label (name)
+	Logic        *FieldLogic       `json:"logic"`         // UI logic for this field
+	Options      FieldOptions      `json:"options"`       // single/multi-select options
+	OptionLabels []string          `json:"option_labels"` // option labels are shown below [types.FormFieldTypeSingleChoice] options
+	Placeholder  string            `json:"placeholder"`   // placeholder value
+	Required     bool              `json:"required"`      // whether the field is required
+	Hidden       bool              `json:"hidden"`        // whether the field is hidden
+	Type         FormFieldType     `json:"type"`          // field type
+	DataType     FormFieldDataType `json:"data_type"`     // the data type for form submissions to this field
 }
 
 // FormFieldSubmission is a form submission for a particular form field. Form submissions consists of one or more form field submission
@@ -162,25 +163,27 @@ func (f FormField) MarshalJSON() ([]byte, error) {
 	}
 
 	d := struct {
-		ID          uuid.UUID     `json:"id"`    // field's unique id
-		Order       int           `json:"order"` // order in which the field appears on forms
-		Label       string        `json:"label"` // field's label (name)
-		Logic       *FieldLogic   `json:"logic"`
-		Options     FieldOptions  `json:"options"`     // single/multi-select options
-		Placeholder string        `json:"placeholder"` // placeholder value
-		Required    bool          `json:"required"`    // whether the field is required
-		Hidden      bool          `json:"hidden"`      // whether the field is hidden
-		Type        FormFieldType `json:"type"`        // field type
+		ID           uuid.UUID     `json:"id"`            // field's unique id
+		Order        int           `json:"order"`         // order in which the field appears on forms
+		Label        string        `json:"label"`         // field's label (name)
+		Logic        *FieldLogic   `json:"logic"`         // field's logic configuration
+		Options      FieldOptions  `json:"options"`       // single/multi-select options
+		OptionLabels []string      `json:"option_labels"` // labels for [FormFieldTypeSingleChoice] options
+		Placeholder  string        `json:"placeholder"`   // placeholder value
+		Required     bool          `json:"required"`      // whether the field is required
+		Hidden       bool          `json:"hidden"`        // whether the field is hidden
+		Type         FormFieldType `json:"type"`          // field type
 	}{
 
-		ID:          id,
-		Order:       f.Order,
-		Label:       f.Label,
-		Options:     f.Options,
-		Placeholder: f.Placeholder,
-		Required:    f.Required,
-		Hidden:      f.Hidden,
-		Type:        f.Type,
+		ID:           id,
+		Order:        f.Order,
+		Label:        f.Label,
+		Options:      f.Options,
+		OptionLabels: f.OptionLabels,
+		Placeholder:  f.Placeholder,
+		Required:     f.Required,
+		Hidden:       f.Hidden,
+		Type:         f.Type,
 	}
 
 	if f.Logic != nil && f.Logic.Configured() {
