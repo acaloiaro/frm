@@ -150,6 +150,13 @@
                 '';
               };
 
+              templ-server = {
+                description = "Run templ and watch for changes";
+                exec = ''
+                  templ generate -cmd frm-server -watch -watch-pattern='(^(?:[^e]|e[^n]|en[^u]|enu[^m]|enum[^e]|enume[^r])*\.go$)|(.+\.templ$)|(.+_templ\.txt$)|(.+styles\.css$)'  -proxy 'http://localhost:3000'
+                '';
+              };
+
               migrate = {
                 description = "Use go-migrate to generate migrations";
                 exec = "${go-migrate}/bin/migrate -source file://./db/migrations -database $DATABASE_URL_NON_PGX $*";
@@ -162,35 +169,14 @@
                 '';
               };
 
-              templ-watcher = {
-                exec = ''
-                  templ generate -watch -watch-pattern='(^(?:[^e]|e[^n]|en[^u]|enu[^m]|enum[^e]|enume[^r])*\.go$)|(.+\.templ$)|(.+_templ\.txt$)|(.+styles\.css$)'  -proxy 'http://localhost:3000'
-
-                '';
-                description = "run the frm dev server and templ";
-              };
-
               rebuild-tailwind = {
-                description = "rebuild tailwind's output and trigger a templ rebuild by touching a templ file";
-                # When tailwind updates CSS, we need to trigger a rebuild of the go application, hence the modification to main.go
-                exec = "tailwindcss -c ui/tailwind.config.js -i ./ui/css/tailwind.css -o ./static/css/styles.css && echo -e \"package frm\nimport \\x22fmt\\x22\nfunc main() { fmt.Println($(head -c2 /dev/urandom | od -An -vtu4)) }\" > ./trigger_restart.go";
+                description = "rebuild tailwind's css";
+                exec = "tailwindcss  -c ui/tailwind.config.js -i ./ui/css/tailwind.css -o ./static/css/styles.css && echo -e \"package frm\nimport \\x22fmt\\x22\nfunc main() { fmt.Println($(head -c2 /dev/urandom | od -An -vtu4)) }\" > ./trigger_restart.go";
               };
             };
 
-            processes.templ-watcher = {
-              exec = "templ-watcher";
-            };
-            processes."frm-server" = {
-              exec = ''
-                reflex \
-                  -v \
-                  -s \
-                  --inverse-regex='.+enumer\.go$' \
-                  --inverse-regex='^\.devenv' \
-                  --inverse-regex='^\.direnv' \
-                  -r '.+\.go$' \
-                  -- frm-server
-              '';
+            processes."server" = {
+              exec = "templ-server";
               process-compose = {
                 availability = {
                   restart = "on_failure";
@@ -221,9 +207,8 @@
               exec = ''
                 reflex \
                     -v \
-                    --inverse-regex='\.devenv' \
-                    --inverse-regex='\.direnv' \
-                    --inverse-regex='.+trigger_rebuild.+' \
+                    --inverse-regex='^\.devenv' \
+                    --inverse-regex='^\.direnv' \
                     -r '.+tailwind\.css$|.+\.templ$' \
                     -- rebuild-tailwind
               '';
@@ -232,7 +217,10 @@
             processes.sqlc = {
               exec = ''
                 reflex \
-                  -s -r '.+\.sql$' \
+                  -s \
+                  --inverse-regex='^\.devenv' \
+                  --inverse-regex='^\.direnv' \
+                  -r '.+\.sql$' \
                   -- run-generate-models
               '';
             };

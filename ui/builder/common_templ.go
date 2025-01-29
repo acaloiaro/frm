@@ -156,7 +156,7 @@ func FormBuilderNavTitle(form frm.Form) templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div id=\"form-builder-nav-title\" data-hx-swap-oob=\"true\" class=\"flex-grow flex justify-center\"><h3 tabindex=\"0\" class=\"hover:bg-gray-100 dark:hover:bg-gray-800 rounded px-2 cursor-pointer relative font-medium py-1 text-md w-1/3 text-gray-500 truncate form-editor-title\" style=\"height: auto;\" id=\"form-editor-title\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div id=\"form-builder-nav-title\" data-hx-swap-oob=\"true\" class=\"flex-grow flex justify-center\"><h3 tabindex=\"0\" class=\"rounded px-2 cursor-pointer relative font-medium py-1 text-2xl w-2/3 text-center text-gray-500 truncate form-editor-title\" style=\"height: auto;\" id=\"form-editor-title\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -199,7 +199,7 @@ func FormBuilderNav(form frm.Form) templ.Component {
 			templ_7745c5c3_Var5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div id=\"form-builder-nav\" data-hx-swap-oob=\"true\" class=\"border-b p-2 flex gap-x-2 items-center bg-white z-50\"><div id=\"form-editor-navbar-tabs\"><div role=\"tablist\" aria-orientation=\"horizontal\" class=\"tabs tabs-boxed bg-gray-50 dark:bg-gray-800 rounded-lg p-1 h-auto grid grid-cols-2 items-center gap-x-1.5 px-2\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div id=\"form-builder-nav\" data-hx-swap-oob=\"true\" class=\"p-2 flex gap-x-2 items-center bg-white z-50\"><div id=\"form-editor-navbar-tabs\"><div role=\"tablist\" aria-orientation=\"horizontal\" class=\"tabs tabs-boxed bg-gray-50 dark:bg-gray-800 rounded-lg p-1 h-auto grid grid-cols-2 items-center gap-x-1.5 px-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
