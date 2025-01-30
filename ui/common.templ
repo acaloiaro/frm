@@ -154,7 +154,7 @@ templ App(pageTitle string) {
 	<html lang="eng">
 		@Head(pageTitle)
 		<body>
-			<main hx-ext="response-targets">
+			<main>
 				{ children... }
 			</main>
 			@footer()
@@ -188,6 +188,18 @@ func FieldOptionsAsSelectorOptions(form frm.Form, field types.FormField) (option
 		})
 	}
 	return
+}
+
+templ ValidationErrors(errs types.ValidationErrors) {
+	if len(errs) > 0 {
+		for fieldID, err := range errs {
+			<div id={ fmt.Sprintf("errors-%s", fieldID) } data-hx-swap-oob="true" class="flex flex-col gap-3 py-3">
+				<p class="text-red-500">
+					{ err.Error() }
+				</p>
+			</div>
+		}
+	}
 }
 
 // ViewerMetdata contains data needed by the viewer component. It is rendered to JSON and accessed via Javascript.

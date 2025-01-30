@@ -113,6 +113,15 @@ func Collect(w http.ResponseWriter, r *http.Request) {
 	if errs.Any() {
 		slog.Info("[collector] failed validation", "errors", errs)
 		w.WriteHeader(http.StatusBadRequest)
+		err = ui.ValidationErrors(errs).Render(r.Context(), w)
+		if err != nil {
+			slog.Error("[collector] unable to render validation error response", "errors", errs)
+			w.WriteHeader(http.StatusInternalServerError)
+		} else {
+			w.WriteHeader(http.StatusBadRequest)
+
+		}
+		return
 	}
 	sc := submission.Get("short_code")
 	submission.Del("short_code")

@@ -36,4 +36,8 @@ templ SingleChoice(field types.FormField) {
 			}
 		</div>
 	</div>
+	<div
+		id={ fmt.Sprintf("errors-%s", field.ID.String()) }
+		class="text-red-400"
+	></div>
 }

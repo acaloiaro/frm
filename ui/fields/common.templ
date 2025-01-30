@@ -71,9 +71,13 @@ templ singleLineTextView(field types.FormField) {
 		placeholder={ field.Placeholder }
 		type="text"
 		autocomplete="off"
+		if field.Required {
+			required
+		}
 		_={ fmt.Sprintf("on keyup debounced at 250ms trigger field_change(field_id: '%s', value: my.value)", field.ID.String()) }
 		class="flex-1 appearance-none border border-gray-300 dark:border-gray-600 w-full text-gray-700 dark:bg-notion-dark-light dark:text-gray-300 dark:placeholder-gray-500 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:border-2 focus:ring-opacity-100 px-4 py-2 text-base resize-y block rounded-xl bg-sky-50"
 	/>
+	<div hx-swap-oob="true" id={ fmt.Sprintf("errors-%s", field.ID.String()) }></div>
 }
 
 templ multiLineTextView(field types.FormField) {
@@ -84,9 +88,16 @@ templ multiLineTextView(field types.FormField) {
 		class="flex-1 appearance-none border border-gray-300 dark:border-gray-600 w-full text-gray-700 dark:bg-notion-dark-light dark:text-gray-300 dark:placeholder-gray-500 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:border-transparent focus:ring-opacity-100 px-4 py-2 text-base resize-y block rounded-xl bg-sky-50"
 		placeholder={ field.Placeholder }
 		autocomplete="off"
+		if field.Required {
+			required
+		}
 		_={ fmt.Sprintf("on keyup debounced at 250ms trigger field_change(field_id: '%s', value: my.value)", field.ID.String()) }
 		rows="3"
 	></textarea>
+	<div
+		id={ fmt.Sprintf("errors-%s", field.ID.String()) }
+		class="text-red-400"
+	></div>
 }
 
 templ selectView(field types.FormField) {
@@ -103,6 +114,10 @@ templ selectView(field types.FormField) {
 		EditItems:      false,
 		Hyperscript:    fmt.Sprintf("on change trigger field_change(field_id: '%s', value: my.value)", field.ID.String()),
 	})
+	<div
+		id={ fmt.Sprintf("errors-%s", field.ID.String()) }
+		class="text-red-400"
+	></div>
 }
 
 // FormFieldTypeLabel is the UI label for FormFieldTypes, e.g. 'text_single' -> "Single line text"
@@ -131,10 +146,6 @@ templ FormFieldTypeLabel(fieldType types.FormFieldType) {
 
 // ToSelectorOpts converts a slices of types.Option to a slice of selector.Option
 func ToSelectorOpts(opts []types.Option, selectAll bool) (sopts []selector.Option) {
-	// TODO: Fix -- adding an empty option because the first select <option> is selected by default, for some reason
-	sopts = append(sopts, (selector.Option)(selector.Option{
-		Value: "",
-	}))
 	for _, opt := range opts {
 		if selectAll {
 			opt.Selected = true

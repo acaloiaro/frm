@@ -8,3 +8,25 @@ globally kill the tailwind ring by default
 input {
   --tw-ring-shadow: 0 0 #000 !important;
 }
+
+/*
+Allow HTML5 validation on Choices-js
+https://github.com/Choices-js/Choices/issues/449
+*/
+.choices[data-type*="select-one"] select.choices__input {
+  display: block !important;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+}
+
+.choices[data-type*="select-multiple"] select.choices__input {
+  display: block !important;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+}

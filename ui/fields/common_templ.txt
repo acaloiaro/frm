@@ -11,13 +11,21 @@
 <input id=\"
 \" name=\"
 \" placeholder=\"
-\" type=\"text\" autocomplete=\"off\" _=\"
-\" class=\"flex-1 appearance-none border border-gray-300 dark:border-gray-600 w-full text-gray-700 dark:bg-notion-dark-light dark:text-gray-300 dark:placeholder-gray-500 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:border-2 focus:ring-opacity-100 px-4 py-2 text-base resize-y block rounded-xl bg-sky-50\">
+\" type=\"text\" autocomplete=\"off\"
+ required
+ _=\"
+\" class=\"flex-1 appearance-none border border-gray-300 dark:border-gray-600 w-full text-gray-700 dark:bg-notion-dark-light dark:text-gray-300 dark:placeholder-gray-500 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:border-2 focus:ring-opacity-100 px-4 py-2 text-base resize-y block rounded-xl bg-sky-50\"><div hx-swap-oob=\"true\" id=\"
+\"></div>
 <textarea id=\"
 \" name=\"
 \" class=\"flex-1 appearance-none border border-gray-300 dark:border-gray-600 w-full text-gray-700 dark:bg-notion-dark-light dark:text-gray-300 dark:placeholder-gray-500 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:border-transparent focus:ring-opacity-100 px-4 py-2 text-base resize-y block rounded-xl bg-sky-50\" placeholder=\"
-\" autocomplete=\"off\" _=\"
-\" rows=\"3\"></textarea>
+\" autocomplete=\"off\"
+ required
+ _=\"
+\" rows=\"3\"></textarea><div id=\"
+\" class=\"text-red-400\"></div>
+<div id=\"
+\" class=\"text-red-400\"></div>
 <div class=\"flex gap-3\">
 <label class=\"w-full cursor-pointer truncate\">
 Single-line text

@@ -140,7 +140,9 @@ templ Selector(args SelectArgs) {
 		if args.Hyperscript != "" {
 			_={ args.Hyperscript }
 		}
-	></select>
+	>
+		<option disabled>{ args.Placeholder }</option>
+	</select>
 	<div id={ dataElementID(args) } data-args={ templ.JSONString(args) } _={ fmt.Sprintf("init initializeSelect('%s')", dataElementID(args)) }></div>
 	<!-- when OptionsContent
  are present, their components render inside of this element when chosen -->
@@ -216,6 +218,7 @@ templ Selector(args SelectArgs) {
 				addChoices: true,
 				addItems: true,
 				itemSelectText: "",
+				shouldSort: false,
 			});
 			element._choices = choices;
 		

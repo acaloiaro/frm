@@ -12,4 +12,5 @@
 <div class=\"w-full first:text-left last:text-right\">
 </div>
 </div>
-</div></div>
+</div></div><div id=\"
+\" class=\"text-red-400\"></div>

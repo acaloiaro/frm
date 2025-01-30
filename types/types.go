@@ -9,6 +9,7 @@ import (
 
 // ErrRequiredNoValueProvided is a form validation error for required fields missing values
 var ErrRequiredNoValueProvided = errors.New("This field is required")
+var ErrUnknownOpitonProvided = errors.New("This field is required, please choose a valid option")
 
 // ValidationErrors is a mapping of form field IDs to the errors validating values submitted to those fields
 type ValidationErrors map[string]error
@@ -152,7 +153,17 @@ func (f FormField) Validate(value []string) (err error) {
 			}
 		}
 	}
-	return nil
+
+	switch f.Type {
+	// ensure that the provided value is one of this field's available options
+	case FormFieldTypeSingleSelect, FormFieldTypeMultiSelect, FormFieldTypeSingleChoice:
+		if !allValid(f, value) {
+			return ErrUnknownOpitonProvided
+		}
+		return nil
+	default:
+		return nil
+	}
 }
 
 // MarshalJSON implements the json.Marshaler interface for FormFieldType
@@ -193,4 +204,21 @@ func (f FormField) MarshalJSON() ([]byte, error) {
 	}
 
 	return json.Marshal(d)
+}
+
+// allValid checks if all field submission values are valid options
+func allValid(field FormField, subset []string) bool {
+	set := make(map[string]bool)
+	for _, v := range field.Options {
+		set[v.Value] = true
+	}
+
+	// Check if all form responses are valid options;
+	for _, v := range subset {
+		if !set[v] {
+			return false
+		}
+	}
+
+	return true
 }

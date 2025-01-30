@@ -53,12 +53,14 @@ templ FormView(form frm.Form, isPreview bool) {
 		<h1 class="rounded relative mb-8 font-black text-slate-700 text-5xl">
 			{ form.Name }
 		</h1>
-		<div id="form-input">
+		<div id="form-input" hx-ext="response-targets">
+			<div id="errors"></div>
 			<form
 				_="on field_change(field_id, value) formValueChanged(field_id, value)"
 				class="flex flex-col gap-3"
+				hx-post={ formCollectorUrl[string](ctx, form) }
+				hx-target-400="#errors"
 			>
-				<input name="submission_id" type="hidden" value="changeme!"/>
 				if sc := shortCode(ctx); sc != nil {
 					<input name="short_code" type="hidden" value={ *sc }/>
 				}
@@ -71,27 +73,18 @@ templ FormView(form frm.Form, isPreview bool) {
 							class="flex flex-col bg-sky-200 rounded-xl p-6"
 						}
 					>
-						<div
-							id={ fmt.Sprintf("errors-%s", field.ID.String()) }
-							class="text-red-400"
-						></div>
 						@fields.View(field)
 					</div>
 				}
 				<div class="py-3"></div>
-				@ui.Button(ui.ButtonArgs{
-					Label:   "submit",
-					Type:    "submit",
-					Classes: []string{"flex-grow", "justify-center", "uppercase"},
-				}, templ.Attributes{
-					"type":               "submit",
-					"data-hx-post":       formCollectorUrl[string](ctx, form),
-					"data-hx-trigger":    "click",
-					"data-hx-target":     "#form-input",
-					"data-hx-target-400": "form",
-					"disabled":           isPreview,
-				},
-				)
+				<input
+					type="submit"
+					value="submit"
+					class="btn bg-primary-500 hover:bg-primary-400 cursor-pointer justify-center uppercase"
+					if isPreview {
+						disabled
+					}
+				/>
 			</form>
 		</div>
 	</div>
