@@ -13,7 +13,7 @@ import (
 // Builder is the primary form builder UI, surrounded by the app chrome
 templ Viewer(form frm.Form) {
 	@ui.App(form.Name) {
-		<div class="bg-sky-100 h-screen">
+		<div class="bg-sky-100">
 			<section id="app-container" class="container mx-auto">
 				@FormView(form, false)
 			</section>
@@ -21,14 +21,14 @@ templ Viewer(form frm.Form) {
 	}
 }
 
-// FormPreview previews a frm.Form
+// FormPreview renders forms in a mock browser for previewing purposes
 templ FormPreview(form frm.Form) {
 	<section id="builder-main-middle-col" class="w-full h-full overflow-y-scroll overscroll-auto p-4 bg-gray-50 border-y-1 max-h-9/10">
 		<div class="mockup-browser border-base-300 border overflow-visible">
 			<div class="mockup-browser-toolbar">
 				<div class="input border-base-300 border">https://your-form-domain.com/form</div>
 			</div>
-			<div class="flex h-full border-base-300 bg-sky-100 border-t px-4 py-8">
+			<div class="flex border-base-300 bg-sky-100 border-t px-4 py-8">
 				@FormView(form, true)
 			</div>
 		</div>
@@ -42,7 +42,7 @@ templ FormView(form frm.Form, isPreview bool) {
 		if isPreview {
 			class="flex flex-col w-full mx-auto justify-top"
 		} else {
-			class="flex flex-col w-1/2 mx-auto justify-top pt-12"
+			class="flex flex-col w-1/2 mx-auto justify-top py-12"
 		}
 		data-hx-swap-oob="true"
 	>

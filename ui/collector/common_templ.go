@@ -52,7 +52,7 @@ func Viewer(form frm.Form) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"bg-sky-100 h-screen\"><section id=\"app-container\" class=\"container mx-auto\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"bg-sky-100\"><section id=\"app-container\" class=\"container mx-auto\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -74,7 +74,7 @@ func Viewer(form frm.Form) templ.Component {
 	})
 }
 
-// FormPreview previews a frm.Form
+// FormPreview renders forms in a mock browser for previewing purposes
 func FormPreview(form frm.Form) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -96,7 +96,7 @@ func FormPreview(form frm.Form) templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<section id=\"builder-main-middle-col\" class=\"w-full h-full overflow-y-scroll overscroll-auto p-4 bg-gray-50 border-y-1 max-h-9/10\"><div class=\"mockup-browser border-base-300 border overflow-visible\"><div class=\"mockup-browser-toolbar\"><div class=\"input border-base-300 border\">https://your-form-domain.com/form</div></div><div class=\"flex h-full border-base-300 bg-sky-100 border-t px-4 py-8\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<section id=\"builder-main-middle-col\" class=\"w-full h-full overflow-y-scroll overscroll-auto p-4 bg-gray-50 border-y-1 max-h-9/10\"><div class=\"mockup-browser border-base-300 border overflow-visible\"><div class=\"mockup-browser-toolbar\"><div class=\"input border-base-300 border\">https://your-form-domain.com/form</div></div><div class=\"flex border-base-300 bg-sky-100 border-t px-4 py-8\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -144,7 +144,7 @@ func FormView(form frm.Form, isPreview bool) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " class=\"flex flex-col w-1/2 mx-auto justify-top pt-12\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " class=\"flex flex-col w-1/2 mx-auto justify-top py-12\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
