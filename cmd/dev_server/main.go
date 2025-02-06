@@ -76,6 +76,7 @@ func main() {
 		WorkspaceIDUrlParam: workspaceParamName, // name of the chi URL parameter name
 		BuilderMountPoint:   fmt.Sprintf("/frm/{%s}/build", workspaceParamName),
 		CollectorMountPoint: fmt.Sprintf("/frm/{%s}/collect", workspaceParamName),
+		CollectorFooter:     `<a href="https://github.com/acaloiaro/frm" class="text-gray-500">Feedback powered by <span class="underline">frm</span></a>`,
 		Reciever: func(ctx context.Context, submission frm.FormSubmission) (err error) {
 			log.Println("GOT SUBMISSION!", submission)
 			return

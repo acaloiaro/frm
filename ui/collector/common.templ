@@ -8,6 +8,7 @@ import (
 	"github.com/acaloiaro/frm/internal"
 	"github.com/acaloiaro/frm/ui"
 	"github.com/acaloiaro/frm/ui/fields"
+	"html/template"
 )
 
 // Builder is the primary form builder UI, surrounded by the app chrome
@@ -87,7 +88,21 @@ templ FormView(form frm.Form, isPreview bool) {
 				/>
 			</form>
 		</div>
+		if f, err := frm.Instance(ctx); err == nil {
+			<div id="collector_footer" class="pt-6 text-center">
+				@toTemplComponent(f.CollectorFooter)
+			</div>
+		}
 	</div>
+}
+
+func toTemplComponent(html string) templ.Component {
+	t, err := template.New("templ_component").Parse(html)
+	if err != nil {
+		return templ.NopComponent
+	}
+
+	return templ.FromGoHTML(t, nil)
 }
 
 templ ThankYou() {
@@ -113,4 +128,12 @@ func shortCode(ctx context.Context) (shortCode *string) {
 // formCollectorUrl returns form collector URLs for the given form and additional path arguments
 func formCollectorUrl[T string | templ.SafeURL](ctx context.Context, form frm.Form, path ...string) T {
 	return T(frm.CollectorPathForm(ctx, form.ID, path...))
+}
+
+// externalStyles is an unused component that exists only to make some tailwind CSS classes available in user
+// CSS. e.g. in the CollectorFooter
+//
+// Add to the below <p> tag's classes to expose more styles externally that are not yet available
+templ externalStyles() {
+	<p class="underline"></p>
 }

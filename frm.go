@@ -21,6 +21,7 @@ var ErrNoInstanceAvailable = errors.New("no frm instance is available on the con
 type Frm struct {
 	BuilderMountPoint   string                 // relative URL path where frm mounts the builder to your app's router
 	CollectorMountPoint string                 // relative URL path where frm mounts the collector to your app's router
+	CollectorFooter     string                 // footer shown at the bottom of the collector page
 	DBArgs              internal.DBArgs        // database arguments
 	Receiver            FormSubmissionReceiver // function that processes incoming form submissions
 	WorkspaceID         string                 // ID of the workspace that frm acts on behalf of
@@ -31,10 +32,11 @@ type Frm struct {
 type Args struct {
 	BuilderMountPoint   string                 // path on the router to mount frm's builder
 	CollectorMountPoint string                 // path on the router to mount frm's collector
-	Reciever            FormSubmissionReceiver // function that processes incoming form submissions
+	CollectorFooter     string                 // footer shown at the bottom of the collector page
 	PostgresDisableSSL  bool                   // disable ssl when connecting to postgres
-	PostgresURL         string                 // postgres database URL
 	PostgresSchema      string                 // postgres schema where frm stores data
+	PostgresURL         string                 // postgres database URL
+	Reciever            FormSubmissionReceiver // function that processes incoming form submissions
 	WorkspaceID         string                 // ID of the workspace for which frm is being initialized
 	WorkspaceIDUrlParam string                 // named URL parameter that identifies the workspace, e.g. for route /{workspace_id}, the value would be "workspace_id"
 }
@@ -62,6 +64,7 @@ func New(args Args) (f *Frm, err error) {
 	f = &Frm{
 		BuilderMountPoint:   strings.TrimSuffix(args.BuilderMountPoint, "/"),
 		CollectorMountPoint: strings.TrimSuffix(args.CollectorMountPoint, "/"),
+		CollectorFooter:     args.CollectorFooter,
 		DBArgs: internal.DBArgs{
 			URL:        args.PostgresURL,
 			DisableSSL: args.PostgresDisableSSL,

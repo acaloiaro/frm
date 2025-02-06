@@ -2941,6 +2941,10 @@ input.tab:checked + .tab-content,
   padding-top: 0.75rem;
 }
 
+.pt-6 {
+  padding-top: 1.5rem;
+}
+
 .pt-9 {
   padding-top: 2.25rem;
 }
@@ -3052,6 +3056,10 @@ input.tab:checked + .tab-content,
 .text-white {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity));
+}
+
+.underline {
+  text-decoration-line: underline;
 }
 
 .placeholder-gray-400::-moz-placeholder {
