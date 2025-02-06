@@ -13,7 +13,7 @@ import (
 // Builder is the primary form builder UI, surrounded by the app chrome
 templ Viewer(form frm.Form) {
 	@ui.App(form.Name) {
-		<div class="bg-sky-100">
+		<div class="bg-sky-100 h-full">
 			<section id="app-container" class="container mx-auto">
 				@FormView(form, false)
 			</section>
@@ -42,7 +42,7 @@ templ FormView(form frm.Form, isPreview bool) {
 		if isPreview {
 			class="flex flex-col w-full mx-auto justify-top"
 		} else {
-			class="flex flex-col w-1/2 mx-auto justify-top py-12"
+			class="flex flex-col w-full md:w-2/3 lg:w-1/2 mx-auto justify-top py-6 lg:py-12 px-3 lg:px-0"
 		}
 		data-hx-swap-oob="true"
 	>
@@ -50,7 +50,7 @@ templ FormView(form frm.Form, isPreview bool) {
 			id="form-metadata"
 			data-data={ ui.ViewerMetadata{Form: form}.JSON() }
 		></div>
-		<h1 class="rounded relative mb-8 font-black text-slate-700 text-5xl">
+		<h1 class="rounded relative mb-8 font-black text-slate-700 text-2xl md:text-4xl lg:text-5xl">
 			{ form.Name }
 		</h1>
 		<div id="form-input" hx-ext="response-targets">
