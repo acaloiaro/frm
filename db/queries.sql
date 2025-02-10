@@ -102,4 +102,6 @@ WHERE workspace_id = @workspace_id
 -- name: SaveShortCode :one
 
 INSERT INTO short_codes (workspace_id, form_id, subject_id, short_code)
-VALUES (@workspace_id, @form_id, @subject_id, @short_code) RETURNING *;
+VALUES (@workspace_id, @form_id, @subject_id, @short_code) ON CONFLICT (subject_id, form_id) DO
+UPDATE
+SET updated_at = timezone('utc', now()) RETURNING *;

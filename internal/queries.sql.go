@@ -406,7 +406,9 @@ func (q *Queries) SaveDraft(ctx context.Context, arg SaveDraftParams) (Form, err
 const saveShortCode = `-- name: SaveShortCode :one
 
 INSERT INTO short_codes (workspace_id, form_id, subject_id, short_code)
-VALUES ($1, $2, $3, $4) RETURNING id, workspace_id, form_id, short_code, subject_id, created_at, updated_at
+VALUES ($1, $2, $3, $4) ON CONFLICT (subject_id, form_id) DO
+UPDATE
+SET updated_at = timezone('utc', now()) RETURNING id, workspace_id, form_id, short_code, subject_id, created_at, updated_at
 `
 
 type SaveShortCodeParams struct {
@@ -419,7 +421,9 @@ type SaveShortCodeParams struct {
 // SaveShortCode
 //
 //	INSERT INTO short_codes (workspace_id, form_id, subject_id, short_code)
-//	VALUES ($1, $2, $3, $4) RETURNING id, workspace_id, form_id, short_code, subject_id, created_at, updated_at
+//	VALUES ($1, $2, $3, $4) ON CONFLICT (subject_id, form_id) DO
+//	UPDATE
+//	SET updated_at = timezone('utc', now()) RETURNING id, workspace_id, form_id, short_code, subject_id, created_at, updated_at
 func (q *Queries) SaveShortCode(ctx context.Context, arg SaveShortCodeParams) (ShortCode, error) {
 	row := q.db.QueryRow(ctx, saveShortCode,
 		arg.WorkspaceID,

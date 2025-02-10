@@ -48,4 +48,16 @@ func TestCreateShortCode(t *testing.T) {
 	if len(sc.ShortCode) != internal.DefaultShortcodeLen {
 		t.Fatal("shortcode length is incorrect")
 	}
+
+	sc2, err := f.CreateShortCode(ctx, frm.CreateShortCodeArgs{
+		FormID:    draft.ID,
+		SubjectID: "foobar_idx",
+	})
+	if err != nil {
+		t.Error(err)
+	}
+
+	if sc2.ShortCode != sc.ShortCode {
+		t.Error("successive SaveShortCode calls should create same short code")
+	}
 }
