@@ -11,7 +11,8 @@ import (
 )
 
 const (
-	EventDraftCreated = "frmDraftCreated" // htmx event sent when new drafts are created
+	EventDraftCreated     = "frmDraftCreated" // htmx event sent when new drafts are created
+	DefaultCopyNameSuffix = "(COPY)"          // the default suffix added to forms when they're copied
 )
 
 var ErrCannotDetermineWorkspace = errors.New("workspace cannot be determine without WorkspaceID or WorkspaceIDUrlParam")
@@ -49,10 +50,13 @@ type FormSubmissionReceiver = func(ctx context.Context, submission FormSubmissio
 // - Published forms are available to be used
 //
 // - Draft forms are in a draft state, yet to be published
+//
+// - Archived forms are not intended to be used
 type FormStatus = internal.FormStatus
 
 const FormStatusPublished = internal.FormStatusPublished
 const FormStatusDraft = internal.FormStatusDraft
+const FormStatusArchived = internal.FormStatusArchived
 
 // New initializes a new frm instance
 //
@@ -95,6 +99,47 @@ func (f *Frm) GetForm(ctx context.Context, id int64) (form Form, err error) {
 	}
 
 	form = (Form)(frm)
+	return
+}
+
+// CopyFormArgs are passed to frm.CopyForm()
+type CopyFormArgs struct {
+	ForgetParentForm bool   // forget the parent form from which the copied form is copied
+	ID               int64  // the id of the form to copy
+	NameSuffix       string // suffix to be added to the original form's name, e.g. "(COPY)"
+}
+
+// CopyForm copies existing Forms
+//
+// Returns the copied form
+func (f *Frm) CopyForm(ctx context.Context, args CopyFormArgs) (form Form, err error) {
+	var of internal.Form
+	of, err = internal.Q(ctx, f.DBArgs).GetForm(ctx, internal.GetFormParams{
+		WorkspaceID: f.WorkspaceID,
+		ID:          args.ID,
+	})
+	if err != nil {
+		return
+	}
+	copiedFormName := of.Name
+	if args.NameSuffix != "" {
+		copiedFormName = fmt.Sprintf("%s %s", of.Name, args.NameSuffix)
+	}
+	p := &internal.SaveFormParams{
+		WorkspaceID: of.WorkspaceID,
+		FormID:      &of.ID,
+		Name:        copiedFormName,
+		Fields:      of.Fields,
+	}
+	if args.ForgetParentForm {
+		p.FormID = nil
+	}
+	nf, err := internal.Q(ctx, f.DBArgs).SaveForm(ctx, *p)
+	if err != nil {
+		return
+	}
+
+	form = (Form)(nf)
 	return
 }
 

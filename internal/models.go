@@ -17,6 +17,7 @@ type FormStatus string
 const (
 	FormStatusPublished FormStatus = "published"
 	FormStatusDraft     FormStatus = "draft"
+	FormStatusArchived  FormStatus = "archived"
 )
 
 func (e *FormStatus) Scan(src interface{}) error {

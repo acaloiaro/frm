@@ -40,6 +40,7 @@ func Mount(router chi.Router, f *frm.Frm) {
 		form.Delete("/", handlers.DeleteForm)
 		form.Post("/draft", handlers.NewDraft)
 		form.Put("/publish", handlers.PublishDraft)
+		form.Put("/status", handlers.ChangeStatus)
 		form.Put("/fields/order", handlers.UpdateFieldOrder)
 		form.Put("/settings", handlers.UpdateSettings)
 		form.Post("/fields", handlers.NewField)

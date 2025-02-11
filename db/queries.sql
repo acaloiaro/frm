@@ -38,14 +38,15 @@ WHERE workspace_id = @workspace_id
   AND form_id = @form_id
   AND status = 'draft';
 
--- name: SaveDraft :one
+-- name: SaveForm :one
 
-INSERT INTO forms (id, form_id, workspace_id, name, fields)
-VALUES (coalesce(nullif(@id, 0), nextval('form_ids'))::bigint, @form_id, @workspace_id, @name, @fields) ON conflict(id) DO
+INSERT INTO forms (id, form_id, workspace_id, name, fields, status)
+VALUES (coalesce(nullif(@id, 0), nextval('form_ids'))::bigint, @form_id, @workspace_id, @name, @fields, coalesce(nullif(@status, ''), 'draft')::form_status) ON conflict(id) DO
 UPDATE
 SET updated_at = timezone('utc', now()),
     name = @name,
-    fields = @fields RETURNING *;
+    status = coalesce(nullif(@status, '')::form_status, forms.status),
+    fields = coalesce(@fields, forms.fields) RETURNING *;
 
 -- name: PublishDraft :one
 WITH draft AS

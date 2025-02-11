@@ -77,7 +77,7 @@ func TestCreateAndUpdateForm(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	f, err := internal.Q(ctx, frms.DBArgs).SaveDraft(ctx, internal.SaveDraftParams{
+	f, err := internal.Q(ctx, frms.DBArgs).SaveForm(ctx, internal.SaveFormParams{
 		Name:        "hello world",
 		Fields:      fields,
 		WorkspaceID: frms.WorkspaceID,
@@ -87,7 +87,7 @@ func TestCreateAndUpdateForm(t *testing.T) {
 		return
 	}
 
-	f, err = internal.Q(ctx, frms.DBArgs).SaveDraft(ctx, internal.SaveDraftParams{
+	f, err = internal.Q(ctx, frms.DBArgs).SaveForm(ctx, internal.SaveFormParams{
 		ID:          f.ID,
 		Name:        nameUpdate,
 		Fields:      updatedFields,

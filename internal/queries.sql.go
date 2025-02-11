@@ -355,39 +355,43 @@ func (q *Queries) PublishDraft(ctx context.Context, id int64) (Form, error) {
 	return i, err
 }
 
-const saveDraft = `-- name: SaveDraft :one
+const saveForm = `-- name: SaveForm :one
 
-INSERT INTO forms (id, form_id, workspace_id, name, fields)
-VALUES (coalesce(nullif($1, 0), nextval('form_ids'))::bigint, $2, $3, $4, $5) ON conflict(id) DO
+INSERT INTO forms (id, form_id, workspace_id, name, fields, status)
+VALUES (coalesce(nullif($1, 0), nextval('form_ids'))::bigint, $2, $3, $4, $5, coalesce(nullif($6, ''), 'draft')::form_status) ON conflict(id) DO
 UPDATE
 SET updated_at = timezone('utc', now()),
     name = $4,
-    fields = $5 RETURNING id, form_id, workspace_id, name, fields, status, created_at, updated_at
+    status = coalesce(nullif($6, '')::form_status, forms.status),
+    fields = coalesce($5, forms.fields) RETURNING id, form_id, workspace_id, name, fields, status, created_at, updated_at
 `
 
-type SaveDraftParams struct {
+type SaveFormParams struct {
 	ID          interface{}      `json:"id"`
 	FormID      *int64           `json:"form_id"`
 	WorkspaceID string           `json:"workspace_id"`
 	Name        string           `json:"name"`
 	Fields      types.FormFields `json:"fields"`
+	Status      interface{}      `json:"status"`
 }
 
-// SaveDraft
+// SaveForm
 //
-//	INSERT INTO forms (id, form_id, workspace_id, name, fields)
-//	VALUES (coalesce(nullif($1, 0), nextval('form_ids'))::bigint, $2, $3, $4, $5) ON conflict(id) DO
+//	INSERT INTO forms (id, form_id, workspace_id, name, fields, status)
+//	VALUES (coalesce(nullif($1, 0), nextval('form_ids'))::bigint, $2, $3, $4, $5, coalesce(nullif($6, ''), 'draft')::form_status) ON conflict(id) DO
 //	UPDATE
 //	SET updated_at = timezone('utc', now()),
 //	    name = $4,
-//	    fields = $5 RETURNING id, form_id, workspace_id, name, fields, status, created_at, updated_at
-func (q *Queries) SaveDraft(ctx context.Context, arg SaveDraftParams) (Form, error) {
-	row := q.db.QueryRow(ctx, saveDraft,
+//	    status = coalesce(nullif($6, '')::form_status, forms.status),
+//	    fields = coalesce($5, forms.fields) RETURNING id, form_id, workspace_id, name, fields, status, created_at, updated_at
+func (q *Queries) SaveForm(ctx context.Context, arg SaveFormParams) (Form, error) {
+	row := q.db.QueryRow(ctx, saveForm,
 		arg.ID,
 		arg.FormID,
 		arg.WorkspaceID,
 		arg.Name,
 		arg.Fields,
+		arg.Status,
 	)
 	var i Form
 	err := row.Scan(

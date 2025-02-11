@@ -120,7 +120,7 @@ func UpdateFieldOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	draft.Fields = updatedFields
-	draft, err = internal.Q(ctx, f.DBArgs).SaveDraft(ctx, internal.SaveDraftParams{
+	draft, err = internal.Q(ctx, f.DBArgs).SaveForm(ctx, internal.SaveFormParams{
 		ID:     draft.ID,
 		Name:   draft.Name,
 		Fields: updatedFields,
@@ -236,7 +236,7 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 	if len(formName) == 0 {
 		formName = "New form"
 	}
-	form, err = internal.Q(ctx, f.DBArgs).SaveDraft(ctx, internal.SaveDraftParams{
+	form, err = internal.Q(ctx, f.DBArgs).SaveForm(ctx, internal.SaveFormParams{
 		ID:     draftID,
 		Name:   formName,
 		Fields: form.Fields,
@@ -339,7 +339,7 @@ func NewField(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fields[fieldID.String()] = *newField
-	_, err = internal.Q(ctx, f.DBArgs).SaveDraft(ctx, internal.SaveDraftParams{
+	_, err = internal.Q(ctx, f.DBArgs).SaveForm(ctx, internal.SaveFormParams{
 		ID:     formID,
 		Name:   draft.Name,
 		Fields: fields,
@@ -489,7 +489,7 @@ func UpdateFields(w http.ResponseWriter, r *http.Request) {
 	}
 
 	draft.Fields = updatedFields
-	draft, err = internal.Q(ctx, f.DBArgs).SaveDraft(ctx, internal.SaveDraftParams{
+	draft, err = internal.Q(ctx, f.DBArgs).SaveForm(ctx, internal.SaveFormParams{
 		ID:     draft.ID,
 		Name:   draft.Name,
 		Fields: updatedFields,
@@ -544,7 +544,7 @@ func DeleteField(w http.ResponseWriter, r *http.Request) {
 	updatedFields := draft.Fields
 	delete(updatedFields, fmt.Sprint(fieldID))
 	draft.Fields = updatedFields
-	draft, err = internal.Q(ctx, f.DBArgs).SaveDraft(ctx, internal.SaveDraftParams{
+	draft, err = internal.Q(ctx, f.DBArgs).SaveForm(ctx, internal.SaveFormParams{
 		ID:     draft.ID,
 		Name:   draft.Name,
 		Fields: updatedFields,
@@ -575,7 +575,59 @@ func DeleteField(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-// NewDraft creates a new draft from scratch or an existing form
+// ChangeStatus changes the status of forms
+func ChangeStatus(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	f, err := frm.Instance(ctx)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	formID, err := formID(ctx, f)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	err = r.ParseForm()
+	if err != nil {
+		slog.Error("unable to change form status", "error", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	form, err := internal.Q(ctx, f.DBArgs).GetForm(ctx, internal.GetFormParams{
+		WorkspaceID: f.WorkspaceID,
+		ID:          *formID,
+	})
+	if err != nil {
+		slog.Error("unable to get form", slog.Any("error", err), slog.Any("workspace_id", f.WorkspaceID), slog.Any("form_id", *formID))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	status := frm.FormStatus(r.FormValue("status"))
+	form, err = internal.Q(ctx, f.DBArgs).SaveForm(ctx, internal.SaveFormParams{
+		WorkspaceID: f.WorkspaceID,
+		ID:          form.ID,
+		Name:        form.Name,
+		Fields:      form.Fields,
+		Status:      status,
+	})
+	if err != nil {
+		slog.Error("unable to change form status", slog.Any("error", err))
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+// NewDraft creates new drafts
+//
+// Drafts may be created from scratch by not providing a formID in the request
+// Drafts may be created from existing forms by providing a formID in the request
+// Drafts may be "clones" of existing forms by providing the "clone" URL parameter, the only differences between clones
+// and drafts created from existing forms is that cloned form names are suffixed, and don't recall their parent form.
 func NewDraft(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	f, err := frm.Instance(ctx)
@@ -585,38 +637,38 @@ func NewDraft(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	isClone := r.URL.Query().Get("clone") != ""
+	suffix := r.URL.Query().Get("name_suffix")
+
+	var draft internal.Form
 	// dont check for errors here, because this endpoint handles both new drafts and drafts from existing forms
 	formID, _ := formID(ctx, f)
 
 	q := internal.Q(ctx, f.DBArgs)
-	draftParams := &internal.SaveDraftParams{
+	draftParams := &internal.SaveFormParams{
 		WorkspaceID: f.WorkspaceID,
 		Fields:      types.FormFields{},
 	}
 	if formID != nil {
-		form, err := q.GetForm(ctx, internal.GetFormParams{
-			WorkspaceID: f.WorkspaceID,
-			ID:          *formID,
+		copy, err := f.CopyForm(ctx, frm.CopyFormArgs{
+			ID:               *formID,
+			ForgetParentForm: isClone,
+			NameSuffix:       suffix,
 		})
-		if err != nil && errors.Is(err, pgx.ErrNoRows) {
-			w.WriteHeader(http.StatusNotFound)
-		} else if err != nil {
+		if err != nil {
 			slog.Error("unable to create draft", "error", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		draftParams.FormID = &form.ID
-		draftParams.Name = form.Name
-		draftParams.Fields = form.Fields
+		draft = (internal.Form)(copy)
 	} else {
 		draftParams.Name = "New form"
-	}
-
-	draft, err := q.SaveDraft(ctx, *draftParams)
-	if err != nil {
-		slog.Error("unable to create draft", "error", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+		draft, err = q.SaveForm(ctx, *draftParams)
+		if err != nil {
+			slog.Error("unable to create draft", "error", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 
 	w.Header().Add("HX-Trigger", fmt.Sprintf("{\"%s\": {\"draft_id\": \"%d\"}}", frm.EventDraftCreated, draft.ID))
@@ -639,17 +691,7 @@ func PublishDraft(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	draft, err := internal.Q(ctx, f.DBArgs).GetDraft(ctx, internal.GetDraftParams{
-		WorkspaceID: f.WorkspaceID,
-		ID:          *draftID,
-	})
-	if err != nil {
-		slog.Error("unable to publish draft", "error", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	_, err = internal.Q(ctx, f.DBArgs).PublishDraft(ctx, draft.ID)
+	_, err = internal.Q(ctx, f.DBArgs).PublishDraft(ctx, *draftID)
 	if err != nil {
 		slog.Error("unable to publish draft", "error", err)
 		w.WriteHeader(http.StatusInternalServerError)
