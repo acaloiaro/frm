@@ -117,6 +117,9 @@ templ Head(pageTitle string) {
 							case 'contains':
 								match = watchingField.logic.trigger_values.some(val => newValue.toLowerCase().includes(val.toLowerCase()))
 								break;
+							case 'not':
+								match = watchingField.logic.trigger_values.some(val => newValue.toLowerCase() !== val.toLowerCase())
+								break;
 						}
 
 						// Most actions are likely to be performed upon the containing element, such as show/hide/require.

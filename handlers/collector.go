@@ -111,7 +111,7 @@ func Collect(w http.ResponseWriter, r *http.Request) {
 	submission := r.Form
 	errs := validate(f, submission)
 	if errs.Any() {
-		slog.Info("[collector] failed validation", "errors", errs)
+		slog.Debug("[collector] failed validation", "errors", errs)
 		w.WriteHeader(http.StatusBadRequest)
 		err = ui.ValidationErrors(errs).Render(r.Context(), w)
 		if err != nil {
@@ -141,7 +141,7 @@ func Collect(w http.ResponseWriter, r *http.Request) {
 	// TODO: Keep track of the submission id
 	// submissionID := r.Form.Get("id")
 
-	// Validation renders whether there are errors or not errors, so that non-erroneous fields can be cleared of error messages
+	// Validation renders whether there are errors or not, so that non-erroneous fields can be cleared of error messages
 	// as the user corrects validation errors
 	allFields := slices.Collect(maps.Keys(f.Fields))
 	err = ui.Validation(allFields, errs).Render(ctx, w)

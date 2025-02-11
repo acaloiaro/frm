@@ -459,6 +459,7 @@ func UpdateFields(w http.ResponseWriter, r *http.Request) {
 			}
 			oldField.Logic.TargetFieldID = targetFieldID
 			updatedFields[fieldID] = oldField
+		// field logic, subject field chosen
 		case fieldGroup == builder.FieldGroupLogic && fieldName == builder.FieldLogicTargetFieldValue:
 			oldField := draft.Fields[fieldID]
 			if oldField.Logic == nil {
@@ -466,6 +467,7 @@ func UpdateFields(w http.ResponseWriter, r *http.Request) {
 			}
 			oldField.Logic.TriggerValues = fieldValues
 			updatedFields[fieldID] = oldField
+		// field logic, comparator chosen
 		case fieldGroup == builder.FieldGroupLogic && fieldName == builder.FieldLogicComparator:
 			oldField := draft.Fields[fieldID]
 			if oldField.Logic == nil {
@@ -473,6 +475,7 @@ func UpdateFields(w http.ResponseWriter, r *http.Request) {
 			}
 			oldField.Logic.TriggerComparator, _ = types.FieldLogicComparatorString(fieldValues[0])
 			updatedFields[fieldID] = oldField
+		// field logic, action to take
 		case fieldGroup == builder.FieldGroupLogic && fieldName == types.FieldLogicTriggerShow.String():
 			oldField := draft.Fields[fieldID]
 			if oldField.Logic == nil {

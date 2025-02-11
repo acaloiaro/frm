@@ -464,14 +464,19 @@ func comparatorOptionsFor(field types.FormField) (options selector.FieldOptions)
 	default:
 		options = selector.FieldOptions{
 			selector.Option{
+				Value:    fmt.Sprint(types.FieldLogicComparatorContains),
+				Label:    "Contains",
+				Selected: field.Logic != nil && field.Logic.TriggerComparator == types.FieldLogicComparatorContains,
+			},
+			selector.Option{
 				Value:    fmt.Sprint(types.FieldLogicComparatorEqual),
 				Label:    "Equal to =",
 				Selected: field.Logic != nil && field.Logic.TriggerComparator == types.FieldLogicComparatorEqual,
 			},
 			selector.Option{
-				Value:    fmt.Sprint(types.FieldLogicComparatorContains),
-				Label:    "Contains",
-				Selected: field.Logic != nil && field.Logic.TriggerComparator == types.FieldLogicComparatorContains,
+				Value:    fmt.Sprint(types.FieldLogicComparatorNot),
+				Label:    "NOT",
+				Selected: field.Logic != nil && field.Logic.TriggerComparator == types.FieldLogicComparatorNot,
 			},
 		}
 	}

@@ -1479,14 +1479,19 @@ func comparatorOptionsFor(field types.FormField) (options selector.FieldOptions)
 	default:
 		options = selector.FieldOptions{
 			selector.Option{
+				Value:    fmt.Sprint(types.FieldLogicComparatorContains),
+				Label:    "Contains",
+				Selected: field.Logic != nil && field.Logic.TriggerComparator == types.FieldLogicComparatorContains,
+			},
+			selector.Option{
 				Value:    fmt.Sprint(types.FieldLogicComparatorEqual),
 				Label:    "Equal to =",
 				Selected: field.Logic != nil && field.Logic.TriggerComparator == types.FieldLogicComparatorEqual,
 			},
 			selector.Option{
-				Value:    fmt.Sprint(types.FieldLogicComparatorContains),
-				Label:    "Contains",
-				Selected: field.Logic != nil && field.Logic.TriggerComparator == types.FieldLogicComparatorContains,
+				Value:    fmt.Sprint(types.FieldLogicComparatorNot),
+				Label:    "NOT",
+				Selected: field.Logic != nil && field.Logic.TriggerComparator == types.FieldLogicComparatorNot,
 			},
 		}
 	}
@@ -1540,7 +1545,7 @@ func LogicConfiguratorStepThree(form frm.Form, field types.FormField, targetFiel
 			var templ_7745c5c3_Var68 string
 			templ_7745c5c3_Var68, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s-logic-chosen-field-value", field.ID.String()))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/builder/common.templ`, Line: 499, Col: 70}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/builder/common.templ`, Line: 504, Col: 70}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var68))
 			if templ_7745c5c3_Err != nil {
@@ -1553,7 +1558,7 @@ func LogicConfiguratorStepThree(form frm.Form, field types.FormField, targetFiel
 			var templ_7745c5c3_Var69 string
 			templ_7745c5c3_Var69, templ_7745c5c3_Err = templ.JoinStringErrs(fields.FieldName(field, FieldGroupLogic, FieldLogicTargetFieldValue))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/builder/common.templ`, Line: 500, Col: 79}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/builder/common.templ`, Line: 505, Col: 79}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var69))
 			if templ_7745c5c3_Err != nil {
@@ -1571,7 +1576,7 @@ func LogicConfiguratorStepThree(form frm.Form, field types.FormField, targetFiel
 				var templ_7745c5c3_Var70 string
 				templ_7745c5c3_Var70, templ_7745c5c3_Err = templ.JoinStringErrs(field.Logic.TriggerValues[0])
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/builder/common.templ`, Line: 505, Col: 41}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/builder/common.templ`, Line: 510, Col: 41}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var70))
 				if templ_7745c5c3_Err != nil {
@@ -1589,7 +1594,7 @@ func LogicConfiguratorStepThree(form frm.Form, field types.FormField, targetFiel
 			var templ_7745c5c3_Var71 string
 			templ_7745c5c3_Var71, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("on keyup debounced at 600ms trigger '%s'", FieldsFormUpdateEvent))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/builder/common.templ`, Line: 507, Col: 86}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/builder/common.templ`, Line: 512, Col: 86}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var71))
 			if templ_7745c5c3_Err != nil {

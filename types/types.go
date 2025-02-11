@@ -49,6 +49,7 @@ type FieldLogicComparator int
 const (
 	FieldLogicComparatorEqual    FieldLogicComparator = iota // target field value is equal to the subject value
 	FieldLogicComparatorContains                             // target field value contains the subject value
+	FieldLogicComparatorNot                                  // target field value is "not" the subject value
 )
 
 // FieldLogicTriggerAction enum enumerates all possible field logic trigger actions

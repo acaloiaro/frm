@@ -8,11 +8,11 @@ import (
 	"strings"
 )
 
-const _FieldLogicComparatorName = "equalcontains"
+const _FieldLogicComparatorName = "equalcontainsnot"
 
-var _FieldLogicComparatorIndex = [...]uint8{0, 5, 13}
+var _FieldLogicComparatorIndex = [...]uint8{0, 5, 13, 16}
 
-const _FieldLogicComparatorLowerName = "equalcontains"
+const _FieldLogicComparatorLowerName = "equalcontainsnot"
 
 func (i FieldLogicComparator) String() string {
 	if i < 0 || i >= FieldLogicComparator(len(_FieldLogicComparatorIndex)-1) {
@@ -27,20 +27,24 @@ func _FieldLogicComparatorNoOp() {
 	var x [1]struct{}
 	_ = x[FieldLogicComparatorEqual-(0)]
 	_ = x[FieldLogicComparatorContains-(1)]
+	_ = x[FieldLogicComparatorNot-(2)]
 }
 
-var _FieldLogicComparatorValues = []FieldLogicComparator{FieldLogicComparatorEqual, FieldLogicComparatorContains}
+var _FieldLogicComparatorValues = []FieldLogicComparator{FieldLogicComparatorEqual, FieldLogicComparatorContains, FieldLogicComparatorNot}
 
 var _FieldLogicComparatorNameToValueMap = map[string]FieldLogicComparator{
-	_FieldLogicComparatorName[0:5]:       FieldLogicComparatorEqual,
-	_FieldLogicComparatorLowerName[0:5]:  FieldLogicComparatorEqual,
-	_FieldLogicComparatorName[5:13]:      FieldLogicComparatorContains,
-	_FieldLogicComparatorLowerName[5:13]: FieldLogicComparatorContains,
+	_FieldLogicComparatorName[0:5]:        FieldLogicComparatorEqual,
+	_FieldLogicComparatorLowerName[0:5]:   FieldLogicComparatorEqual,
+	_FieldLogicComparatorName[5:13]:       FieldLogicComparatorContains,
+	_FieldLogicComparatorLowerName[5:13]:  FieldLogicComparatorContains,
+	_FieldLogicComparatorName[13:16]:      FieldLogicComparatorNot,
+	_FieldLogicComparatorLowerName[13:16]: FieldLogicComparatorNot,
 }
 
 var _FieldLogicComparatorNames = []string{
 	_FieldLogicComparatorName[0:5],
 	_FieldLogicComparatorName[5:13],
+	_FieldLogicComparatorName[13:16],
 }
 
 // FieldLogicComparatorString retrieves an enum value from the enum constants string name.
