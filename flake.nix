@@ -8,7 +8,7 @@
       url = "github:acaloiaro/ess/v2.13.0";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    templ.url = "github:a-h/templ/v0.3.819";
+    templ.url = "github:a-h/templ/v0.3.833";
   };
 
   outputs = {
