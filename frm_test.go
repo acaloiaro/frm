@@ -117,3 +117,15 @@ func TestCopyForm(t *testing.T) {
 		return
 	}
 }
+
+func TestNoopWhenPoolUnavailable(t *testing.T) {
+	ctx := context.Background()
+	_, err := internal.Q(ctx, internal.DBArgs{
+		URL:        "INVALID URL",
+		DisableSSL: true,
+		Schema:     "frm_test",
+	}).GetForm(ctx, internal.GetFormParams{})
+	if err != internal.ErrNoopDatabase {
+		t.Error(fmt.Errorf("expected: '%s' but got: '%s'", internal.ErrNoopDatabase, err))
+	}
+}

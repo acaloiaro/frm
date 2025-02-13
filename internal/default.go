@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log/slog"
 	"math/rand"
 	"strings"
 
@@ -14,8 +13,31 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
+
+var (
+	ErrNoopDatabase = errors.New("frm had a problem getting a database connection")
+)
+
+type MockRow struct{}
+type NoopDBTX struct{}
+
+func (m *MockRow) Scan(dest ...any) (err error) {
+	return ErrNoopDatabase
+}
+
+func (n *NoopDBTX) Exec(context.Context, string, ...interface{}) (pgconn.CommandTag, error) {
+	return pgconn.CommandTag{}, ErrNoopDatabase
+}
+
+func (n *NoopDBTX) Query(context.Context, string, ...interface{}) (pgx.Rows, error) {
+	return nil, ErrNoopDatabase
+}
+func (n *NoopDBTX) QueryRow(context.Context, string, ...interface{}) pgx.Row {
+	return &MockRow{}
+}
 
 type contextKey string
 
@@ -96,8 +118,7 @@ func getPool(ctx context.Context, args DBArgs) (p *pgxpool.Pool, err error) {
 func Q(ctx context.Context, args DBArgs) *Queries {
 	p, err := getPool(ctx, args)
 	if err != nil {
-		slog.Error("database pool unavailable", "error", err)
-		return nil // TODO return a no-op DBTX to avoid NPEs
+		return New(&NoopDBTX{})
 	}
 	return New(p)
 }
