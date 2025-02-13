@@ -55,7 +55,7 @@ templ Builder(form frm.Form) {
 				<!-- Left column -->
 				@builderColumnLeft(form)
 				<!-- Middle Column -->
-				@collector.FormPreview(form)
+				@collector.FormPreview(collector.ViewerArgs{Preview: true, Form: form})
 				<!-- Right Column -->
 				@builderColumnRight(form)
 			</section>

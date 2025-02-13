@@ -56,11 +56,7 @@ func Mount(router chi.Router, f *frm.Frm) {
 	collector.NotFound(handlers.StaticAssetHandler)
 	collector.With(addRequestContext).Route(fmt.Sprintf("/s/{%s}", UrlParamShortCode), func(sc chi.Router) {
 		sc.Get("/", handlers.ShortCode)
-	})
-	collector.Route(fmt.Sprintf("/{%s}", UrlParamFormID), func(form chi.Router) {
-		form = form.With(addRequestContext)
-		form.Get("/", handlers.View)
-		form.Post("/", handlers.Collect)
+		sc.Post("/", handlers.Collect)
 	})
 
 	router.Mount(f.BuilderMountPoint, builder)

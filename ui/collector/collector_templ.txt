@@ -7,8 +7,10 @@
  class=\"flex flex-col w-full md:w-2/3 lg:w-1/2 mx-auto justify-top py-6 lg:py-12 px-3 lg:px-0\"
  data-hx-swap-oob=\"true\"><div id=\"form-metadata\" data-data=\"
 \"></div><h1 class=\"rounded relative mb-8 font-black text-slate-700 text-2xl md:text-4xl lg:text-5xl\">
-</h1><div id=\"form-input\" hx-ext=\"response-targets\"><div id=\"errors\"></div><form _=\"on field_change(field_id, value) formValueChanged(field_id, value)\" class=\"flex flex-col gap-3\" hx-post=\"
-\" hx-target-400=\"#errors\">
+</h1><div id=\"form-input\" hx-ext=\"response-targets\"><div id=\"errors\"></div><form _=\"on field_change(field_id, value) formValueChanged(field_id, value)\" class=\"flex flex-col gap-3\"
+ data-hx-post=\"
+\" data-hx-target-400=\"#errors\"
+>
 <input name=\"short_code\" type=\"hidden\" value=\"
 \"> 
 <div id=\"
