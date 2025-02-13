@@ -108,7 +108,7 @@ func Builder(form frm.Form) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = collector.FormPreview(form).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = collector.FormPreview(collector.ViewerArgs{Preview: true, Form: form}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

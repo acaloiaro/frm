@@ -17,37 +17,6 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-// View renders the form viewer for the collector
-func View(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	i, err := frm.Instance(ctx)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	formID, err := formID(ctx, i)
-	if err != nil {
-		slog.Error("unable to view form", "error", err)
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-	f, err := internal.Q(ctx, i.DBArgs).GetForm(ctx, internal.GetFormParams{
-		WorkspaceID: i.WorkspaceID,
-		ID:          *formID,
-	})
-	if err != nil {
-		slog.Error("unable to view form", "error", err)
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-	// Render the form collector
-	err = collector.Viewer((frm.Form)(f)).Render(ctx, w)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-}
-
 // ShortCode handles requsts for form short codes and renders the corresponding form
 //
 // When Forms are submitted via short URL, submissions are attributed to the subject with which the short code was
@@ -74,8 +43,15 @@ func ShortCode(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
+	var ok bool
+	shortCode, ok := ctx.Value(internal.ShortCodeContextKey).(*string)
+	if !ok {
+		slog.Error("no short code provided")
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
 	// Render the form collector
-	err = collector.Viewer((frm.Form)(f)).Render(ctx, w)
+	err = collector.Viewer(collector.ViewerArgs{Form: (frm.Form)(f), ShortCode: *shortCode}).Render(ctx, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}

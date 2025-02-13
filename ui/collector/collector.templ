@@ -11,36 +11,43 @@ import (
 	"html/template"
 )
 
+// ViewerArgs are the arguments passed to the Viewer/FormView/FormPreview components
+type ViewerArgs struct {
+	Form      frm.Form // form being viewed
+	Preview   bool     // form is being viewed in the builder's preview mode
+	ShortCode string   // short code of the subject viewing the form
+}
+
 // Builder is the primary form builder UI, surrounded by the app chrome
-templ Viewer(form frm.Form) {
-	@ui.App(form.Name) {
+templ Viewer(args ViewerArgs) {
+	@ui.App(args.Form.Name) {
 		<div class="bg-sky-100 h-full">
 			<section id="app-container" class="container mx-auto">
-				@FormView(form, false)
+				@FormView(args)
 			</section>
 		</div>
 	}
 }
 
 // FormPreview renders forms in a mock browser for previewing purposes
-templ FormPreview(form frm.Form) {
+templ FormPreview(args ViewerArgs) {
 	<section id="builder-main-middle-col" class="w-full h-full overflow-y-scroll overscroll-auto p-4 bg-gray-50 border-y-1 max-h-9/10">
 		<div class="mockup-browser border-base-300 border overflow-visible">
 			<div class="mockup-browser-toolbar">
 				<div class="input border-base-300 border">https://your-form-domain.com/form</div>
 			</div>
 			<div class="flex border-base-300 bg-sky-100 border-t px-4 py-8">
-				@FormView(form, true)
+				@FormView(args)
 			</div>
 		</div>
 	</section>
 }
 
 // FormView is a view of Forms
-templ FormView(form frm.Form, isPreview bool) {
+templ FormView(args ViewerArgs) {
 	<div
 		id="form-viewer"
-		if isPreview {
+		if args.Preview {
 			class="flex flex-col w-full mx-auto justify-top"
 		} else {
 			class="flex flex-col w-full md:w-2/3 lg:w-1/2 mx-auto justify-top py-6 lg:py-12 px-3 lg:px-0"
@@ -49,23 +56,25 @@ templ FormView(form frm.Form, isPreview bool) {
 	>
 		<div
 			id="form-metadata"
-			data-data={ ui.ViewerMetadata{Form: form}.JSON() }
+			data-data={ ui.ViewerMetadata{Form: args.Form}.JSON() }
 		></div>
 		<h1 class="rounded relative mb-8 font-black text-slate-700 text-2xl md:text-4xl lg:text-5xl">
-			{ form.Name }
+			{ args.Form.Name }
 		</h1>
 		<div id="form-input" hx-ext="response-targets">
 			<div id="errors"></div>
 			<form
 				_="on field_change(field_id, value) formValueChanged(field_id, value)"
 				class="flex flex-col gap-3"
-				hx-post={ formCollectorUrl[string](ctx, form) }
-				hx-target-400="#errors"
-			>
-				if sc := shortCode(ctx); sc != nil {
-					<input name="short_code" type="hidden" value={ *sc }/>
+				if args.ShortCode != "" {
+					data-hx-post={ formCollectorUrl[string](ctx, args.ShortCode) }
+					data-hx-target-400="#errors"
 				}
-				for _, field := range fields.SortFields(form.Fields) {
+			>
+				if args.ShortCode != "" {
+					<input name="short_code" type="hidden" value={ args.ShortCode }/>
+				}
+				for _, field := range fields.SortFields(args.Form.Fields) {
 					<div
 						id={ fmt.Sprintf("field-container-%s", field.ID.String()) }
 						if field.Hidden {
@@ -82,7 +91,7 @@ templ FormView(form frm.Form, isPreview bool) {
 					type="submit"
 					value="submit"
 					class="btn bg-primary-500 hover:bg-primary-400 cursor-pointer justify-center uppercase"
-					if isPreview {
+					if args.Preview {
 						disabled
 					}
 				/>
@@ -126,8 +135,8 @@ func shortCode(ctx context.Context) (shortCode *string) {
 }
 
 // formCollectorUrl returns form collector URLs for the given form and additional path arguments
-func formCollectorUrl[T string | templ.SafeURL](ctx context.Context, form frm.Form, path ...string) T {
-	return T(frm.CollectorPathForm(ctx, form.ID, path...))
+func formCollectorUrl[T string | templ.SafeURL](ctx context.Context, shortCode string) T {
+	return T(frm.CollectorPathShortCode(ctx, shortCode))
 }
 
 // externalStyles is an unused component that exists only to make some tailwind CSS classes available in user

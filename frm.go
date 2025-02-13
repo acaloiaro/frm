@@ -261,12 +261,12 @@ func BuilderPathFormField(ctx context.Context, formID int64, fieldID string, arg
 	return path
 }
 
-// CollectorPathForm returns the collector URL path for the provided form ID
-func CollectorPathForm(ctx context.Context, formID int64, path ...string) string {
+// CollectorPathShortCode returns the collector's URL path for the provided shortcode
+func CollectorPathShortCode(ctx context.Context, shortCode string) string {
 	base, ok := ctx.Value(internal.CollectorMountPointContextKey).(string)
 	if !ok {
 		return "/"
 	}
 	base = filepath.Clean(base)
-	return fmt.Sprintf("%s/%d", base, formID)
+	return fmt.Sprintf("%s/s/%s", base, shortCode)
 }

@@ -136,7 +136,7 @@ func UpdateFieldOrder(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
-	err = collector.FormView((frm.Form)(draft), true).Render(ctx, w)
+	err = collector.FormView(collector.ViewerArgs{Form: (frm.Form)(draft), Preview: true}).Render(ctx, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
@@ -254,7 +254,7 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Re-render the form preview
-	err = collector.FormView((frm.Form)(form), true).Render(ctx, w)
+	err = collector.FormView(collector.ViewerArgs{Form: (frm.Form)(form), Preview: true}).Render(ctx, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
@@ -357,7 +357,7 @@ func NewField(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Re-render the form preview
-	err = collector.FormView((frm.Form)(draft), true).Render(ctx, w)
+	err = collector.FormView(collector.ViewerArgs{Form: (frm.Form)(draft), Preview: true}).Render(ctx, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
@@ -506,7 +506,7 @@ func UpdateFields(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Re-render the form preview
-	err = collector.FormView((frm.Form)(draft), true).Render(ctx, w)
+	err = collector.FormView(collector.ViewerArgs{Form: (frm.Form)(draft), Preview: true}).Render(ctx, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
@@ -561,7 +561,7 @@ func DeleteField(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Re-render the form preview
-	err = collector.FormView((frm.Form)(draft), true).Render(ctx, w)
+	err = collector.FormView(collector.ViewerArgs{Form: (frm.Form)(draft), Preview: true}).Render(ctx, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
