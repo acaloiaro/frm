@@ -10,7 +10,7 @@
 </h1><div id=\"form-input\" hx-ext=\"response-targets\"><div id=\"errors\"></div><form _=\"on field_change(field_id, value) formValueChanged(field_id, value)\" class=\"flex flex-col gap-3\"
  data-hx-post=\"
 \" data-hx-target-400=\"#errors\"
->
+ data-hx-disabled-elt=\"find #submit_button\" data-hx-indicator=\"#spinner\">
 <input name=\"short_code\" type=\"hidden\" value=\"
 \"> 
 <div id=\"
@@ -19,9 +19,10 @@
  class=\"flex flex-col bg-sky-200 rounded-xl p-6\"
 >
 </div>
-<div class=\"py-3\"></div><input type=\"submit\" value=\"submit\" class=\"btn bg-primary-500 hover:bg-primary-400 cursor-pointer justify-center uppercase\"
+<div class=\"py-3\"></div><button id=\"submit_button\" class=\"btn bg-primary-500 hover:bg-primary-400 cursor-pointer justify-center uppercase disabled:bg-gray-500\"
  disabled
-></form></div>
+>Submit <img id=\"spinner\" class=\"htmx-indicator\" src=\"
+\"></button></form></div>
 <div id=\"collector_footer\" class=\"pt-6 text-center\">
 </div>
 </div>

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"math/rand"
 	"strings"
 
@@ -118,6 +119,7 @@ func getPool(ctx context.Context, args DBArgs) (p *pgxpool.Pool, err error) {
 func Q(ctx context.Context, args DBArgs) *Queries {
 	p, err := getPool(ctx, args)
 	if err != nil {
+		slog.Error("unable to get database connect", "error", err)
 		return New(&NoopDBTX{})
 	}
 	return New(p)
