@@ -143,17 +143,10 @@
                 description = "Execute 'ess' with default parameters";
               };
 
-              frm-server = {
+              frm-dev = {
                 description = "Run the development server";
                 exec = ''
-                  go generate ./... && go run ./cmd/dev_server
-                '';
-              };
-
-              templ-server = {
-                description = "Run templ and watch for changes";
-                exec = ''
-                  templ generate -cmd frm-server -watch -watch-pattern='(^(?:[^e]|e[^n]|en[^u]|enu[^m]|enum[^e]|enume[^r])*\.go$)|(.+\.templ$)|(.+_templ\.txt$)|(.+styles\.css$)'  -proxy 'http://localhost:3000'
+                  go generate ./... && go run cmd/dev_server/main.go
                 '';
               };
 
@@ -168,19 +161,21 @@
                   ${sqlc}/bin/sqlc generate && echo sqlc generate done
                 '';
               };
-
-              rebuild-tailwind = {
-                description = "rebuild tailwind's css";
-                exec = "tailwindcss  -c ui/tailwind.config.js -i ./ui/css/tailwind.css -o ./static/css/styles.css && echo -e \"package frm\nimport \\x22fmt\\x22\nfunc main() { fmt.Println($(head -c2 /dev/urandom | od -An -vtu4)) }\" > ./trigger_restart.go";
-              };
             };
 
-            processes."server" = {
-              exec = "templ-server";
+            processes.frm-server = {
+              exec = ''
+                reflex \
+                          --start-service \
+                          --inverse-regex=testdata \
+                          --inverse-regex='_test.go$' \
+                          --inverse-regex='^\.devenv' \
+                          --inverse-regex='^\.direnv' \
+                          --inverse-regex='^vendor' \
+                          --inverse-regex='.*_enumer\.go|.+\.templ|.+frm-dev$' -v \
+                          frm-dev
+              '';
               process-compose = {
-                availability = {
-                  restart = "on_failure";
-                };
                 readiness_probe = {
                   http_get = {
                     host = "127.0.0.1";
@@ -206,11 +201,17 @@
             processes.tailwindcss = {
               exec = ''
                 reflex \
-                    -v \
-                    --inverse-regex='^\.devenv' \
-                    --inverse-regex='^\.direnv' \
-                    -r '.+tailwind\.css$|.+\.templ$' \
-                    -- rebuild-tailwind
+                  --start-service \
+                  -r '.*tailwind\.css$|.*\.templ$' \
+                  --inverse-regex='\.devenv' \
+                  --inverse-regex='\.direnv' \
+                  -- tailwindcss -i ./css/tailwind.css -o ./static/css/styles.css
+              '';
+            };
+
+            processes.templ = {
+              exec = ''
+                templ generate --watch --proxy="http://localhost:3000"
               '';
             };
 
