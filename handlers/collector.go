@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"net/url"
 	"slices"
-	"time"
 
 	"github.com/acaloiaro/frm"
 	"github.com/acaloiaro/frm/internal"
@@ -164,7 +163,6 @@ func Collect(w http.ResponseWriter, r *http.Request) {
 			slog.Error("[collector] unable to execute submission receiver", "error", err)
 		}
 	}
-	time.Sleep(3 * time.Second)
 	err = collector.ThankYou().Render(ctx, w)
 	if err != nil {
 		slog.Error("[collector] unable to render thank you page", "error", err)

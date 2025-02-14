@@ -119,7 +119,7 @@ func getPool(ctx context.Context, args DBArgs) (p *pgxpool.Pool, err error) {
 func Q(ctx context.Context, args DBArgs) *Queries {
 	p, err := getPool(ctx, args)
 	if err != nil {
-		slog.Error("unable to get database connect", "error", err)
+		slog.Error("[frm] unable to get database connection", "error", err)
 		return New(&NoopDBTX{})
 	}
 	return New(p)
