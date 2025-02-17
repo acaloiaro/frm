@@ -179,7 +179,14 @@ func FieldOptionsAsSelectorOptions(form frm.Form, field types.FormField) (option
 	for _, option := range field.Options {
 		selected := false
 		for _, f := range form.Fields {
-			if f.Logic != nil && slices.Contains(f.Logic.TriggerValues, option.ID.String()) {
+			if f.Logic == nil || f.Logic.TriggerValues == nil || len(f.Logic.TriggerValues) == 0 {
+				continue
+			}
+			vals := []string{}
+			for _, val := range f.Logic.TriggerValues {
+				vals = append(vals, val)
+			}
+			if f.Logic != nil && slices.Contains(vals, option.ID.String()) {
 				selected = true
 			}
 		}
@@ -187,6 +194,7 @@ func FieldOptionsAsSelectorOptions(form frm.Form, field types.FormField) (option
 			ID:       option.ID,
 			Label:    option.Label,
 			Value:    option.ID.String(),
+			Order:    option.Order,
 			Selected: selected,
 		})
 	}

@@ -14,6 +14,7 @@ type Option struct {
 	ID       uuid.UUID `json:"id"`
 	Value    string    `json:"value"`
 	Label    string    `json:"label"`
+	Order    int       `json:"order"`
 	Selected bool      `json:"selected"`
 	Disabled bool      `json:"disabled"`
 }

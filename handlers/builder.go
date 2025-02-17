@@ -371,7 +371,10 @@ func NewField(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 }
 
-// UpdateFields handles updates to a form's fields
+// UpdateFields handles updates to form draft fields
+//
+// This endpoint updates every draft field. If a field is not present in the request, it will not be present on the
+// draft after this endpoint succeeds.
 func UpdateFields(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	f, err := frm.Instance(ctx)
@@ -400,99 +403,86 @@ func UpdateFields(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updatedFields := draft.Fields
+	// newFields becomes the draft's full set of fields after this endpoint succeeds
+	newFields := map[string]*types.FormField{}
 
-	// clear out the logic fields, ensuring logic only gets configured when the UI reflects fully configured logic
-	for fid, f := range updatedFields {
-		f.Logic = nil
-		updatedFields[fid] = f
-	}
-
+	// iterate over all submitted fields, adding each one to 'newFields'
 	for formFieldName, formFieldValues := range r.Form {
 		matches := formFieldIDExtractor.FindStringSubmatch(formFieldName)
 		if len(matches) < 4 {
+			slog.Warn("skipping field: unable to match field naming convention", "field_name", formFieldName)
 			continue
 		}
 		fieldID := matches[1]
 		fieldGroup := matches[3]
 		fieldName := matches[4]
 		fieldValues := formFieldValues
-		isset := len(fieldValues) > 0
-		if !isset {
+
+		id, err := uuid.Parse(fieldID)
+		if err != nil {
+			slog.Error("skipping field: unable to parse field id", "field_id", fieldID)
 			continue
 		}
+
+		var field *types.FormField
+		var present bool
+		if field, present = newFields[fieldID]; !present {
+			// The PUT /fields endpoint is only called after a field exists. Thus, it is appropriate to use the 'order'
+			// and 'type' of the draft's field when updating, since PUT /fields does not affect order or type
+			field = &types.FormField{
+				ID:    id,
+				Order: draft.Fields[fieldID].Order,
+				Type:  draft.Fields[fieldID].Type,
+				Logic: &types.FieldLogic{},
+			}
+			newFields[fieldID] = field
+		}
+
+		// parse specific field update requests and update the corresponding field accordingly
 		switch {
 		case fieldName == "required":
-			val := (len(fieldValues) > 1 && fieldValues[1] == "on") || (len(fieldValues) > 0 && fieldValues[0] == "on")
-			oldField := draft.Fields[fieldID]
-			oldField.Required = val
-			updatedFields[fieldID] = oldField
+			required := (len(fieldValues) > 1 && fieldValues[1] == "on") || (len(fieldValues) > 0 && fieldValues[0] == "on")
+			field.Required = required
 		case fieldName == "hidden":
-			val := (len(fieldValues) > 1 && fieldValues[1] == "on") || (len(fieldValues) > 0 && fieldValues[0] == "on")
-			oldField := draft.Fields[fieldID]
-			oldField.Hidden = val
-			updatedFields[fieldID] = oldField
+			hidden := (len(fieldValues) > 1 && fieldValues[1] == "on") || (len(fieldValues) > 0 && fieldValues[0] == "on")
+			field.Hidden = hidden
 		case fieldName == "label":
-			oldField := draft.Fields[fieldID]
-			oldField.Label = fieldValues[0]
-			updatedFields[fieldID] = oldField
+			field.Label = fieldValues[0]
 		case fieldName == "placeholder":
-			oldField := draft.Fields[fieldID]
-			oldField.Placeholder = fieldValues[0]
-			updatedFields[fieldID] = oldField
+			field.Placeholder = fieldValues[0]
 		case fieldName == "options":
-			oldField := draft.Fields[fieldID]
-			oldField.Options = toFormFieldOption(oldField, fieldValues)
-			updatedFields[fieldID] = oldField
+			field.Options = toFormFieldOption(draft.Fields[fieldID], fieldValues)
 		case fieldName == "option_labels":
-			oldField := draft.Fields[fieldID]
-			oldField.OptionLabels = fieldValues
-			updatedFields[fieldID] = oldField
+			field.OptionLabels = fieldValues
+		// field logic, target field chosen
 		case fieldGroup == builder.FieldGroupLogic && fieldName == builder.FieldLogicTargetFieldID:
 			targetFieldID, err := uuid.Parse(fieldValues[0])
 			if err != nil {
 				continue
 			}
-			oldField := draft.Fields[fieldID]
-			if oldField.Logic == nil {
-				oldField.Logic = &types.FieldLogic{}
-			}
-			oldField.Logic.TargetFieldID = targetFieldID
-			updatedFields[fieldID] = oldField
+			field.Logic.TargetFieldID = targetFieldID
 		// field logic, subject field chosen
 		case fieldGroup == builder.FieldGroupLogic && fieldName == builder.FieldLogicTargetFieldValue:
-			oldField := draft.Fields[fieldID]
-			if oldField.Logic == nil {
-				oldField.Logic = &types.FieldLogic{}
-			}
-			oldField.Logic.TriggerValues = fieldValues
-			updatedFields[fieldID] = oldField
+			field.Logic.TriggerValues = fieldValues
 		// field logic, comparator chosen
 		case fieldGroup == builder.FieldGroupLogic && fieldName == builder.FieldLogicComparator:
-			oldField := draft.Fields[fieldID]
-			if oldField.Logic == nil {
-				oldField.Logic = &types.FieldLogic{}
-			}
-			oldField.Logic.TriggerComparator, _ = types.FieldLogicComparatorString(fieldValues[0])
-			updatedFields[fieldID] = oldField
+			field.Logic.TriggerComparator, _ = types.FieldLogicComparatorString(fieldValues[0])
 		// field logic, action to take
 		case fieldGroup == builder.FieldGroupLogic && fieldName == types.FieldLogicTriggerShow.String():
-			oldField := draft.Fields[fieldID]
-			if oldField.Logic == nil {
-				oldField.Logic = &types.FieldLogic{}
-			}
 			if len(fieldValues) > 0 && fieldValues[0] == "on" {
-				oldField.Logic.TriggerActions = []types.FieldLogicTriggerAction{types.FieldLogicTriggerShow}
+				field.Logic.TriggerActions = types.FieldLogicTriggerActions{types.FieldLogicTriggerShow}
 			}
-			updatedFields[fieldID] = oldField
 		}
 	}
 
-	draft.Fields = updatedFields
+	ff := types.FormFields{}
+	for fieldID, fptr := range newFields {
+		ff[fieldID] = *fptr
+	}
 	draft, err = internal.Q(ctx, f.DBArgs).SaveForm(ctx, internal.SaveFormParams{
 		ID:     draft.ID,
 		Name:   draft.Name,
-		Fields: updatedFields,
+		Fields: ff,
 	})
 	if err != nil {
 		slog.Error("unable to save form", slog.Any("error", err))
@@ -774,7 +764,7 @@ var formFieldIDExtractor = regexp.MustCompile(`^\[([a-fA-F0-9]{8}-[a-fA-F0-9]{4}
 // options for the field being updated.
 func toFormFieldOption(field types.FormField, options []string) types.FieldOptions {
 	fieldOptions := types.FieldOptions{}
-	for _, option := range options {
+	for i, option := range options {
 		var id uuid.UUID
 		optionID, err := uuid.Parse(option)
 		if err != nil {
@@ -783,9 +773,11 @@ func toFormFieldOption(field types.FormField, options []string) types.FieldOptio
 				ID:    id,
 				Value: id.String(),
 				Label: option,
+				Order: i,
 			})
 		} else {
 			for _, opt := range field.Options {
+				opt.Order = i
 				if opt.ID == optionID {
 					fieldOptions = append(fieldOptions, opt)
 				}
