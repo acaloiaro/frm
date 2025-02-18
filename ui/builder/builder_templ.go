@@ -1568,7 +1568,7 @@ func LogicConfiguratorStepThree(form frm.Form, field types.FormField, targetFiel
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if field.Logic != nil && field.Logic.TriggerValues[0] != "" {
+			if field.Logic != nil && len(field.Logic.TriggerValues) > 0 {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 109, " value=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err

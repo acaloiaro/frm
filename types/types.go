@@ -109,6 +109,7 @@ type FieldLogic struct {
 	TriggerActions    FieldLogicTriggerActions `json:"actions"`          // actions to take when the field comparator evaluates true
 }
 
+// FieldLogicTriggerActions is a collection of field logic trigger actions
 type FieldLogicTriggerActions []FieldLogicTriggerAction
 
 // Contains determines whether FieldLogicTriggerActions contains some other trigger action
@@ -121,15 +122,12 @@ func (f FieldLogicTriggerActions) Contains(a FieldLogicTriggerAction) bool {
 	return false
 }
 
-func (f *FieldLogic) Configured() bool {
-	return f.TargetFieldID != uuid.Nil && len(f.TriggerValues) > 0 && len(f.TriggerActions) > 0
-}
-
 // Option is a select option (single and multi)
 type Option struct {
 	ID       uuid.UUID `json:"id"`
 	Value    string    `json:"value"`
 	Label    string    `json:"label"`
+	Order    int       `json:"order"`
 	Selected bool      `json:"-"`
 	Disabled bool      `json:"-"`
 }
@@ -196,12 +194,7 @@ func (f FormField) MarshalJSON() ([]byte, error) {
 		Required:     f.Required,
 		Hidden:       f.Hidden,
 		Type:         f.Type,
-	}
-
-	if f.Logic != nil && f.Logic.Configured() {
-		d.Logic = f.Logic
-	} else {
-		d.Logic = nil
+		Logic:        f.Logic,
 	}
 
 	return json.Marshal(d)

@@ -271,7 +271,7 @@ func FormView(args ViewerArgs) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<div class=\"py-3\"></div><button id=\"submit_button\" class=\"btn bg-primary-500 hover:bg-primary-400 cursor-pointer justify-center uppercase disabled:bg-gray-500\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<div class=\"py-3\"></div><button id=\"submit_button\" class=\"btn bg-primary-500 hover:bg-primary-400 cursor-pointer justify-center uppercase disabled:bg-gray-200 disabled:cursor-not-allowed\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

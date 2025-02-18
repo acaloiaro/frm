@@ -506,7 +506,7 @@ templ LogicConfiguratorStepThree(form frm.Form, field types.FormField, targetFie
 				type="text"
 				class="bg-gray-50"
 				placeholder="Enter a value"
-				if field.Logic != nil && field.Logic.TriggerValues[0] != "" {
+				if field.Logic != nil && len(field.Logic.TriggerValues) > 0 {
 					value={ field.Logic.TriggerValues[0] }
 				}
 				_={ fmt.Sprintf("on keyup debounced at 600ms trigger '%s'", FieldsFormUpdateEvent) }
