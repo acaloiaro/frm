@@ -469,7 +469,7 @@ func UpdateFields(w http.ResponseWriter, r *http.Request) {
 			field.Logic.TriggerComparator, _ = types.FieldLogicComparatorString(fieldValues[0])
 		// field logic, action to take
 		case fieldGroup == builder.FieldGroupLogic && fieldName == types.FieldLogicTriggerShow.String():
-			if len(fieldValues) > 0 && fieldValues[0] == "on" {
+			if len(fieldValues) > 0 && fieldValues[0] == "on" || len(fieldValues) > 1 && fieldValues[1] == "on" {
 				field.Logic.TriggerActions = types.FieldLogicTriggerActions{types.FieldLogicTriggerShow}
 			}
 		}
