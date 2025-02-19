@@ -172,6 +172,12 @@ func (f FormField) MarshalJSON() ([]byte, error) {
 		id = f.ID
 	}
 
+	// only confiugre logic when logic is _completely_ configured
+	var logic *FieldLogic
+	if f.Logic != nil && f.Logic.TargetFieldID != uuid.Nil && len(f.Logic.TriggerValues) > 0 && f.Logic.TriggerValues[0] != "" {
+		logic = f.Logic
+	}
+
 	d := struct {
 		ID           uuid.UUID     `json:"id"`            // field's unique id
 		Order        int           `json:"order"`         // order in which the field appears on forms
@@ -194,7 +200,7 @@ func (f FormField) MarshalJSON() ([]byte, error) {
 		Required:     f.Required,
 		Hidden:       f.Hidden,
 		Type:         f.Type,
-		Logic:        f.Logic,
+		Logic:        logic,
 	}
 
 	return json.Marshal(d)
