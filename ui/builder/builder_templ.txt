@@ -96,13 +96,8 @@
 </div></div><div>
 </div><div><div id=\"
 \">
-</div></div><div><p class=\"pb-3\">Choose an action</p><input id=\"
-\" type=\"checkbox\" class=\"checkbox\" name=\"
-\"
- checked
- _=\"
-\"> <label for=\"
-\">Show this field</label></div></div>
+</div></div><div><p class=\"pb-3\">Choose action(s)</p>
+</div></div>
 <input id=\"
 \" name=\"
 \" type=\"text\" class=\"bg-gray-50\" placeholder=\"Enter a value\"

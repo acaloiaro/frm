@@ -59,7 +59,8 @@ const (
 type FieldLogicTriggerAction int
 
 const (
-	FieldLogicTriggerShow FieldLogicTriggerAction = iota // show the field in the to the user
+	FieldLogicTriggerShow    FieldLogicTriggerAction = iota // make the field visible to the user
+	FieldLogicTriggerRequire FieldLogicTriggerAction = iota // require the user to enter a value
 )
 
 // FormFields is a collection of form fields associated with a Form
@@ -157,6 +158,11 @@ func (f FormField) Validate(value []string) (err error) {
 	switch f.Type {
 	// ensure that the provided value is one of this field's available options
 	case FormFieldTypeSingleSelect, FormFieldTypeMultiSelect, FormFieldTypeSingleChoice, FormFieldTypeSingleChoiceSpaced:
+		// Choices-js causes fields to be submitted with am empty value, rather than excluding it. This is a bit hacky.
+		if !f.Required && len(value) == 1 && value[0] == "" {
+			return nil
+		}
+
 		if !allValid(f, value) {
 			return ErrUnknownOpitonProvided
 		}

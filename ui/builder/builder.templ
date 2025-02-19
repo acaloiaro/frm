@@ -2,6 +2,7 @@ package builder
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/acaloiaro/frm"
 	"github.com/acaloiaro/frm/types"
@@ -28,17 +29,15 @@ const (
 // Logic field group form field names
 const (
 	// FieldLogicChosenFieldID is the name of a HTML form field. The value of the form field with this name represents the field that was chosen as the target for field-specific logic.
-	//
-	// TODO: provide an example
 	FieldLogicTargetFieldID = "target_field_id"
-	// FieldLogicChosenField is the name of a HTML form field. The value of the form field represents the boolean comparator to be used to evaluate the chosen field against its field value.
-	//
-	// TODO: provide an example
+	// FieldLogicComparator is the name of a HTML form field. The value of the form field represents the boolean comparator to be used to evaluate the chosen field against its field value.
 	FieldLogicComparator = "comparator"
+
 	// FieldLogicChosenFieldValue is the name of a HTML Form field. The value of the form field represents the value that the target field's value is compared against when deciding whether or not to display a field in the UI.
-	//
-	// TODO: provide an example
 	FieldLogicTargetFieldValue = "target_field_value"
+
+	// FieldLogicActions is the name of a HTML form field. The value of the form field represents the actions to be taken when the field's logic evaluates truthfully
+	FieldLogicActions = "actions"
 )
 
 // Field groups within the the form field configuration screen
@@ -439,21 +438,15 @@ templ fieldLogicConfiguration(form frm.Form, field types.FormField) {
 			</div>
 		</div>
 		<div>
-			<p class="pb-3">Choose an action</p>
-			<input
-				id={ fmt.Sprintf("%s-logic-action", field.ID.String()) }
-				type="checkbox"
-				class="checkbox"
-				name={ fields.FieldName(field, FieldGroupLogic, types.FieldLogicTriggerShow.String()) }
-				if field.Logic != nil && field.Logic.TriggerActions.Contains(types.FieldLogicTriggerShow) {
-					checked
-				}
-				_={ fmt.Sprintf(`
-						on click 
-						trigger '%s'`, 
-						FieldsFormUpdateEvent) }
-			/>
-			<label for={ fmt.Sprintf("%s-logic-action", field.ID.String()) }>Show this field</label>
+			<p class="pb-3">Choose action(s)</p>
+			@selector.Selector(selector.SelectArgs{
+				ID:                   fmt.Sprintf("field-%s-logic-config-action-chooser", field.ID.String()),
+				Name:                 fields.FieldName(field, FieldGroupLogic, FieldLogicActions),
+				Placeholder:          "Choose action(s) to take when true",
+				Options:              logicActionOptions(field),
+				SelectionChangeEvent: FieldsFormUpdateEvent,
+				Multiple:             true,
+			})
 		</div>
 	</div>
 }
@@ -482,6 +475,31 @@ func comparatorOptionsFor(field types.FormField) (options selector.FieldOptions)
 	}
 
 	return
+}
+
+// logicActionOptions returns the available logic actions as selector.FieldOptions
+func logicActionOptions(field types.FormField) (options []selector.Option) {
+	for _, action := range types.FieldLogicTriggerActionValues() {
+		options = append(options,
+			selector.Option{
+				Value:    action.String(),
+				Label:    actionLabelFor(action),
+				Selected: field.Logic != nil && slices.Contains(field.Logic.TriggerActions, action),
+			})
+	}
+
+	return
+}
+
+func actionLabelFor(action types.FieldLogicTriggerAction) string {
+	switch action {
+	case types.FieldLogicTriggerShow:
+		return "Show the field"
+	case types.FieldLogicTriggerRequire:
+		return "Require the field"
+	}
+
+	return "Unknown action"
 }
 
 // LogicConfiguratorStepThree returns HTML input elments appropriate for choosing values for `targetField` in the logic configurator.

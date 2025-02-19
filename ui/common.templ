@@ -79,6 +79,7 @@ templ Head(pageTitle string) {
 				    }
 				})
 
+				// formValueChanged handles changes to user input in form fields
 				function formValueChanged(fieldID, newValue) {
 					var formMetadata = JSON.parse(document.getElementById('form-metadata').getAttribute("data-data"));
 					if (formMetadata == null) {
@@ -98,6 +99,7 @@ templ Head(pageTitle string) {
 					for (i in watchingFields) {
 						let watchingField = watchingFields[i]
 						let match = false
+						var watcherFieldElement = document.getElementById(watchingField.id) // the actual element watching the field
 						var watcherFieldContainerID = `field-container-${watchingField.id}` // the DOM element that contains the watching field
 						logic = watchingField.logic
 
@@ -133,11 +135,20 @@ templ Head(pageTitle string) {
 							switch (actions[i]) {
 								case "field_logic_trigger_show":
 									if (match) {
-										el.classList.remove("hidden");
+										el.classList.remove("hidden")
 									} else {
-										el.classList.add("hidden");
+										el.classList.add("hidden")
 									}
 									break;
+								case "field_logic_trigger_require":
+									if (match) {
+										el.classList.remove("hidden")
+										watcherFieldElement.setAttribute("required", "")
+									} else {
+										el.classList.add("hidden")
+										watcherFieldElement.removeAttribute("required")
+									}
+									break
 							}
 						}
 					}

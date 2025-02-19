@@ -172,7 +172,7 @@
                           --inverse-regex='^\.devenv' \
                           --inverse-regex='^\.direnv' \
                           --inverse-regex='^vendor' \
-                          --inverse-regex='.*_enumer\.go|.+\.templ|.+frm-dev$' -v \
+                          --inverse-regex='.*_enumer\.go|.*_enumer_.*|.+\.templ|.+frm-dev$' -v \
                           frm-dev
               '';
               process-compose = {

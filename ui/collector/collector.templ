@@ -2,7 +2,6 @@ package collector
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/acaloiaro/frm"
 	"github.com/acaloiaro/frm/internal"
@@ -77,16 +76,7 @@ templ FormView(args ViewerArgs) {
 					<input name="short_code" type="hidden" value={ args.ShortCode }/>
 				}
 				for _, field := range fields.SortFields(args.Form.Fields) {
-					<div
-						id={ fmt.Sprintf("field-container-%s", field.ID.String()) }
-						if field.Hidden {
-							class="flex flex-col bg-sky-200 rounded-xl p-6 hidden"
-						} else {
-							class="flex flex-col bg-sky-200 rounded-xl p-6"
-						}
-					>
-						@fields.View(field)
-					</div>
+					@fields.View(field)
 				}
 				<div class="py-3"></div>
 				<button

@@ -1,5 +1,5 @@
 <div class=\"w-full\"><div class=\"join w-full\">
-<label class=\"join-item h-auto flex-grow shrink btn has-[:checked]:bg-sky-400 first:border-x-0 last:border-r-0 border-y-0 border-black bg-sky-50\"><!-- the input field is hidden with opacity, width, and height, but available for HTML validation when 'required' --><input class=\"opacity-0 w-0 h-0\" type=\"radio\" id=\"
+<label class=\"join-item h-auto flex-grow shrink btn has-[:checked]:bg-sky-400 first:border-x-0 last:border-r-0 border-y-0 border-black bg-sky-50 py-3\"><!-- the input field is hidden with opacity, width, and height, but available for HTML validation when 'required' --><input class=\"opacity-0 w-0 h-0\" type=\"radio\" id=\"
 \" name=\"
 \" aria-label=\"
 \" value=\"
