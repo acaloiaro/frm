@@ -2680,6 +2680,10 @@ input.tab:checked + .tab-content,
   flex-grow: 1;
 }
 
+.grow {
+  flex-grow: 1;
+}
+
 .cursor-move {
   cursor: move;
 }
@@ -2765,10 +2769,6 @@ input.tab:checked + .tab-content,
 
 .place-self-center {
   place-self: center;
-}
-
-.justify-self-end {
-  justify-self: end;
 }
 
 .overflow-visible {
