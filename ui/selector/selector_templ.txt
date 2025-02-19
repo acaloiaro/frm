@@ -13,8 +13,7 @@
 \"
  _=\"
 \"
-><option selected disabled>
-</option></select><div id=\"
+><option></option></select><div id=\"
 \" data-args=\"
 \" _=\"
 \"></div><!-- when OptionsContent\n are present, their components render inside of this element when chosen -->

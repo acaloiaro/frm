@@ -1326,9 +1326,9 @@ func fieldLogicConfiguration(form frm.Form, field types.FormField) templ.Compone
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var60 string
-		templ_7745c5c3_Var60, templ_7745c5c3_Err = templ.JoinStringErrs(LogicConfiguratorTargetFieldSelected)
+		templ_7745c5c3_Var60, templ_7745c5c3_Err = templ.JoinStringErrs(FieldsFormUpdateEvent)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/builder/builder.templ`, Line: 407, Col: 58}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/builder/builder.templ`, Line: 407, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var60))
 		if templ_7745c5c3_Err != nil {
@@ -1357,7 +1357,7 @@ func fieldLogicConfiguration(form frm.Form, field types.FormField) templ.Compone
 			Placeholder:          "Choose a field",
 			Options:              fields.FieldsAsSelectorOptions(form, field.ID),
 			SearchDisabled:       true,
-			SelectionChangeEvent: LogicConfiguratorTargetFieldSelected,
+			SelectionChangeEvent: FieldsFormUpdateEvent,
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
