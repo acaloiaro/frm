@@ -578,11 +578,7 @@ func FieldOptionsAsSelectorOptions(form frm.Form, field types.FormField) (option
 			if f.Logic == nil || f.Logic.TriggerValues == nil || len(f.Logic.TriggerValues) == 0 {
 				continue
 			}
-			vals := []string{}
-			for _, val := range f.Logic.TriggerValues {
-				vals = append(vals, val)
-			}
-			if f.Logic != nil && slices.Contains(vals, option.ID.String()) {
+			if f.Logic != nil && slices.Contains(f.Logic.TriggerValues, option.ID.String()) {
 				selected = true
 			}
 		}
@@ -627,7 +623,7 @@ func ValidationErrors(errs types.ValidationErrors) templ.Component {
 				var templ_7745c5c3_Var32 string
 				templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("errors-%s", fieldID))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 207, Col: 46}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 203, Col: 46}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 				if templ_7745c5c3_Err != nil {
@@ -640,7 +636,7 @@ func ValidationErrors(errs types.ValidationErrors) templ.Component {
 				var templ_7745c5c3_Var33 string
 				templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(err.Error())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 209, Col: 18}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/common.templ`, Line: 205, Col: 18}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 				if templ_7745c5c3_Err != nil {

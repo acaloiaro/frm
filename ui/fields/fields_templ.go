@@ -596,7 +596,7 @@ func FieldsAsSelectorOptions(form frm.Form, fieldID uuid.UUID) (options []select
 		}
 		selected := false
 		for _, f := range form.Fields {
-			if f.Logic != nil && f.Logic.TargetFieldID == field.ID {
+			if f.ID == fieldID && f.Logic != nil && f.Logic.TargetFieldID == field.ID {
 				selected = true
 			}
 		}
