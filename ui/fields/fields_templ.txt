@@ -33,4 +33,5 @@ Multi-line text
 Single select
 Multi select
 Single Choice
+Single Choice (spaced)
 </label></div>

@@ -1,16 +1,28 @@
-<div class=\"w-full\"><div><div class=\"flex join\">
-<input class=\"join-item btn checked:bg-none flex-grow first:border-x-0 last:border-r-0 border-y-0 border-black bg-sky-50\" type=\"radio\" id=\"
+<div class=\"w-full\"><div class=\"join w-full\">
+<label class=\"join-item h-auto flex-grow shrink btn has-[:checked]:bg-sky-400 first:border-x-0 last:border-r-0 border-y-0 border-black bg-sky-50\"><!-- the input field is hidden with opacity, width, and height, but available for HTML validation when 'required' --><input class=\"opacity-0 w-0 h-0\" type=\"radio\" id=\"
 \" name=\"
 \" aria-label=\"
 \" value=\"
 \"
  required
  _=\"
-\">
+\"> 
+</label>
 </div>
 <div class=\"flex flex-grow w-full text-center text-gray-400\">
 <div class=\"w-full first:text-left last:text-right\">
 </div>
 </div>
+</div><div id=\"
+\" class=\"text-red-400\"></div>
+<div class=\"w-full\"><div class=\"grid grid-cols-1 xl:grid-cols-2 gap-8\">
+<label class=\"flex gap-2 w-auto h-auto btn bg-sky-50 has-[:checked]:bg-sky-400 has-[:checked]:border-sky-500 py-3\"><span>
+</span> <span class=\"grow\"></span> <input type=\"radio\" class=\"peer opacity-0 w-0 h-0\" name=\"
+\" aria-label=\"
+\" value=\"
+\"
+ required
+ _=\"
+\"> <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\" class=\"size-7 shrink place-self-end invisible peer-checked:visible bg-sky-200 rounded-full p-1\"><path fill-rule=\"evenodd\" d=\"M19.916 4.626a.75.75 0 0 1 .208 1.04l-9 13.5a.75.75 0 0 1-1.154.114l-6-6a.75.75 0 0 1 1.06-1.06l5.353 5.353 8.493-12.74a.75.75 0 0 1 1.04-.207Z\" clip-rule=\"evenodd\"></path></svg></label>
 </div></div><div id=\"
 \" class=\"text-red-400\"></div>

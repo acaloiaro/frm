@@ -205,7 +205,7 @@
                   -r '.*tailwind\.css$|.*\.templ$' \
                   --inverse-regex='\.devenv' \
                   --inverse-regex='\.direnv' \
-                  -- tailwindcss -i ./css/tailwind.css -o ./static/css/styles.css
+                  -- tailwindcss -i ./ui/css/tailwind.css -o ./static/css/styles.css -c ./ui/tailwind.config.js
               '';
             };
 

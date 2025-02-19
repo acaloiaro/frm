@@ -1806,11 +1806,11 @@
         "systems": "systems_6"
       },
       "locked": {
-        "lastModified": 1730850516,
-        "narHash": "sha256-V79L9JZLhn78B11DN/ZrQ9beZiUgaOb0EYeQFtW78W8=",
+        "lastModified": 1739908740,
+        "narHash": "sha256-j9glgLcq36MWG/EUFJKC9r4cu8/GbVzJNt8zgniRPfo=",
         "owner": "acaloiaro",
         "repo": "tailwind-cli-extra",
-        "rev": "2ee50b55ea468ebbe39a98be3b221780aa32d3ee",
+        "rev": "f4a392401e3f85a82693b50177944ae0b44ec155",
         "type": "github"
       },
       "original": {
