@@ -336,6 +336,8 @@ func NewField(w http.ResponseWriter, r *http.Request) {
 		newField.Placeholder = "Choose items"
 	case types.FormFieldTypeSingleChoice:
 		newField.Label = "New single choice field"
+	case types.FormFieldTypeSingleChoiceSpaced:
+		newField.Label = "New single choice field (spaced)"
 	}
 
 	fields[fieldID.String()] = *newField

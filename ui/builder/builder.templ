@@ -312,7 +312,7 @@ templ fieldSettingsConfiguration(form frm.Form, field types.FormField) {
 					autocomplete="off"
 					_={ fmt.Sprintf("on keyup debounced at 600ms trigger '%s'", FieldsFormUpdateEvent) }
 				/>
-			case types.FormFieldTypeMultiSelect, types.FormFieldTypeSingleSelect, types.FormFieldTypeSingleChoice:
+			case types.FormFieldTypeMultiSelect, types.FormFieldTypeSingleSelect, types.FormFieldTypeSingleChoice, types.FormFieldTypeSingleChoiceSpaced:
 				<div class="pt-3">
 					<label for={ fields.FieldName(field, "", "options") } class="pr-1">
 						Options
