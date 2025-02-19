@@ -24,11 +24,12 @@ func (v ValidationErrors) Any() bool {
 type FormFieldType int
 
 const (
-	FormFieldTypeTextSingle   FormFieldType = iota // single line of text
-	FormFieldTypeTextMultiple                      // multiple lines of text
-	FormFieldTypeSingleSelect                      // single-select dropdown
-	FormFieldTypeMultiSelect                       // multi-select dropdown
-	FormFieldTypeSingleChoice
+	FormFieldTypeTextSingle         FormFieldType = iota // single line of text
+	FormFieldTypeTextMultiple                            // multiple lines of text
+	FormFieldTypeSingleSelect                            // single-select dropdown
+	FormFieldTypeMultiSelect                             // multi-select dropdown
+	FormFieldTypeSingleChoice                            // nicely styled radio buttons
+	FormFieldTypeSingleChoiceSpaced                      // nicely styled radio buttons, spaced out
 )
 
 // FormFieldDataType enum enumerates all possible data types for form fields
@@ -155,7 +156,7 @@ func (f FormField) Validate(value []string) (err error) {
 
 	switch f.Type {
 	// ensure that the provided value is one of this field's available options
-	case FormFieldTypeSingleSelect, FormFieldTypeMultiSelect, FormFieldTypeSingleChoice:
+	case FormFieldTypeSingleSelect, FormFieldTypeMultiSelect, FormFieldTypeSingleChoice, FormFieldTypeSingleChoiceSpaced:
 		if !allValid(f, value) {
 			return ErrUnknownOpitonProvided
 		}

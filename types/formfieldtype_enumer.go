@@ -8,11 +8,11 @@ import (
 	"strings"
 )
 
-const _FormFieldTypeName = "text_singletext_multiplesingle_selectmulti_selectsingle_choice"
+const _FormFieldTypeName = "text_singletext_multiplesingle_selectmulti_selectsingle_choicesingle_choice_spaced"
 
-var _FormFieldTypeIndex = [...]uint8{0, 11, 24, 37, 49, 62}
+var _FormFieldTypeIndex = [...]uint8{0, 11, 24, 37, 49, 62, 82}
 
-const _FormFieldTypeLowerName = "text_singletext_multiplesingle_selectmulti_selectsingle_choice"
+const _FormFieldTypeLowerName = "text_singletext_multiplesingle_selectmulti_selectsingle_choicesingle_choice_spaced"
 
 func (i FormFieldType) String() string {
 	if i < 0 || i >= FormFieldType(len(_FormFieldTypeIndex)-1) {
@@ -30,9 +30,10 @@ func _FormFieldTypeNoOp() {
 	_ = x[FormFieldTypeSingleSelect-(2)]
 	_ = x[FormFieldTypeMultiSelect-(3)]
 	_ = x[FormFieldTypeSingleChoice-(4)]
+	_ = x[FormFieldTypeSingleChoiceSpaced-(5)]
 }
 
-var _FormFieldTypeValues = []FormFieldType{FormFieldTypeTextSingle, FormFieldTypeTextMultiple, FormFieldTypeSingleSelect, FormFieldTypeMultiSelect, FormFieldTypeSingleChoice}
+var _FormFieldTypeValues = []FormFieldType{FormFieldTypeTextSingle, FormFieldTypeTextMultiple, FormFieldTypeSingleSelect, FormFieldTypeMultiSelect, FormFieldTypeSingleChoice, FormFieldTypeSingleChoiceSpaced}
 
 var _FormFieldTypeNameToValueMap = map[string]FormFieldType{
 	_FormFieldTypeName[0:11]:       FormFieldTypeTextSingle,
@@ -45,6 +46,8 @@ var _FormFieldTypeNameToValueMap = map[string]FormFieldType{
 	_FormFieldTypeLowerName[37:49]: FormFieldTypeMultiSelect,
 	_FormFieldTypeName[49:62]:      FormFieldTypeSingleChoice,
 	_FormFieldTypeLowerName[49:62]: FormFieldTypeSingleChoice,
+	_FormFieldTypeName[62:82]:      FormFieldTypeSingleChoiceSpaced,
+	_FormFieldTypeLowerName[62:82]: FormFieldTypeSingleChoiceSpaced,
 }
 
 var _FormFieldTypeNames = []string{
@@ -53,6 +56,7 @@ var _FormFieldTypeNames = []string{
 	_FormFieldTypeName[24:37],
 	_FormFieldTypeName[37:49],
 	_FormFieldTypeName[49:62],
+	_FormFieldTypeName[62:82],
 }
 
 // FormFieldTypeString retrieves an enum value from the enum constants string name.
