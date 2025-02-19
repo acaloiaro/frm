@@ -142,7 +142,7 @@ templ Selector(args SelectArgs) {
 			_={ args.Hyperscript }
 		}
 	>
-		<option selected disabled>{ args.Placeholder }</option>
+		<option></option>
 	</select>
 	<div id={ dataElementID(args) } data-args={ templ.JSONString(args) } _={ fmt.Sprintf("init initializeSelect('%s')", dataElementID(args)) }></div>
 	<!-- when OptionsContent

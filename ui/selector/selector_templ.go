@@ -287,82 +287,69 @@ func Selector(args SelectArgs) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "><option selected disabled>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "><option></option></select><div id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var10 string
-		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(args.Placeholder)
+		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(dataElementID(args))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/selector/selector.templ`, Line: 145, Col: 46}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/selector/selector.templ`, Line: 147, Col: 30}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</option></select><div id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" data-args=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var11 string
-		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(dataElementID(args))
+		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(templ.JSONString(args))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/selector/selector.templ`, Line: 147, Col: 30}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/selector/selector.templ`, Line: 147, Col: 67}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\" data-args=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\" _=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var12 string
-		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(templ.JSONString(args))
+		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("init initializeSelect('%s')", dataElementID(args)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/selector/selector.templ`, Line: 147, Col: 67}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/selector/selector.templ`, Line: 147, Col: 137}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "\" _=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var13 string
-		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("init initializeSelect('%s')", dataElementID(args)))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/selector/selector.templ`, Line: 147, Col: 137}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "\"></div><!-- when OptionsContent\n are present, their components render inside of this element when chosen -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "\"></div><!-- when OptionsContent\n are present, their components render inside of this element when chosen -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if len(args.OptionsContent) > 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<!-- content displayed when specific options are selected --> <div id=\"selected-content\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<!-- content displayed when specific options are selected --> <div id=\"selected-content\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			for item, component := range args.OptionsContent {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<div id=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<div id=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var14 string
-				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(item.ContentID())
+				var templ_7745c5c3_Var13 string
+				templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(item.ContentID())
 				if templ_7745c5c3_Err != nil {
 					return templ.Error{Err: templ_7745c5c3_Err, FileName: `ui/selector/selector.templ`, Line: 154, Col: 30}
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\" class=\"hidden\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\" class=\"hidden\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -370,17 +357,17 @@ func Selector(args SelectArgs) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "</div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<script>\n\t\t/**\n\t\t * Function to wait for predicates.\n\t\t * @param {function() : Promise.<Boolean> | function() : Boolean} predicate\n\t\t * - A function that returns or resolves a bool\n\t\t * @param {Number} [timeout] - Optional maximum waiting time in ms after rejected\n\t\t */\n\t\tfunction waitFor(predicate, timeout) {\n\t\t    return new Promise((resolve, reject) => {\n\t\t        let running = true;\n\n\t\t        const check = async () => {\n\t\t            const res = await predicate();\n\t\t            if (res) return resolve(res);\n\t\t            if (running) setTimeout(check, 100);\n\t\t        };\n\n\t\t        check();\n\n\t\t        if (!timeout) return;\n\t\t        setTimeout(() => {\n\t\t            running = false;\n\t\t            reject();\n\t\t        }, timeout);\n\t\t    });\n\t\t}\n\n\t\tasync function initializeSelect(dataElementID) {\n\t\t\t// wait 10 seconds for choices.js to load \n\t\t\ttry {\n\t\t\t\tawait waitFor(() => typeof Choices !== 'undefined', 10000);\n\t\t\t} catch {\n\t\t\t\tconsole.log(\"unable to load choices!\")\n\t\t\t}\n\n\t\t\tconst argsElement = document.getElementById(dataElementID);\n\t\t\tconst args = JSON.parse(argsElement.getAttribute('data-args'));\n\t\t\tif (args.Options != null) {\n\t\t\t\targs.Options.map((option) => {\n\t\t\t\t\tif (option.value === \"\") {\n\t\t\t\t\t\tconsole.error(`option id: (${option.id}) label: (${option.label}) should have a value! ensure every option provided to SelectorArgs has a 'Value'`)\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t}\n\t\t\tvar searchEnabled = true\n\t\t\tif (args.SearchDisabled) {\n\t\t\t\tsearchEnabled = false\n\t\t\t}\n\n\t\t\tvar element = document.getElementById(args.ID)\n\t\t\tvar choices = new Choices(element, {\n\t\t\t\tchoices: args.Options != null ? args.Options : [],\n\t\t\t\tduplicateItemsAllowed: false,\n\t\t\t\tplaceholder: true,\n\t\t\t\tplaceholderValue: args.Placeholder,\n\t\t\t\tsearchEnabled: searchEnabled,\n\t\t\t\teditItems: args.EditItems,\n\t\t\t\tremoveItems: true,\n\t\t\t\tremoveItemButton: true,\n\t\t\t\taddChoices: true,\n\t\t\t\taddItems: true,\n\t\t\t\titemSelectText: \"\",\n\t\t\t\tshouldSort: false,\n\t\t\t});\n\t\t\telement._choices = choices;\n\t\t\n\t\t\t/**\n\t\t\t* When the user's selection(s) have changed, notify a DOM element with an event\n\t\t\t*/\n\t\t\tfunction notifySelected(event) {\n\t\t\t\tif (args.SelectionChangeEvent == \"\") {\n\t\t\t\t\treturn\n\t\t\t\t}\n\t\t\t\tvar element = document.getElementById(args.ID)\n\t\t\t\tif (element == null) {\n\t\t\t\t\treturn\n\t\t\t\t}\n\t\t\t\telement.dispatchEvent(new CustomEvent(args.SelectionChangeEvent, {bubbles: true, detail: { id: args.ID, value: event.detail.value}}))\n\t\t\t}\n\t\t\t\n\t\t\telement.addEventListener('change', notifySelected, false);\n\t\t}\n\t</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<script>\n\t\t/**\n\t\t * Function to wait for predicates.\n\t\t * @param {function() : Promise.<Boolean> | function() : Boolean} predicate\n\t\t * - A function that returns or resolves a bool\n\t\t * @param {Number} [timeout] - Optional maximum waiting time in ms after rejected\n\t\t */\n\t\tfunction waitFor(predicate, timeout) {\n\t\t    return new Promise((resolve, reject) => {\n\t\t        let running = true;\n\n\t\t        const check = async () => {\n\t\t            const res = await predicate();\n\t\t            if (res) return resolve(res);\n\t\t            if (running) setTimeout(check, 100);\n\t\t        };\n\n\t\t        check();\n\n\t\t        if (!timeout) return;\n\t\t        setTimeout(() => {\n\t\t            running = false;\n\t\t            reject();\n\t\t        }, timeout);\n\t\t    });\n\t\t}\n\n\t\tasync function initializeSelect(dataElementID) {\n\t\t\t// wait 10 seconds for choices.js to load \n\t\t\ttry {\n\t\t\t\tawait waitFor(() => typeof Choices !== 'undefined', 10000);\n\t\t\t} catch {\n\t\t\t\tconsole.log(\"unable to load choices!\")\n\t\t\t}\n\n\t\t\tconst argsElement = document.getElementById(dataElementID);\n\t\t\tconst args = JSON.parse(argsElement.getAttribute('data-args'));\n\t\t\tif (args.Options != null) {\n\t\t\t\targs.Options.map((option) => {\n\t\t\t\t\tif (option.value === \"\") {\n\t\t\t\t\t\tconsole.error(`option id: (${option.id}) label: (${option.label}) should have a value! ensure every option provided to SelectorArgs has a 'Value'`)\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t}\n\t\t\tvar searchEnabled = true\n\t\t\tif (args.SearchDisabled) {\n\t\t\t\tsearchEnabled = false\n\t\t\t}\n\n\t\t\tvar element = document.getElementById(args.ID)\n\t\t\tvar choices = new Choices(element, {\n\t\t\t\tchoices: args.Options != null ? args.Options : [],\n\t\t\t\tduplicateItemsAllowed: false,\n\t\t\t\tplaceholder: true,\n\t\t\t\tplaceholderValue: args.Placeholder,\n\t\t\t\tsearchEnabled: searchEnabled,\n\t\t\t\teditItems: args.EditItems,\n\t\t\t\tremoveItems: true,\n\t\t\t\tremoveItemButton: true,\n\t\t\t\taddChoices: true,\n\t\t\t\taddItems: true,\n\t\t\t\titemSelectText: \"\",\n\t\t\t\tshouldSort: false,\n\t\t\t});\n\t\t\telement._choices = choices;\n\t\t\n\t\t\t/**\n\t\t\t* When the user's selection(s) have changed, notify a DOM element with an event\n\t\t\t*/\n\t\t\tfunction notifySelected(event) {\n\t\t\t\tif (args.SelectionChangeEvent == \"\") {\n\t\t\t\t\treturn\n\t\t\t\t}\n\t\t\t\tvar element = document.getElementById(args.ID)\n\t\t\t\tif (element == null) {\n\t\t\t\t\treturn\n\t\t\t\t}\n\t\t\t\telement.dispatchEvent(new CustomEvent(args.SelectionChangeEvent, {bubbles: true, detail: { id: args.ID, value: event.detail.value}}))\n\t\t\t}\n\t\t\t\n\t\t\telement.addEventListener('change', notifySelected, false);\n\t\t}\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

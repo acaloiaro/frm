@@ -404,7 +404,7 @@ templ fieldLogicConfiguration(form frm.Form, field types.FormField) {
 		<div>
 			<div
 				data-hx-get={ frm.BuilderPathFormField(ctx, form.ID, field.ID.String(), "/logic/choices") }
-				data-hx-trigger={ LogicConfiguratorTargetFieldSelected }
+				data-hx-trigger={ FieldsFormUpdateEvent }
 				data-hx-swap="innerHTML"
 				data-hx-target={ fmt.Sprintf("#logic-field-value-chooser-%s", field.ID.String()) }
 				data-hx-on:htmx:config-request="event.detail.parameters['id'] = event.detail.triggeringEvent.detail.value"
@@ -415,7 +415,7 @@ templ fieldLogicConfiguration(form frm.Form, field types.FormField) {
 					Placeholder:          "Choose a field",
 					Options:              fields.FieldsAsSelectorOptions(form, field.ID),
 					SearchDisabled:       true,
-					SelectionChangeEvent: LogicConfiguratorTargetFieldSelected,
+					SelectionChangeEvent: FieldsFormUpdateEvent,
 				})
 			</div>
 		</div>
