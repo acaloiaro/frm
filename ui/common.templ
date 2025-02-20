@@ -100,6 +100,16 @@ templ Head(pageTitle string) {
 						let watchingField = watchingFields[i]
 						let match = false
 						var watcherFieldElement = document.getElementById(watchingField.id) // the actual element watching the field
+						// radio form elements such as "single choice" elements cannot get gotten by ID because they are
+						// radio button in a form group, all sharing a "name" attribute, rather than having one unique id
+						// like other input elements. Thus, when we cannot get a watching field by ID, we must be able to get it by
+						// name.
+						if (watcherFieldElement == null) {
+							radioFormElements = document.getElementsByName(watchingField.id)
+							if (radioFormElements.length > 0) {
+								watcherFieldElement = radioFormElements[0]
+							}
+						}
 						var watcherFieldContainerID = `field-container-${watchingField.id}` // the DOM element that contains the watching field
 						logic = watchingField.logic
 
