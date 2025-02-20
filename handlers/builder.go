@@ -676,7 +676,13 @@ func NewDraft(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	w.Header().Add("HX-Trigger", fmt.Sprintf("{\"%s\": {\"draft_id\": \"%d\"}}", frm.EventDraftCreated, draft.ID))
+	var event string
+	if isClone {
+		event = frm.EventCloneCreated
+	} else {
+		event = frm.EventDraftCreated
+	}
+	w.Header().Add("HX-Trigger", fmt.Sprintf("{\"%s\": {\"draft_id\": \"%d\"}}", event, draft.ID))
 	w.WriteHeader(http.StatusCreated)
 }
 
@@ -696,12 +702,35 @@ func PublishDraft(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = internal.Q(ctx, f.DBArgs).PublishDraft(ctx, *draftID)
+	tx, err := internal.Tx(ctx, f.DBArgs)
+	if err != nil {
+		slog.Error("unable to publish draft", "error", err)
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
+
+	q := internal.Q(ctx, f.DBArgs).WithTx(tx)
+	_, err = q.PublishDraft(ctx, *draftID)
 	if err != nil {
 		slog.Error("unable to publish draft", "error", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
+	err = q.DeleteForm(ctx, internal.DeleteFormParams{
+		WorkspaceID: f.WorkspaceID,
+		ID:          *draftID,
+	})
+	if err != nil {
+		slog.Error("unable to publish draft", "error", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	err = tx.Commit(ctx)
 
 	w.WriteHeader(http.StatusNoContent)
 }

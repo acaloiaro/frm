@@ -6,12 +6,14 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/acaloiaro/frm/internal"
 )
 
 const (
 	EventDraftCreated     = "frmDraftCreated" // htmx event sent when new drafts are created
+	EventCloneCreated     = "frmCloneCreated" // htmx event sent when new clones are created
 	DefaultCopyNameSuffix = "(COPY)"          // the default suffix added to forms when they're copied
 )
 
@@ -23,6 +25,7 @@ type Frm struct {
 	BuilderMountPoint   string                 // relative URL path where frm mounts the builder to your app's router
 	CollectorMountPoint string                 // relative URL path where frm mounts the collector to your app's router
 	CollectorFooter     string                 // footer shown at the bottom of the collector page
+	DraftMaxAge         time.Duration          // the duration that form drafts may remain in the draft stage before removal
 	DBArgs              internal.DBArgs        // database arguments
 	Receiver            FormSubmissionReceiver // function that processes incoming form submissions
 	WorkspaceID         string                 // ID of the workspace that frm acts on behalf of
@@ -34,6 +37,7 @@ type Args struct {
 	BuilderMountPoint   string                 // path on the router to mount frm's builder
 	CollectorMountPoint string                 // path on the router to mount frm's collector
 	CollectorFooter     string                 // footer shown at the bottom of the collector page
+	DraftMaxAge         time.Duration          // the duration that form drafts may remain in the draft state before removal
 	PostgresDisableSSL  bool                   // disable ssl when connecting to postgres
 	PostgresSchema      string                 // postgres schema where frm stores data
 	PostgresURL         string                 // postgres database URL
@@ -69,6 +73,7 @@ func New(args Args) (f *Frm, err error) {
 		BuilderMountPoint:   strings.TrimSuffix(args.BuilderMountPoint, "/"),
 		CollectorMountPoint: strings.TrimSuffix(args.CollectorMountPoint, "/"),
 		CollectorFooter:     args.CollectorFooter,
+		DraftMaxAge:         args.DraftMaxAge,
 		DBArgs: internal.DBArgs{
 			URL:        args.PostgresURL,
 			DisableSSL: args.PostgresDisableSSL,
@@ -84,6 +89,16 @@ func New(args Args) (f *Frm, err error) {
 // Init initializes the frm database if it hasn't been initialized
 func (f *Frm) Init(ctx context.Context) (err error) {
 	err = internal.InitializeDB(ctx, f.DBArgs)
+	if err != nil {
+		return
+	}
+
+	go func() {
+		err = internal.DraftMonitor(ctx, f.DBArgs, f.DraftMaxAge)
+		if err != nil {
+			return
+		}
+	}()
 	return
 }
 
@@ -130,6 +145,7 @@ func (f *Frm) CopyForm(ctx context.Context, args CopyFormArgs) (form Form, err e
 		FormID:      &of.ID,
 		Name:        copiedFormName,
 		Fields:      of.Fields,
+		Status:      FormStatusDraft,
 	}
 	if args.ForgetParentForm {
 		p.FormID = nil
