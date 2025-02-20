@@ -456,6 +456,11 @@ func UpdateFields(w http.ResponseWriter, r *http.Request) {
 			field.Options = toFormFieldOption(draft.Fields[fieldID], fieldValues)
 		case fieldName == "option_labels":
 			field.OptionLabels = fieldValues
+		case fieldName == "option_ordering":
+			field.OptionOrder, err = types.FormFieldOptionOrderString(fieldValues[0])
+			if err != nil {
+				field.OptionOrder = types.OptionOrderNatural
+			}
 		// field logic, target field chosen
 		case fieldGroup == builder.FieldGroupLogic && fieldName == builder.FieldLogicTargetFieldID:
 			targetFieldID, err := uuid.Parse(fieldValues[0])

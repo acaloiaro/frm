@@ -52,7 +52,7 @@ func SingleChoice(field types.FormField) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			for _, option := range field.Options {
+			for _, option := range field.SortedOptions() {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<label class=\"join-item h-auto flex-grow shrink btn has-[:checked]:bg-sky-400 first:border-x-0 last:border-r-0 border-y-0 border-black bg-sky-50 py-3\"><!-- the input field is hidden with opacity, width, and height, but available for HTML validation when 'required' --><input class=\"opacity-0 w-0 h-0\" type=\"radio\" id=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -244,7 +244,7 @@ func SingleChoiceSpaced(field types.FormField) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			for _, option := range field.Options {
+			for _, option := range field.SortedOptions() {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<label class=\"flex gap-2 w-auto h-auto btn bg-sky-50 has-[:checked]:bg-sky-400 has-[:checked]:border-sky-500 py-3\"><span>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err

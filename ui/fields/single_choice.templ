@@ -11,7 +11,7 @@ templ SingleChoice(field types.FormField) {
 	@LabeledField(field) {
 		<div class="w-full">
 			<div class="join w-full">
-				for _, option := range field.Options {
+				for _, option := range field.SortedOptions() {
 					<label class="join-item h-auto flex-grow shrink btn has-[:checked]:bg-sky-400 first:border-x-0 last:border-r-0 border-y-0 border-black bg-sky-50 py-3">
 						<!-- the input field is hidden with opacity, width, and height, but available for HTML validation when 'required' -->
 						<input
@@ -50,7 +50,7 @@ templ SingleChoiceSpaced(field types.FormField) {
 	@LabeledField(field) {
 		<div class="w-full">
 			<div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
-				for _, option := range field.Options {
+				for _, option := range field.SortedOptions() {
 					<label
 						class="flex gap-2 w-auto h-auto btn bg-sky-50 has-[:checked]:bg-sky-400 has-[:checked]:border-sky-500 py-3"
 					>

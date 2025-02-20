@@ -62,18 +62,19 @@
 \" name=\"
 \" type=\"text\" class=\"w-full rounded-md\" value=\"
 \" autocomplete=\"off\" _=\"
-\"> 
-<div class=\"pt-3\"><label for=\"
-\" class=\"pr-1\">Placeholder</label></div><input id=\"
+\"><div class=\"pt-3\"><label for=\"
+\" class=\"pr-1\">Placeholder</label> <input id=\"
 \" name=\"
 \" type=\"text\" class=\"w-full rounded-md\" value=\"
 \" autocomplete=\"off\" _=\"
-\">
+\"></div>
 <div class=\"pt-3\"><label for=\"
 \" class=\"pr-1\">Options</label></div>
  
 <div class=\"pt-3\"><label for=\"
 \" class=\"pr-1\">Option labels</label></div>
+ <div class=\"pt-3\"><label for=\"
+\" class=\"pr-1\">Option Ordering</label></div>
 <div class=\"pt-3\"><label for=\"
 \" class=\"pr-1\">Required</label></div><input id=\"
 \" name=\"
