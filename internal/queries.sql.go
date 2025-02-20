@@ -9,7 +9,27 @@ import (
 	"context"
 
 	"github.com/acaloiaro/frm/types"
+	"time"
 )
+
+const cleanupDrafts = `-- name: CleanupDrafts :exec
+
+DELETE
+FROM forms
+WHERE status = 'draft'
+  AND updated_at < now() - $1::interval
+`
+
+// CleanupDrafts
+//
+//	DELETE
+//	FROM forms
+//	WHERE status = 'draft'
+//	  AND updated_at < now() - $1::interval
+func (q *Queries) CleanupDrafts(ctx context.Context, hours time.Duration) error {
+	_, err := q.db.Exec(ctx, cleanupDrafts, hours)
+	return err
+}
 
 const deleteForm = `-- name: DeleteForm :exec
 
@@ -183,6 +203,7 @@ FROM forms
 WHERE workspace_id = $1
   AND form_id = $2
   AND status = 'draft'
+ORDER BY created_at DESC
 `
 
 type ListDraftsParams struct {
@@ -197,6 +218,7 @@ type ListDraftsParams struct {
 //	WHERE workspace_id = $1
 //	  AND form_id = $2
 //	  AND status = 'draft'
+//	ORDER BY created_at DESC
 func (q *Queries) ListDrafts(ctx context.Context, arg ListDraftsParams) ([]Form, error) {
 	rows, err := q.db.Query(ctx, listDrafts, arg.WorkspaceID, arg.FormID)
 	if err != nil {
@@ -235,6 +257,7 @@ WHERE workspace_id = $1
                        WHEN cardinality($2::form_status[]) > 0 THEN $2::form_status[]
                        ELSE enum_range(NULL::form_status)::form_status[]
                    END::form_status[])
+ORDER BY created_at DESC
 `
 
 type ListFormsParams struct {
@@ -251,6 +274,7 @@ type ListFormsParams struct {
 //	                       WHEN cardinality($2::form_status[]) > 0 THEN $2::form_status[]
 //	                       ELSE enum_range(NULL::form_status)::form_status[]
 //	                   END::form_status[])
+//	ORDER BY created_at DESC
 func (q *Queries) ListForms(ctx context.Context, arg ListFormsParams) ([]Form, error) {
 	rows, err := q.db.Query(ctx, listForms, arg.WorkspaceID, arg.Statuses)
 	if err != nil {

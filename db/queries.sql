@@ -20,6 +20,13 @@ WHERE workspace_id = @workspace_id
   AND id = @id
   AND status = 'draft';
 
+-- name: CleanupDrafts :exec
+
+DELETE
+FROM forms
+WHERE status = 'draft'
+  AND updated_at < now() - @hours::interval;
+
 -- name: ListForms :many
 
 SELECT *
@@ -28,7 +35,8 @@ WHERE workspace_id = @workspace_id
   AND status = any(CASE
                        WHEN cardinality(@statuses::form_status[]) > 0 THEN @statuses::form_status[]
                        ELSE enum_range(NULL::form_status)::form_status[]
-                   END::form_status[]);
+                   END::form_status[])
+ORDER BY created_at DESC;
 
 -- name: ListDrafts :many
 
@@ -36,7 +44,8 @@ SELECT *
 FROM forms
 WHERE workspace_id = @workspace_id
   AND form_id = @form_id
-  AND status = 'draft';
+  AND status = 'draft'
+ORDER BY created_at DESC;
 
 -- name: SaveForm :one
 
