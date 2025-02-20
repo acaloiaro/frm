@@ -27,6 +27,22 @@ templ FieldLabel(field types.FormField) {
 	</label>
 }
 
+// FieldLabel is a HTML label for a field
+//
+// The "required" indicator CSS watches conditionally displays when any descendant input element has the "required" attribute.
+// This is done by being part of a tailwind 'group' that is applied to the container element in [fields.View()]
+templ LabeledField(field types.FormField) {
+	<label for={ field.ID.String() } class="text-slate-700 text-xl">
+		<div class="pb-5">
+			<span>{ field.Label }</span>
+			<span
+				class="invisible group-has-[:required]:visible text-red-500 required-dot"
+			>*</span>
+		</div>
+		{ children... }
+	</label>
+}
+
 templ FieldTypeIcon(fieldType types.FormFieldType) {
 	<div class="p-1 rounded-md flex items-center justify-center bg-blue-100 text-blue-900 ml-2">
 		switch int(fieldType) {
@@ -51,75 +67,92 @@ templ FieldTypeIcon(fieldType types.FormFieldType) {
 
 // View displays fields with the appropriate UI component
 templ View(field types.FormField) {
-	switch field.Type {
-		case types.FormFieldTypeTextSingle:
-			@singleLineTextView(field)
-		case types.FormFieldTypeTextMultiple:
-			@multiLineTextView(field)
-		case types.FormFieldTypeSingleSelect, types.FormFieldTypeMultiSelect:
-			@selectView(field)
-		case types.FormFieldTypeSingleChoice:
-			@SingleChoice(field)
-		case types.FormFieldTypeSingleChoiceSpaced:
-			@SingleChoiceSpaced(field)
-	}
+	<div
+		id={ fmt.Sprintf("field-container-%s", field.ID.String()) }
+		if field.Hidden {
+			class="group hidden"
+		} else {
+			class="group"
+		}
+	>
+		<div
+			class="flex flex-col bg-sky-200 rounded-xl p-6 border-red-500 group-has-[:user-invalid]:border-2"
+		>
+			switch field.Type {
+				case types.FormFieldTypeTextSingle:
+					@singleLineTextView(field)
+				case types.FormFieldTypeTextMultiple:
+					@multiLineTextView(field)
+				case types.FormFieldTypeSingleSelect, types.FormFieldTypeMultiSelect:
+					@selectView(field)
+				case types.FormFieldTypeSingleChoice:
+					@SingleChoice(field)
+				case types.FormFieldTypeSingleChoiceSpaced:
+					@SingleChoiceSpaced(field)
+			}
+		</div>
+	</div>
 }
 
 templ singleLineTextView(field types.FormField) {
-	@FieldLabel(field)
-	<input
-		id={ field.ID.String() }
-		name={ field.ID.String() }
-		placeholder={ field.Placeholder }
-		type="text"
-		autocomplete="off"
-		if field.Required {
-			required
-		}
-		_={ fmt.Sprintf("on keyup debounced at 250ms trigger field_change(field_id: '%s', value: my.value)", field.ID.String()) }
-		class="flex-1 appearance-none border border-gray-300 dark:border-gray-600 w-full text-gray-700 dark:bg-notion-dark-light dark:text-gray-300 dark:placeholder-gray-500 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:border-2 focus:ring-opacity-100 px-4 py-2 text-base resize-y block rounded-xl bg-sky-50"
-	/>
-	<div hx-swap-oob="true" id={ fmt.Sprintf("errors-%s", field.ID.String()) }></div>
+	@LabeledField(field) {
+		<input
+			id={ field.ID.String() }
+			name={ field.ID.String() }
+			placeholder={ field.Placeholder }
+			type="text"
+			autocomplete="off"
+			if field.Required {
+				required
+			}
+			_={ fmt.Sprintf("on keyup debounced at 250ms trigger field_change(field_id: '%s', value: my.value)", field.ID.String()) }
+			class="flex-1 appearance-none border border-gray-300 dark:border-gray-600 w-full text-gray-700 dark:bg-notion-dark-light dark:text-gray-300 dark:placeholder-gray-500 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:border-2 focus:ring-opacity-100 px-4 py-2 text-base resize-y block rounded-xl bg-sky-50"
+		/>
+		<div hx-swap-oob="true" id={ fmt.Sprintf("errors-%s", field.ID.String()) }></div>
+	}
 }
 
 templ multiLineTextView(field types.FormField) {
-	@FieldLabel(field)
-	<textarea
-		id={ field.ID.String() }
-		name={ field.ID.String() }
-		class="flex-1 appearance-none border border-gray-300 dark:border-gray-600 w-full text-gray-700 dark:bg-notion-dark-light dark:text-gray-300 dark:placeholder-gray-500 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:border-transparent focus:ring-opacity-100 px-4 py-2 text-base resize-y block rounded-xl bg-sky-50"
-		placeholder={ field.Placeholder }
-		autocomplete="off"
-		if field.Required {
-			required
-		}
-		_={ fmt.Sprintf("on keyup debounced at 250ms trigger field_change(field_id: '%s', value: my.value)", field.ID.String()) }
-		rows="3"
-	></textarea>
-	<div
-		id={ fmt.Sprintf("errors-%s", field.ID.String()) }
-		class="text-red-400"
-	></div>
+	@LabeledField(field) {
+		<textarea
+			id={ field.ID.String() }
+			name={ field.ID.String() }
+			class="flex-1 appearance-none border border-gray-300 dark:border-gray-600 w-full text-gray-700 dark:bg-notion-dark-light dark:text-gray-300 dark:placeholder-gray-500 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:border-transparent focus:ring-opacity-100 px-4 py-2 text-base resize-y block rounded-xl bg-sky-50"
+			placeholder={ field.Placeholder }
+			autocomplete="off"
+			if field.Required {
+				required
+			}
+			_={ fmt.Sprintf("on keyup debounced at 250ms trigger field_change(field_id: '%s', value: my.value)", field.ID.String()) }
+			rows="3"
+		></textarea>
+		<div
+			id={ fmt.Sprintf("errors-%s", field.ID.String()) }
+			class="text-red-400"
+		></div>
+	}
 }
 
 templ selectView(field types.FormField) {
-	@selector.Selector(selector.SelectArgs{
-		ID:             field.ID.String(),
-		Name:           field.ID.String(),
-		Label:          field.Label,
-		LabelClass:     "text-slate-700 text-xl py-1",
-		Required:       field.Required,
-		Placeholder:    field.Placeholder,
-		Multiple:       field.Type == types.FormFieldTypeMultiSelect,
-		Options:        ToSelectorOpts(field.Options, false),
-		SearchDisabled: true,
-		EditItems:      false,
-		Hyperscript:    fmt.Sprintf("on change trigger field_change(field_id: '%s', value: my.value)", field.ID.String()),
-	})
-	<div
-		id={ fmt.Sprintf("errors-%s", field.ID.String()) }
-		class="text-red-400"
-	></div>
+	@LabeledField(field) {
+		@selector.Selector(selector.SelectArgs{
+			ID:             field.ID.String(),
+			Name:           field.ID.String(),
+			Label:          "", // make its defulat label styling not render by being blank
+			LabelClass:     "text-slate-700 text-xl py-1",
+			Required:       field.Required,
+			Placeholder:    field.Placeholder,
+			Multiple:       field.Type == types.FormFieldTypeMultiSelect,
+			Options:        ToSelectorOpts(field.Options, false),
+			SearchDisabled: true,
+			EditItems:      false,
+			Hyperscript:    fmt.Sprintf("on change trigger field_change(field_id: '%s', value: my.value)", field.ID.String()),
+		})
+		<div
+			id={ fmt.Sprintf("errors-%s", field.ID.String()) }
+			class="text-red-400"
+		></div>
+	}
 }
 
 // FormFieldTypeLabel is the UI label for FormFieldTypes, e.g. 'text_single' -> "Single line text"

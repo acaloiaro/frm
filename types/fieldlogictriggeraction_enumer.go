@@ -8,11 +8,11 @@ import (
 	"strings"
 )
 
-const _FieldLogicTriggerActionName = "field_logic_trigger_show"
+const _FieldLogicTriggerActionName = "field_logic_trigger_showfield_logic_trigger_require"
 
-var _FieldLogicTriggerActionIndex = [...]uint8{0, 24}
+var _FieldLogicTriggerActionIndex = [...]uint8{0, 24, 51}
 
-const _FieldLogicTriggerActionLowerName = "field_logic_trigger_show"
+const _FieldLogicTriggerActionLowerName = "field_logic_trigger_showfield_logic_trigger_require"
 
 func (i FieldLogicTriggerAction) String() string {
 	if i < 0 || i >= FieldLogicTriggerAction(len(_FieldLogicTriggerActionIndex)-1) {
@@ -26,17 +26,21 @@ func (i FieldLogicTriggerAction) String() string {
 func _FieldLogicTriggerActionNoOp() {
 	var x [1]struct{}
 	_ = x[FieldLogicTriggerShow-(0)]
+	_ = x[FieldLogicTriggerRequire-(1)]
 }
 
-var _FieldLogicTriggerActionValues = []FieldLogicTriggerAction{FieldLogicTriggerShow}
+var _FieldLogicTriggerActionValues = []FieldLogicTriggerAction{FieldLogicTriggerShow, FieldLogicTriggerRequire}
 
 var _FieldLogicTriggerActionNameToValueMap = map[string]FieldLogicTriggerAction{
-	_FieldLogicTriggerActionName[0:24]:      FieldLogicTriggerShow,
-	_FieldLogicTriggerActionLowerName[0:24]: FieldLogicTriggerShow,
+	_FieldLogicTriggerActionName[0:24]:       FieldLogicTriggerShow,
+	_FieldLogicTriggerActionLowerName[0:24]:  FieldLogicTriggerShow,
+	_FieldLogicTriggerActionName[24:51]:      FieldLogicTriggerRequire,
+	_FieldLogicTriggerActionLowerName[24:51]: FieldLogicTriggerRequire,
 }
 
 var _FieldLogicTriggerActionNames = []string{
 	_FieldLogicTriggerActionName[0:24],
+	_FieldLogicTriggerActionName[24:51],
 }
 
 // FieldLogicTriggerActionString retrieves an enum value from the enum constants string name.
