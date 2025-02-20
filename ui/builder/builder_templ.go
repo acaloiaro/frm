@@ -1499,7 +1499,7 @@ func LogicConfiguratorStepThree(form frm.Form, field types.FormField, targetFiel
 		}
 		ctx = templ.ClearChildren(ctx)
 		switch targetField.Type {
-		case types.FormFieldTypeMultiSelect, types.FormFieldTypeSingleSelect, types.FormFieldTypeSingleChoice:
+		case types.FormFieldTypeMultiSelect, types.FormFieldTypeSingleSelect, types.FormFieldTypeSingleChoice, types.FormFieldTypeSingleChoiceSpaced:
 			templ_7745c5c3_Err = selector.Selector(selector.SelectArgs{
 				ID:                   fmt.Sprintf("%s-logic-chosen-field-value", field.ID.String()),
 				Label:                "",

@@ -508,7 +508,7 @@ func actionLabelFor(action types.FieldLogicTriggerAction) string {
 // targetField: the target field chosen as the logic target
 templ LogicConfiguratorStepThree(form frm.Form, field types.FormField, targetField types.FormField) {
 	switch targetField.Type {
-		case types.FormFieldTypeMultiSelect, types.FormFieldTypeSingleSelect, types.FormFieldTypeSingleChoice:
+		case types.FormFieldTypeMultiSelect, types.FormFieldTypeSingleSelect, types.FormFieldTypeSingleChoice, types.FormFieldTypeSingleChoiceSpaced:
 			@selector.Selector(selector.SelectArgs{
 				ID:                   fmt.Sprintf("%s-logic-chosen-field-value", field.ID.String()),
 				Label:                "",
