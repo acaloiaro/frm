@@ -161,6 +161,11 @@
                   ${sqlc}/bin/sqlc generate && echo sqlc generate done
                 '';
               };
+
+              jjd = {
+                description = "jujutsu diff, specialized for templ projects";
+                exec = ''jj diff '~ glob:"**/*_templ.txt" & ~ glob:"**/*_templ.go"' --git'';
+              };
             };
 
             processes.frm-server = {

@@ -3,13 +3,16 @@ package types
 import (
 	"encoding/json"
 	"errors"
+	"math/rand/v2"
+	"slices"
+	"sort"
 
 	"github.com/google/uuid"
 )
 
 // ErrRequiredNoValueProvided is a form validation error for required fields missing values
 var ErrRequiredNoValueProvided = errors.New("This field is required")
-var ErrUnknownOpitonProvided = errors.New("This field is required, please choose a valid option")
+var ErrUnknownOptionProvided = errors.New("This field is required, please choose a valid option")
 
 // ValidationErrors is a mapping of form field IDs to the errors validating values submitted to those fields
 type ValidationErrors map[string]error
@@ -53,6 +56,16 @@ const (
 	FieldLogicComparatorNot                                  // target field value is "not" the subject value
 )
 
+// FormFieldOptionOrder enum enumerates all possible ways to order FieldOptions
+//
+//go:generate enumer -type FormFieldOptionOrder -trimprefix FormFieldOptionOrder -transform=snake -json -text
+type FormFieldOptionOrder int
+
+const (
+	OptionOrderNatural FormFieldOptionOrder = iota // FieldOptions are ordered naturally according to their order field
+	OptionOrderRandom                              // FieldOptions are ordered randomly
+)
+
 // FieldLogicTriggerAction enum enumerates all possible field logic trigger actions
 //
 //go:generate enumer -type FieldLogicTriggerAction -trimprefix FieldLogicTriggerAction -transform=snake -json -text
@@ -60,7 +73,7 @@ type FieldLogicTriggerAction int
 
 const (
 	FieldLogicTriggerShow    FieldLogicTriggerAction = iota // make the field visible to the user
-	FieldLogicTriggerRequire FieldLogicTriggerAction = iota // require the user to enter a value
+	FieldLogicTriggerRequire                                // require the user to enter a value
 )
 
 // FormFields is a collection of form fields associated with a Form
@@ -78,17 +91,18 @@ type FieldOptions []Option
 
 // FormField is a field associated with a form
 type FormField struct {
-	ID           uuid.UUID         `json:"id"`            // field's unique id
-	Order        int               `json:"order"`         // order in which the field appears on forms
-	Label        string            `json:"label"`         // field's label (name)
-	Logic        *FieldLogic       `json:"logic"`         // UI logic for this field
-	Options      FieldOptions      `json:"options"`       // single/multi-select options
-	OptionLabels []string          `json:"option_labels"` // option labels are shown below [types.FormFieldTypeSingleChoice] options
-	Placeholder  string            `json:"placeholder"`   // placeholder value
-	Required     bool              `json:"required"`      // whether the field is required
-	Hidden       bool              `json:"hidden"`        // whether the field is hidden
-	Type         FormFieldType     `json:"type"`          // field type
-	DataType     FormFieldDataType `json:"data_type"`     // the data type for form submissions to this field
+	ID           uuid.UUID            `json:"id"`            // field's unique id
+	Order        int                  `json:"order"`         // order in which the field appears on forms
+	Label        string               `json:"label"`         // field's label (name)
+	Logic        *FieldLogic          `json:"logic"`         // UI logic for this field
+	Options      FieldOptions         `json:"options"`       // single/multi-select options
+	OptionLabels []string             `json:"option_labels"` // option labels are shown below [types.FormFieldTypeSingleChoice] options
+	OptionOrder  FormFieldOptionOrder `json:"option_order"`  // the order in which options appear to viewers
+	Placeholder  string               `json:"placeholder"`   // placeholder value
+	Required     bool                 `json:"required"`      // whether the field is required
+	Hidden       bool                 `json:"hidden"`        // whether the field is hidden
+	Type         FormFieldType        `json:"type"`          // field type
+	DataType     FormFieldDataType    `json:"data_type"`     // the data type for form submissions to this field
 }
 
 // FormFieldSubmission is a form submission for a particular form field. Form submissions consists of one or more form field submission
@@ -142,6 +156,20 @@ func (f FormFieldSortByOrder) Len() int           { return len(f) }
 func (f FormFieldSortByOrder) Swap(i, j int)      { f[i], f[j] = f[j], f[i] }
 func (f FormFieldSortByOrder) Less(i, j int) bool { return f[i].Order < f[j].Order }
 
+// FormFieldOptionSortNatural implements sort.Interface for [[]Option], sorting options naturally by Order
+type FormFieldOptionSortNatural []Option
+
+func (f FormFieldOptionSortNatural) Len() int           { return len(f) }
+func (f FormFieldOptionSortNatural) Swap(i, j int)      { f[i], f[j] = f[j], f[i] }
+func (f FormFieldOptionSortNatural) Less(i, j int) bool { return f[i].Order < f[j].Order }
+
+// FormFieldOptionSortRand implements sort.Interface for [[]Option], sorting options randomly
+type FormFieldOptionSortRand []Option
+
+func (f FormFieldOptionSortRand) Len() int           { return len(f) }
+func (f FormFieldOptionSortRand) Swap(i, j int)      { f[i], f[j] = f[j], f[i] }
+func (f FormFieldOptionSortRand) Less(i, j int) bool { return rand.Int64()%2 == 0 }
+
 // Validate validates values submitted to a form field
 func (f FormField) Validate(value []string) (err error) {
 	if f.Required {
@@ -164,7 +192,7 @@ func (f FormField) Validate(value []string) (err error) {
 		}
 
 		if !allValid(f, value) {
-			return ErrUnknownOpitonProvided
+			return ErrUnknownOptionProvided
 		}
 		return nil
 	default:
@@ -186,16 +214,17 @@ func (f FormField) MarshalJSON() ([]byte, error) {
 	}
 
 	d := struct {
-		ID           uuid.UUID     `json:"id"`            // field's unique id
-		Order        int           `json:"order"`         // order in which the field appears on forms
-		Label        string        `json:"label"`         // field's label (name)
-		Logic        *FieldLogic   `json:"logic"`         // field's logic configuration
-		Options      FieldOptions  `json:"options"`       // single/multi-select options
-		OptionLabels []string      `json:"option_labels"` // labels for [FormFieldTypeSingleChoice] options
-		Placeholder  string        `json:"placeholder"`   // placeholder value
-		Required     bool          `json:"required"`      // whether the field is required
-		Hidden       bool          `json:"hidden"`        // whether the field is hidden
-		Type         FormFieldType `json:"type"`          // field type
+		ID           uuid.UUID            `json:"id"`            // field's unique id
+		Order        int                  `json:"order"`         // order in which the field appears on forms
+		Label        string               `json:"label"`         // field's label (name)
+		Logic        *FieldLogic          `json:"logic"`         // field's logic configuration
+		Options      FieldOptions         `json:"options"`       // single/multi-select options
+		OptionLabels []string             `json:"option_labels"` // labels for [FormFieldTypeSingleChoice] options
+		OptionOrder  FormFieldOptionOrder `json:"option_order"`  // the order in which options appear
+		Placeholder  string               `json:"placeholder"`   // placeholder value
+		Required     bool                 `json:"required"`      // whether the field is required
+		Hidden       bool                 `json:"hidden"`        // whether the field is hidden
+		Type         FormFieldType        `json:"type"`          // field type
 	}{
 
 		ID:           id,
@@ -203,6 +232,7 @@ func (f FormField) MarshalJSON() ([]byte, error) {
 		Label:        f.Label,
 		Options:      f.Options,
 		OptionLabels: f.OptionLabels,
+		OptionOrder:  f.OptionOrder,
 		Placeholder:  f.Placeholder,
 		Required:     f.Required,
 		Hidden:       f.Hidden,
@@ -211,6 +241,22 @@ func (f FormField) MarshalJSON() ([]byte, error) {
 	}
 
 	return json.Marshal(d)
+}
+
+// SortedOptions returns a field's options sorted according to its [OptionOrder]
+func (f *FormField) SortedOptions() (sorted []Option) {
+	sorted = slices.Clone(f.Options)
+	switch f.OptionOrder {
+	case OptionOrderNatural:
+		sort.Sort(FormFieldOptionSortNatural(sorted))
+		return
+	case OptionOrderRandom:
+		sort.Sort(FormFieldOptionSortRand(sorted))
+		return
+	default:
+		sort.Sort(FormFieldOptionSortNatural(sorted))
+		return
+	}
 }
 
 // allValid checks if all field submission values are valid options

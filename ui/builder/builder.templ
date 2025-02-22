@@ -295,22 +295,21 @@ templ fieldSettingsConfiguration(form frm.Form, field types.FormField) {
 			autocomplete="off"
 			_={ fmt.Sprintf("on keyup debounced at 600ms trigger '%s'", FieldsFormUpdateEvent) }
 		/>
+		<div class="pt-3">
+			<label for={ fields.FieldName(field, "", "placeholder") } class="pr-1">
+				Placeholder
+			</label>
+			<input
+				id={ fields.FieldName(field, "", "placeholder") }
+				name={ fields.FieldName(field, "", "placeholder") }
+				type="text"
+				class="w-full rounded-md"
+				value={ field.Placeholder }
+				autocomplete="off"
+				_={ fmt.Sprintf("on keyup debounced at 600ms trigger '%s'", FieldsFormUpdateEvent) }
+			/>
+		</div>
 		switch field.Type {
-			case types.FormFieldTypeTextSingle, types.FormFieldTypeTextMultiple:
-				<div class="pt-3">
-					<label for={ fields.FieldName(field, "", "placeholder") } class="pr-1">
-						Placeholder
-					</label>
-				</div>
-				<input
-					id={ fields.FieldName(field, "", "placeholder") }
-					name={ fields.FieldName(field, "", "placeholder") }
-					type="text"
-					class="w-full rounded-md"
-					value={ field.Placeholder }
-					autocomplete="off"
-					_={ fmt.Sprintf("on keyup debounced at 600ms trigger '%s'", FieldsFormUpdateEvent) }
-				/>
 			case types.FormFieldTypeMultiSelect, types.FormFieldTypeSingleSelect, types.FormFieldTypeSingleChoice, types.FormFieldTypeSingleChoiceSpaced:
 				<div class="pt-3">
 					<label for={ fields.FieldName(field, "", "options") } class="pr-1">
@@ -342,6 +341,20 @@ templ fieldSettingsConfiguration(form frm.Form, field types.FormField) {
 						SelectionChangeEvent: FieldsFormUpdateEvent,
 					})
 				}
+				<div class="pt-3">
+					<label for={ fields.FieldName(field, "", "option_ordering") } class="pr-1">
+						Option Ordering
+					</label>
+				</div>
+				@selector.Selector(selector.SelectArgs{
+					ID:                   fields.FieldName(field, "", "option_ordering"),
+					Name:                 fields.FieldName(field, "", "option_ordering"),
+					Placeholder:          "Choose option ordering",
+					Multiple:             false,
+					SearchDisabled:       true,
+					Options:              optionOrderingOptions(field),
+					SelectionChangeEvent: FieldsFormUpdateEvent,
+				})
 		}
 		<div class="pt-3">
 			<label for={ fields.FieldName(field, "", "required") } class="pr-1">
@@ -451,6 +464,19 @@ templ fieldLogicConfiguration(form frm.Form, field types.FormField) {
 	</div>
 }
 
+// optionOrderingOptions returns the available orderings for options
+func optionOrderingOptions(field types.FormField) (options []selector.Option) {
+	for _, ordering := range types.FormFieldOptionOrderValues() {
+		options = append(options,
+			selector.Option{
+				Value:    ordering.String(),
+				Label:    orderingLabelFor(ordering),
+				Selected: field.OptionOrder == ordering,
+			})
+	}
+	return
+}
+
 // comparatorOptionsFor returns the comparators available for a logic field given its Type
 func comparatorOptionsFor(field types.FormField) (options selector.FieldOptions) {
 	switch field.Type {
@@ -489,6 +515,17 @@ func logicActionOptions(field types.FormField) (options []selector.Option) {
 	}
 
 	return
+}
+
+func orderingLabelFor(ordering types.FormFieldOptionOrder) string {
+	switch ordering {
+	case types.OptionOrderNatural:
+		return "Order options naturally"
+	case types.OptionOrderRandom:
+		return "Order options randomly"
+	}
+
+	return "Unknown ordering"
 }
 
 func actionLabelFor(action types.FieldLogicTriggerAction) string {

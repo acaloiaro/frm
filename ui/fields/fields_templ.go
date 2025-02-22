@@ -607,7 +607,7 @@ func selectView(field types.FormField) templ.Component {
 				Required:       field.Required,
 				Placeholder:    field.Placeholder,
 				Multiple:       field.Type == types.FormFieldTypeMultiSelect,
-				Options:        ToSelectorOpts(field.Options, false),
+				Options:        ToSelectorOpts(field.SortedOptions(), false),
 				SearchDisabled: true,
 				EditItems:      false,
 				Hyperscript:    fmt.Sprintf("on change trigger field_change(field_id: '%s', value: my.value)", field.ID.String()),
