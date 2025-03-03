@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"math/rand"
 	"strings"
+	"time"
 
 	"github.com/acaloiaro/frm/db/migrations"
 	"github.com/golang-migrate/migrate/v4"
@@ -115,6 +116,20 @@ func getPool(ctx context.Context, args DBArgs) (p *pgxpool.Pool, err error) {
 	return
 }
 
+// Tx returns a new transaction from the pool
+func Tx(ctx context.Context, args DBArgs) (tx pgx.Tx, err error) {
+	var p *pgxpool.Pool
+	p, err = getPool(ctx, args)
+	if err != nil {
+		slog.Error("[frm] unable to get database connection", "error", err)
+		return
+	}
+
+	tx, err = p.Begin(ctx)
+
+	return
+}
+
 // Q returns a DBTX instance for querying the frm database
 func Q(ctx context.Context, args DBArgs) *Queries {
 	p, err := getPool(ctx, args)
@@ -142,6 +157,36 @@ func InitializeDB(ctx context.Context, args DBArgs) (err error) {
 
 	err = runMigrations(args)
 	return
+}
+
+// DraftMonitor runs a periodic goroutine that cleans up drafts older than [f.DraftMaxAge]
+func DraftMonitor(ctx context.Context, args DBArgs, draftMaxAge time.Duration) (err error) {
+	if draftMaxAge == 0 {
+		slog.Info("[draft_monitor] not monitoring old drafts for cleanup")
+		return
+	}
+	t := time.NewTicker(draftMaxAge)
+	defer t.Stop()
+
+	// perform the initial cleanup on start, with all successive cleanups happening according to the ticker
+	err = Q(ctx, args).CleanupDrafts(ctx, draftMaxAge)
+	if err != nil {
+		slog.Error("[draft_monitor] unable to clean up old drafts", slog.Any("error", err))
+	}
+
+	slog.Info("[draft_monitor] monitoring old drafts for cleanup with:", slog.Any("interval", draftMaxAge))
+	for {
+		select {
+		case <-t.C:
+			err = Q(ctx, args).CleanupDrafts(ctx, draftMaxAge)
+			if err != nil {
+				slog.Error("[draft_monitor] unable to clean up old drafts", slog.Any("error", err))
+			}
+		case <-ctx.Done():
+			err = nil
+			return
+		}
+	}
 }
 
 // TODO not all db credentials have permission create databases/schemas. Fail gracefully when user lacks permission
