@@ -1,3 +1,0 @@
-<div id=\"
-\" data-hx-swap-oob=\"true\" class=\"text-red-400\">
-</div>

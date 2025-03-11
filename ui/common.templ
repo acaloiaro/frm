@@ -42,6 +42,150 @@ func SafePath(ctx context.Context, path string) templ.SafeURL {
 	return templ.SafeURL(frm.CollectorPath(ctx, path))
 }
 
+type LabeledCheckboxArgs struct {
+	Label       string // label value
+	Name        string // field name attribute
+	Title       string // field title attribute
+	ID          string // field id attribute
+	Checked     bool   // value is checked
+	Required    bool   // field is required
+	Tooltip     string // text tooltip
+	Hyperscript string // hyperscript associated with element
+}
+
+// LabeledCheckbox is a checkbox element with a label
+templ LabeledCheckbox(args LabeledCheckboxArgs) {
+	<label class="fieldset-label">
+		<input
+			id={ args.ID }
+			name={ args.Name }
+			type="checkbox"
+			if args.Checked {
+				checked="checked"
+			}
+			if args.Required {
+				required
+			}
+			class="checkbox"
+			if args.Hyperscript != "" {
+				_={ args.Hyperscript }
+			}
+		/>
+		<span class="pl-3">{ args.Label }</span>
+		if args.Tooltip != "" {
+			<div class="tooltip tooltip-left px-3" data-tip={ args.Tooltip }>
+				<svg
+					data-src="https://unpkg.com/heroicons/20/solid/question-mark-circle.svg"
+					class="inline-block h-5 w-5 text-success"
+				></svg>
+			</div>
+		}
+	</label>
+}
+
+type LabeledSelectorArgs struct {
+	Label                string            // label value
+	LabelClass           string            // CSS class(es) for label
+	Name                 string            // field name attribute
+	Title                string            // field title attribute
+	ID                   string            // field id attribute
+	Options              []selector.Option // seletor options
+	Required             bool              // field is required
+	Multiple             bool              // allow multiple
+	EditItems            bool
+	Placeholder          string
+	SearchDisabled       bool
+	SelectionChangeEvent string // the event fired when a selection changes
+}
+
+// LabeledSelector is a selector with a label
+templ LabeledSelector(args LabeledSelectorArgs) {
+	<label
+		class={ fmt.Sprintf("flex flex-col h-fit w-full input input-bordered flex px-0 %s", args.LabelClass) }
+	>
+		<span class="inline-flex h-full group-[.label-group]:min-w-48 bg-primary-100 items-center rounded-tl-lg rounded-tr-lg px-3">{ args.Label }</span>
+		@selector.Selector(selector.SelectArgs{
+			Name:                 args.Name,
+			LabelClass:           "rounded-tr-lg rounded-tl-lg",
+			ID:                   args.ID,
+			EditItems:            args.EditItems,
+			Options:              args.Options,
+			Multiple:             args.Multiple,
+			Required:             args.Required,
+			Placeholder:          args.Placeholder,
+			SearchDisabled:       args.SearchDisabled,
+			SelectionChangeEvent: args.SelectionChangeEvent,
+		})
+	</label>
+}
+
+type LabeledTextInputArgs struct {
+	Label       string // label value
+	LabelClass  string // CSS class for label
+	Name        string // field name attribute
+	Title       string // field title attribute
+	ID          string // field id attribute
+	Placeholder string // field placeholder attribute
+	Value       string // field value attribute
+	Required    bool   // field is required
+	Tooltip     string // text tooltip
+	Hyperscript string // hyperscript associated with element
+}
+
+// LabeledTextInput is a text input with the label inside of it
+templ LabeledTextInput(args LabeledTextInputArgs) {
+	<label class={ fmt.Sprintf("flex flex-col h-fit w-full %s", args.LabelClass) }>
+		<span class="inline-flex h-full w-full group-[.label-group]:min-w-48 bg-primary-100 rounded-tr-lg rounded-tl-lg items-center px-3">
+			{ args.Label }
+			if !args.Required {
+				<span class="badge badge-info bg-slate-100 mx-3">Optional</span>
+			}
+		</span>
+		<div class="flex items-center">
+			<input
+				class="bg-slate-100 w-full border-0 rounded-br-lg rounded-bl-lg"
+				type="text"
+				name={ args.Name }
+				if args.ID != "" {
+					id={ args.ID }
+				}
+				if args.Placeholder != "" {
+					placeholder={ args.Placeholder }
+				}
+				if args.Value != "" {
+					value={ args.Value }
+				}
+				if args.Required {
+					required
+				}
+				class="border-0"
+				if args.Hyperscript != "" {
+					_={ args.Hyperscript }
+				}
+			/>
+		</div>
+		if args.Tooltip != "" {
+			<div class="tooltip tooltip-left px-3 py-3" data-tip={ args.Tooltip }>
+				<svg
+					data-src="https://unpkg.com/heroicons/20/solid/question-mark-circle.svg"
+					class="inline-block h-5 w-5 text-success"
+				></svg>
+			</div>
+		}
+	</label>
+}
+
+type FieldsetArgs struct {
+	Label string // the label of the field set
+}
+
+templ FieldSet(args FieldsetArgs) {
+	<fieldset class="fieldset flex flex-col gap-2 p-4 bg-base-100 border border-base-300 rounded-box w-full">
+		<legend class="fieldset-legend">{ args.Label }</legend>
+		{ children... }
+	</fieldset>
+}
+
 // head simply provides the <head> element
 templ Head(pageTitle string) {
 	<head>

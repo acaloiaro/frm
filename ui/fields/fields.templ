@@ -9,6 +9,8 @@ import (
 	"github.com/acaloiaro/frm/ui/selector"
 	"github.com/acaloiaro/frm/types"
 
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	"github.com/google/uuid"
 )
 
@@ -41,6 +43,10 @@ templ LabeledField(field types.FormField) {
 		</div>
 		{ children... }
 	</label>
+	<div
+		id={ fmt.Sprintf("errors-%s", field.ID.String()) }
+		class="text-red-400"
+	></div>
 }
 
 templ FieldTypeIcon(fieldType types.FormFieldType) {
@@ -148,10 +154,6 @@ templ selectView(field types.FormField) {
 			EditItems:      false,
 			Hyperscript:    fmt.Sprintf("on change trigger field_change(field_id: '%s', value: my.value)", field.ID.String()),
 		})
-		<div
-			id={ fmt.Sprintf("errors-%s", field.ID.String()) }
-			class="text-red-400"
-		></div>
 	}
 }
 
@@ -228,6 +230,23 @@ func FieldsAsSelectorOptions(form frm.Form, fieldID uuid.UUID) (options []select
 			ID:       field.ID,
 			Label:    field.Label,
 			Value:    field.ID.String(),
+			Selected: selected,
+		})
+	}
+	return
+}
+
+// FormFieldDataTypeOptions returns all known field data types as selector options
+func FormFieldDataTypeOptions(field types.FormField) (options []selector.Option) {
+	for _, dataType := range types.FormFieldDataTypes() {
+		selected := false
+		if field.DataType == dataType {
+			selected = true
+		}
+		options = append(options, selector.Option{
+			ID:       uuid.New(),
+			Label:    cases.Title(language.English, cases.Compact).String(dataType.String()),
+			Value:    dataType.String(),
 			Selected: selected,
 		})
 	}

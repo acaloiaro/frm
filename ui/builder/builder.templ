@@ -42,7 +42,8 @@ const (
 
 // Field groups within the the form field configuration screen
 const (
-	FieldGroupLogic = "logic"
+	FieldGroupLogic    = "logic"
+	FieldGroupSettings = "settings"
 )
 
 // Builder is the primary form builder UI, surrounded by the app chrome
@@ -280,43 +281,32 @@ templ fieldSettingsConfiguration(form frm.Form, field types.FormField) {
 		<input name={ fields.FieldName(field, "", "required") } type="hidden" value={ fmt.Sprint(field.Required) }/>
 		<input name={ fields.FieldName(field, "", "hidden") } type="hidden" value={ fmt.Sprint(field.Hidden) }/>
 		<input name={ fields.FieldName(field, "", "field_type") } type="hidden" value={ fmt.Sprint(field.Type) }/>
-		<div class="pt-3">
-			<label for={ fields.FieldName(field, "", "label") } class="pr-1">
-				Field label
-			</label>
-			@fields.RequiredFieldIndicator()
-		</div>
-		<input
-			id={ fields.FieldName(field, "", "label") }
-			name={ fields.FieldName(field, "", "label") }
-			type="text"
-			class="w-full rounded-md"
-			value={ field.Label }
-			autocomplete="off"
-			_={ fmt.Sprintf("on keyup debounced at 600ms trigger '%s'", FieldsFormUpdateEvent) }
-		/>
-		<div class="pt-3">
-			<label for={ fields.FieldName(field, "", "placeholder") } class="pr-1">
-				Placeholder
-			</label>
-			<input
-				id={ fields.FieldName(field, "", "placeholder") }
-				name={ fields.FieldName(field, "", "placeholder") }
-				type="text"
-				class="w-full rounded-md"
-				value={ field.Placeholder }
-				autocomplete="off"
-				_={ fmt.Sprintf("on keyup debounced at 600ms trigger '%s'", FieldsFormUpdateEvent) }
-			/>
-		</div>
+		@ui.LabeledTextInput(ui.LabeledTextInputArgs{
+			ID:          fields.FieldName(field, "", "label"),
+			Name:        fields.FieldName(field, "", "label"),
+			Label:       "Field label",
+			LabelClass:  "my-4 text-lg",
+			Placeholder: "Write some text",
+			Value:       field.Label,
+			Required:    true,
+			Hyperscript: fmt.Sprintf("on keyup debounced at 600ms trigger '%s'", FieldsFormUpdateEvent),
+		})
+		if field.Type != types.FormFieldTypeSingleChoice && field.Type != types.FormFieldTypeSingleChoiceSpaced {
+			@ui.LabeledTextInput(ui.LabeledTextInputArgs{
+				ID:          fields.FieldName(field, "", "placeholder"),
+				Name:        fields.FieldName(field, "", "placeholder"),
+				Label:       "Placeholder",
+				LabelClass:  "my-4 text-lg",
+				Placeholder: "Choose a placeholder",
+				Value:       field.Placeholder,
+				Hyperscript: fmt.Sprintf("on keyup debounced at 600ms trigger '%s'", FieldsFormUpdateEvent),
+			})
+		}
 		switch field.Type {
 			case types.FormFieldTypeMultiSelect, types.FormFieldTypeSingleSelect, types.FormFieldTypeSingleChoice, types.FormFieldTypeSingleChoiceSpaced:
-				<div class="pt-3">
-					<label for={ fields.FieldName(field, "", "options") } class="pr-1">
-						Options
-					</label>
-				</div>
-				@selector.Selector(selector.SelectArgs{
+				@ui.LabeledSelector(ui.LabeledSelectorArgs{
+					Label:                "Options",
+					LabelClass:           "my-4 text-lg",
 					ID:                   fields.FieldName(field, "", "options"),
 					Name:                 fields.FieldName(field, "", "options"),
 					Placeholder:          "Add, remove, or create new options",
@@ -325,13 +315,19 @@ templ fieldSettingsConfiguration(form frm.Form, field types.FormField) {
 					Options:              fields.ToSelectorOpts(field.Options, true),
 					SelectionChangeEvent: FieldsFormUpdateEvent,
 				})
+				@ui.LabeledSelector(ui.LabeledSelectorArgs{
+					Label:                "Data type",
+					LabelClass:           "my-4 text-lg",
+					ID:                   fields.FieldName(field, "settings", "data_type"),
+					Name:                 fields.FieldName(field, "settings", "data_type"),
+					Placeholder:          "Choose the data type",
+					Options:              fields.FormFieldDataTypeOptions(field),
+					SelectionChangeEvent: FieldsFormUpdateEvent,
+				})
 				if field.Type == types.FormFieldTypeSingleChoice {
-					<div class="pt-3">
-						<label for={ fields.FieldName(field, "", "option_labels") } class="pr-1">
-							Option labels
-						</label>
-					</div>
-					@selector.Selector(selector.SelectArgs{
+					@ui.LabeledSelector(ui.LabeledSelectorArgs{
+						Label:                "Option labels",
+						LabelClass:           "my-4 text-lg",
 						ID:                   fields.FieldName(field, "", "option_labels"),
 						Name:                 fields.FieldName(field, "", "option_labels"),
 						Placeholder:          "Create labels for your options",
@@ -341,12 +337,9 @@ templ fieldSettingsConfiguration(form frm.Form, field types.FormField) {
 						SelectionChangeEvent: FieldsFormUpdateEvent,
 					})
 				}
-				<div class="pt-3">
-					<label for={ fields.FieldName(field, "", "option_ordering") } class="pr-1">
-						Option Ordering
-					</label>
-				</div>
-				@selector.Selector(selector.SelectArgs{
+				@ui.LabeledSelector(ui.LabeledSelectorArgs{
+					Label:                "Order",
+					LabelClass:           "my-4 text-lg",
 					ID:                   fields.FieldName(field, "", "option_ordering"),
 					Name:                 fields.FieldName(field, "", "option_ordering"),
 					Placeholder:          "Choose option ordering",
@@ -356,54 +349,40 @@ templ fieldSettingsConfiguration(form frm.Form, field types.FormField) {
 					SelectionChangeEvent: FieldsFormUpdateEvent,
 				})
 		}
-		<div class="pt-3">
-			<label for={ fields.FieldName(field, "", "required") } class="pr-1">
-				Required
-			</label>
-		</div>
-		<input
-			id={ fields.FieldName(field, "", "required") }
-			name={ fields.FieldName(field, "", "required") }
-			type="checkbox"
-			class="checkbox checkbox-primary"
-			if field.Required {
-				checked
-			}
-			_={ fmt.Sprintf(`
+		@ui.FieldSet(ui.FieldsetArgs{Label: "Settings "}) {
+			@ui.LabeledCheckbox(ui.LabeledCheckboxArgs{
+				ID:      fields.FieldName(field, "settings", "required"),
+				Name:    fields.FieldName(field, "settings", "required"),
+				Label:   "Required",
+				Checked: field.Required,
+				Hyperscript: fmt.Sprintf(`
 						on click 
 						if my.checked 
 							set <input[name='%s']/>'s checked to false 
 						end  
-						then trigger '%s'`, 
-						fields.FieldName(field, "","hidden"), FieldsFormUpdateEvent) }
-		/>
-		<div class="pt-3">
-			<label for={ fields.FieldName(field, "", "hidden") } class="pr-1">
-				Hidden
-			</label>
-		</div>
-		<input
-			id={ fields.FieldName(field, "", "hidden") }
-			name={ fields.FieldName(field, "", "hidden") }
-			type="checkbox"
-			class="checkbox checkbox-primary"
-			if field.Hidden {
-				checked
-			}
-			_={ fmt.Sprintf(`
+						then trigger '%s'`,
+					fields.FieldName(field, "settings", "hidden"), FieldsFormUpdateEvent),
+			})
+			@ui.LabeledCheckbox(ui.LabeledCheckboxArgs{
+				ID:      fields.FieldName(field, "settings", "hidden"),
+				Name:    fields.FieldName(field, "settings", "hidden"),
+				Label:   "Hidden",
+				Checked: field.Hidden,
+				Hyperscript: fmt.Sprintf(`
 						on click 
 						if my.checked 
 							set <input[name='%s']/>'s checked to false 
 						end  
-						then trigger '%s'`, 
-						fields.FieldName(field, "","required"), FieldsFormUpdateEvent) }
-		/>
-		<div class="py-3 divide-y">
+						then trigger '%s'`,
+					fields.FieldName(field, "settings", "required"), FieldsFormUpdateEvent),
+			})
+		}
+		<div class="pt-9 pb-3 divide-y">
 			<label for="delete-field" class="pr-1">
 				Danger zone
 			</label>
 		</div>
-		@ui.Button(ui.ButtonArgs{Type: "button", Label: "Delete field"}, templ.Attributes{
+		@ui.Button(ui.ButtonArgs{Type: "button", Label: "Delete field", Classes: []string{"bg-red-500"}}, templ.Attributes{
 			"data-hx-delete":  ui.FormUrl[string](ctx, form, fmt.Sprintf("/fields/%s", field.ID)),
 			"data-hx-trigger": "click",
 			"data-hx-confirm": "Are you sure?",
