@@ -432,22 +432,17 @@ func UpdateFields(w http.ResponseWriter, r *http.Request) {
 			// The PUT /fields endpoint is only called after a field exists. Thus, it is appropriate to use the 'order'
 			// and 'type' of the draft's field when updating, since PUT /fields does not affect order or type
 			field = &types.FormField{
-				ID:    id,
-				Order: draft.Fields[fieldID].Order,
-				Type:  draft.Fields[fieldID].Type,
-				Logic: &types.FieldLogic{},
+				ID:       id,
+				Order:    draft.Fields[fieldID].Order,
+				Type:     draft.Fields[fieldID].Type,
+				DataType: draft.Fields[fieldID].DataType,
+				Logic:    &types.FieldLogic{},
 			}
 			newFields[fieldID] = field
 		}
 
 		// parse specific field update requests and update the corresponding field accordingly
 		switch {
-		case fieldName == "required":
-			required := (len(fieldValues) > 1 && fieldValues[1] == "on") || (len(fieldValues) > 0 && fieldValues[0] == "on")
-			field.Required = required
-		case fieldName == "hidden":
-			hidden := (len(fieldValues) > 1 && fieldValues[1] == "on") || (len(fieldValues) > 0 && fieldValues[0] == "on")
-			field.Hidden = hidden
 		case fieldName == "label":
 			field.Label = fieldValues[0]
 		case fieldName == "placeholder":
@@ -461,7 +456,19 @@ func UpdateFields(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				field.OptionOrder = types.OptionOrderNatural
 			}
+		case fieldName == "data_type":
+			dt, err := types.FormFieldDataTypeString(fieldValues[0])
+			if err != nil {
+				dt = types.FormFieldDataTypeText
+			}
+			field.DataType = dt
 		// field logic, target field chosen
+		case fieldGroup == builder.FieldGroupSettings && fieldName == "required":
+			required := (len(fieldValues) > 1 && fieldValues[1] == "on") || (len(fieldValues) > 0 && fieldValues[0] == "on")
+			field.Required = required
+		case fieldGroup == builder.FieldGroupSettings && fieldName == "hidden":
+			hidden := (len(fieldValues) > 1 && fieldValues[1] == "on") || (len(fieldValues) > 0 && fieldValues[0] == "on")
+			field.Hidden = hidden
 		case fieldGroup == builder.FieldGroupLogic && fieldName == builder.FieldLogicTargetFieldID:
 			targetFieldID, err := uuid.Parse(fieldValues[0])
 			if err != nil {

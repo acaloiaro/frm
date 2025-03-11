@@ -37,13 +37,20 @@ const (
 
 // FormFieldDataType enum enumerates all possible data types for form fields
 //
+// This type informs how form field submissions may be used by 'frm' users.
+//
 //go:generate enumer -type FormFieldDataType -trimprefix FormFieldDataType -transform=snake -json
 type FormFieldDataType int
 
 const (
 	FormFieldDataTypeText    FormFieldDataType = iota // textual data
 	FormFieldDataTypeNumeric                          // numeric data
+	FormFieldDataTypeRating                           // chosen values represent a 'rating'
 )
+
+func FormFieldDataTypes() []FormFieldDataType {
+	return []FormFieldDataType{FormFieldDataTypeText, FormFieldDataTypeNumeric, FormFieldDataTypeRating}
+}
 
 // FieldLogicComparator enum enumerates all possible form field logic comparators
 //
@@ -102,7 +109,7 @@ type FormField struct {
 	Required     bool                 `json:"required"`      // whether the field is required
 	Hidden       bool                 `json:"hidden"`        // whether the field is hidden
 	Type         FormFieldType        `json:"type"`          // field type
-	DataType     FormFieldDataType    `json:"data_type"`     // the data type for form submissions to this field
+	DataType     FormFieldDataType    `json:"data_type"`     // the data type form submissions to this field
 }
 
 // FormFieldSubmission is a form submission for a particular form field. Form submissions consists of one or more form field submission
@@ -225,6 +232,7 @@ func (f FormField) MarshalJSON() ([]byte, error) {
 		Required     bool                 `json:"required"`      // whether the field is required
 		Hidden       bool                 `json:"hidden"`        // whether the field is hidden
 		Type         FormFieldType        `json:"type"`          // field type
+		DataType     FormFieldDataType    `json:"data_type"`     // field's data type
 	}{
 
 		ID:           id,
@@ -238,6 +246,7 @@ func (f FormField) MarshalJSON() ([]byte, error) {
 		Hidden:       f.Hidden,
 		Type:         f.Type,
 		Logic:        logic,
+		DataType:     f.DataType,
 	}
 
 	return json.Marshal(d)

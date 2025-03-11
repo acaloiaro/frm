@@ -8,11 +8,11 @@ import (
 	"strings"
 )
 
-const _FormFieldDataTypeName = "textnumeric"
+const _FormFieldDataTypeName = "textnumericrating"
 
-var _FormFieldDataTypeIndex = [...]uint8{0, 4, 11}
+var _FormFieldDataTypeIndex = [...]uint8{0, 4, 11, 17}
 
-const _FormFieldDataTypeLowerName = "textnumeric"
+const _FormFieldDataTypeLowerName = "textnumericrating"
 
 func (i FormFieldDataType) String() string {
 	if i < 0 || i >= FormFieldDataType(len(_FormFieldDataTypeIndex)-1) {
@@ -27,20 +27,24 @@ func _FormFieldDataTypeNoOp() {
 	var x [1]struct{}
 	_ = x[FormFieldDataTypeText-(0)]
 	_ = x[FormFieldDataTypeNumeric-(1)]
+	_ = x[FormFieldDataTypeRating-(2)]
 }
 
-var _FormFieldDataTypeValues = []FormFieldDataType{FormFieldDataTypeText, FormFieldDataTypeNumeric}
+var _FormFieldDataTypeValues = []FormFieldDataType{FormFieldDataTypeText, FormFieldDataTypeNumeric, FormFieldDataTypeRating}
 
 var _FormFieldDataTypeNameToValueMap = map[string]FormFieldDataType{
-	_FormFieldDataTypeName[0:4]:       FormFieldDataTypeText,
-	_FormFieldDataTypeLowerName[0:4]:  FormFieldDataTypeText,
-	_FormFieldDataTypeName[4:11]:      FormFieldDataTypeNumeric,
-	_FormFieldDataTypeLowerName[4:11]: FormFieldDataTypeNumeric,
+	_FormFieldDataTypeName[0:4]:        FormFieldDataTypeText,
+	_FormFieldDataTypeLowerName[0:4]:   FormFieldDataTypeText,
+	_FormFieldDataTypeName[4:11]:       FormFieldDataTypeNumeric,
+	_FormFieldDataTypeLowerName[4:11]:  FormFieldDataTypeNumeric,
+	_FormFieldDataTypeName[11:17]:      FormFieldDataTypeRating,
+	_FormFieldDataTypeLowerName[11:17]: FormFieldDataTypeRating,
 }
 
 var _FormFieldDataTypeNames = []string{
 	_FormFieldDataTypeName[0:4],
 	_FormFieldDataTypeName[4:11],
+	_FormFieldDataTypeName[11:17],
 }
 
 // FormFieldDataTypeString retrieves an enum value from the enum constants string name.
