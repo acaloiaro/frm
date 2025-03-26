@@ -1,0 +1,84 @@
+<div class=\"toast toast-top toast-center pt-12 z-50 opacity-0\" _=\"on intersection(intersecting) transition my opacity from 0 to 1 over 500 milliseconds\n\t\tthen wait 3s\n\t\tthen transition my opacity from 1 to 0 over 500 milliseconds\">
+<div class=\"card rounded-md bg-base-100 shadow-lg p-2 text-white bg-primary-400\" _=\"on click add .hidden to #messages\"><span>
+</span></div>
+<div class=\"card rounded-md bg-base-100 shadow-lg p-2 text-white bg-orange-400\" _=\"on click add .hidden to #messages\"><span>
+</span></div>
+<div class=\"card rounded-md bg-base-100 shadow-lg p-2 text-white bg-red-400\" _=\"on click add .hidden to #messages\"><span>
+</span></div>
+</div>
+<svg data-src=\"
+\" class=\"h-5 w-5\"></svg>
+<button
+ class=\"
+\">
+</button>
+<div
+ class=\"
+\">
+</div>
+<label class=\"fieldset-label\"><input id=\"
+\" name=\"
+\" type=\"checkbox\"
+ checked=\"checked\"
+ required
+ class=\"checkbox\"
+ _=\"
+\"
+> <span class=\"pl-3\">
+</span> 
+<div class=\"tooltip tooltip-left px-3\" data-tip=\"
+\"><svg data-src=\"https://unpkg.com/heroicons/20/solid/question-mark-circle.svg\" class=\"inline-block h-5 w-5 text-success\"></svg></div>
+</label>
+<label class=\"
+\"><span class=\"inline-flex h-full group-[.label-group]:min-w-48 bg-primary-100 items-center rounded-tl-lg rounded-tr-lg px-3\">
+</span>
+</label>
+<label class=\"
+\"><span class=\"inline-flex h-full w-full group-[.label-group]:min-w-48 bg-primary-100 rounded-tr-lg rounded-tl-lg items-center px-3\">
+ 
+<span class=\"badge badge-info bg-slate-100 mx-3\">Optional</span>
+</span><div class=\"flex items-center\"><input class=\"bg-slate-100 w-full border-0 rounded-br-lg rounded-bl-lg\" type=\"text\" name=\"
+\"
+ id=\"
+\"
+ placeholder=\"
+\"
+ value=\"
+\"
+ required
+ class=\"border-0\"
+ _=\"
+\"
+></div>
+<div class=\"tooltip tooltip-left px-3 py-3\" data-tip=\"
+\"><svg data-src=\"https://unpkg.com/heroicons/20/solid/question-mark-circle.svg\" class=\"inline-block h-5 w-5 text-success\"></svg></div>
+</label>
+<fieldset class=\"fieldset flex flex-col gap-2 p-4 bg-base-100 border border-base-300 rounded-box w-full\"><legend class=\"fieldset-legend\">
+</legend>
+</fieldset>
+<head><title>
+</title><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+<link href=\"
+\" rel=\"stylesheet\"><link rel=\"stylesheet\" href=\"
+\" nonce=\"
+\"><script type=\"text/javascript\" src=\"
+\" nonce=\"
+\"></script> <script type=\"text/javascript\" src=\"
+\" nonce=\"
+\"></script> <script type=\"text/javascript\" src=\"
+\" nonce=\"
+\"></script> <script ytpe=\"text/javascript\" src=\"
+\" nonce=\"
+\"></script> <script type=\"text/javascript\" src=\"
+\" nonce=\"
+\" async></script> <script type=\"text/javascript\" src=\"
+\" nonce=\"
+\"></script> <script type=\"text/javascript\">\n\t\t\t\thtmx.onLoad(function(content) {\n\t\t\t\t    var sortables = content.querySelectorAll(\".sortable\");\n\t\t\t\t    for (var i = 0; i < sortables.length; i++) {\n\t\t\t\t      var sortable = sortables[i];\n\t\t\t\t      var sortableInstance = new Sortable(sortable, {\n\t\t\t\t          animation: 150,\n\t\t\t\t\t\t  draggable: \".sortme\",\n\t\t\t\t          onMove: function (evt) {\n\t\t\t\t            return evt.related.className.indexOf('htmx-indicator') === -1;\n\t\t\t\t          },\n\t\t\t\t          onEnd: function (evt) {\n\t\t\t\t            this.option(\"disabled\", true);\n\t\t\t\t          }\n\t\t\t\t      });\n\t\t\t\t      // Re-enable sorting on the `htmx:afterSwap` event\n\t\t\t\t      sortable.addEventListener(\"htmx:afterSwap\", function() {\n\t\t\t\t        sortableInstance.option(\"disabled\", false);\n\t\t\t\t      });\n\t\t\t\t    }\n\t\t\t\t})\n\n\t\t\t\t// formValueChanged handles changes to user input in form fields\n\t\t\t\tfunction formValueChanged(fieldID, newValue) {\n\t\t\t\t\tvar formMetadata = JSON.parse(document.getElementById('form-metadata').getAttribute(\"data-data\"));\n\t\t\t\t\tif (formMetadata == null) {\n\t\t\t\t\t\treturn\n\t\t\t\t\t}\n\n\t\t\t\t\t// collect the fields that have logic monitoring the changed field \n\t\t\t\t\tvar watchingFields = Object.values(formMetadata.form.fields).filter(function(field) {\n\t\t\t\t\t\treturn field.logic != null && fieldID === field.logic.target_field_id\n\t\t\t\t\t});\n\n\t\t\t\t\t// no fields watch the one that changed\n\t\t\t\t\tif (watchingFields.length == 0) {\n\t\t\t\t\t\treturn\n\t\t\t\t\t}\n\t\t\t\t\tvar fieldElement = document.getElementById(fieldID)\n\t\t\t\t\tfor (i in watchingFields) {\n\t\t\t\t\t\tlet watchingField = watchingFields[i]\n\t\t\t\t\t\tlet match = false\n\t\t\t\t\t\tvar watcherFieldElement = document.getElementById(watchingField.id) // the actual element watching the field\n\t\t\t\t\t\t// radio form elements such as \"single choice\" elements cannot get gotten by ID because they are\n\t\t\t\t\t\t// radio button in a form group, all sharing a \"name\" attribute, rather than having one unique id\n\t\t\t\t\t\t// like other input elements. Thus, when we cannot get a watching field by ID, we must be able to get it by\n\t\t\t\t\t\t// name.\n\t\t\t\t\t\tif (watcherFieldElement == null) {\n\t\t\t\t\t\t\tradioFormElements = document.getElementsByName(watchingField.id)\n\t\t\t\t\t\t\tif (radioFormElements.length > 0) {\n\t\t\t\t\t\t\t\twatcherFieldElement = radioFormElements[0]\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t\tvar watcherFieldContainerID = `field-container-${watchingField.id}` // the DOM element that contains the watching field\n\t\t\t\t\t\tlogic = watchingField.logic\n\n\t\t\t\t\t\t// check whether the new value is coming from a Choices.js field, in which case the new value\n\t\t\t\t\t\t// is the array of chosen values, joined by commas, otherwise newValue is used as it was passed in\n\t\t\t\t\t\tif (fieldElement != null && fieldElement._choices != null) {\n\t\t\t\t\t\t\t// Choics.getValue() returns scalar for single selects and array for multi. Use Array.of\n\t\t\t\t\t\t\t// to treat everything it returns as an array\n\t\t\t\t\t\t\tnewValue = Array.of(fieldElement._choices.getValue(true)).join(',')\n\t\t\t\t\t\t}\n\n\t\t\t\t\t\t// find if _any_ trigger values match the new value\n\t\t\t\t\t\tswitch (logic.field_comparator) {\n\t\t\t\t\t\t\tcase 'equal':\n\t\t\t\t\t\t\t\tmatch = watchingField.logic.trigger_values.every(val => newValue.localeCompare(val, 'en', {sensitivity: \"base\"}) == 0)\n\t\t\t\t\t\t\t\tbreak;\n\t\t\t\t\t\t\tcase 'contains':\n\t\t\t\t\t\t\t\tmatch = watchingField.logic.trigger_values.some(val => newValue.toLowerCase().includes(val.toLowerCase()))\n\t\t\t\t\t\t\t\tbreak;\n\t\t\t\t\t\t\tcase 'not':\n\t\t\t\t\t\t\t\tmatch = watchingField.logic.trigger_values.some(val => newValue.toLowerCase() !== val.toLowerCase())\n\t\t\t\t\t\t\t\tbreak;\n\t\t\t\t\t\t}\n\n\t\t\t\t\t\t// Most actions are likely to be performed upon the containing element, such as show/hide/require.\n\t\t\t\t\t\t// This may of course change or be expanded, but for now, only the watcher field container is relevant\n\t\t\t\t\t\t// to applying actions.\n\t\t\t\t\t\tlet el = document.getElementById(watcherFieldContainerID)\n\t\t\t\t\t\tlet actions = watchingField.logic.actions\n\n\t\t\t\t\t\t// we have a match, execute the action\n\t\t\t\t\t\tfor (i in actions) {\n\t\t\t\t\t\t\tswitch (actions[i]) {\n\t\t\t\t\t\t\t\tcase \"field_logic_trigger_show\":\n\t\t\t\t\t\t\t\t\tif (match) {\n\t\t\t\t\t\t\t\t\t\tel.classList.remove(\"hidden\")\n\t\t\t\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t\t\t\tel.classList.add(\"hidden\")\n\t\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\t\tbreak;\n\t\t\t\t\t\t\t\tcase \"field_logic_trigger_require\":\n\t\t\t\t\t\t\t\t\tif (match) {\n\t\t\t\t\t\t\t\t\t\tel.classList.remove(\"hidden\")\n\t\t\t\t\t\t\t\t\t\twatcherFieldElement.setAttribute(\"required\", \"\")\n\t\t\t\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t\t\t\tel.classList.add(\"hidden\")\n\t\t\t\t\t\t\t\t\t\twatcherFieldElement.removeAttribute(\"required\")\n\t\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\t\tbreak\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t</script>
+</head>
+<!doctype html><html lang=\"eng\">
+<body><div id=\"messages\"></div><main>
+</main>
+</body></html>
+<div id=\"
+\" data-hx-swap-oob=\"true\" class=\"flex flex-col gap-3 py-3\"><p class=\"text-red-500\">
+</p></div>

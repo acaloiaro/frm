@@ -13,6 +13,7 @@ import (
 	"github.com/acaloiaro/frm/internal"
 	"github.com/acaloiaro/frm/static"
 	"github.com/acaloiaro/frm/types"
+	"github.com/acaloiaro/frm/ui"
 	"github.com/acaloiaro/frm/ui/builder"
 	"github.com/acaloiaro/frm/ui/collector"
 	"github.com/google/uuid"
@@ -699,20 +700,34 @@ func PublishDraft(w http.ResponseWriter, r *http.Request) {
 	f, err := frm.Instance(ctx)
 	if err != nil {
 		slog.Error("unable to publish draft", "error", err)
+		ui.Toast(ui.ToastArgs{
+			Position: ui.ToastPositionTop,
+			Type:     ui.ToastTypeError,
+			Message:  "Failed! Your form was not saved.",
+		}).Render(ctx, w)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	draftID, err := formID(ctx, f)
 	if err != nil {
 		slog.Error("unable to publish draft", "error", err)
-		w.WriteHeader(http.StatusNotFound)
+		ui.Toast(ui.ToastArgs{
+			Position: ui.ToastPositionTop,
+			Type:     ui.ToastTypeError,
+			Message:  "Failed! Your form was not saved.",
+		}).Render(ctx, w)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	tx, err := internal.Tx(ctx, f.DBArgs)
 	if err != nil {
 		slog.Error("unable to publish draft", "error", err)
-		w.WriteHeader(http.StatusNotFound)
+		ui.Toast(ui.ToastArgs{
+			Position: ui.ToastPositionTop,
+			Type:     ui.ToastTypeError,
+			Message:  "Failed! Your form was not saved.",
+		}).Render(ctx, w)
 		return
 	}
 	defer func() {
@@ -723,6 +738,11 @@ func PublishDraft(w http.ResponseWriter, r *http.Request) {
 	_, err = q.PublishDraft(ctx, *draftID)
 	if err != nil {
 		slog.Error("unable to publish draft", "error", err)
+		ui.Toast(ui.ToastArgs{
+			Position: ui.ToastPositionTop,
+			Type:     ui.ToastTypeError,
+			Message:  "Failed! Your form was not saved.",
+		}).Render(ctx, w)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -733,13 +753,32 @@ func PublishDraft(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		slog.Error("unable to publish draft", "error", err)
+		ui.Toast(ui.ToastArgs{
+			Position: ui.ToastPositionTop,
+			Type:     ui.ToastTypeError,
+			Message:  "Failed! Your form was not saved.",
+		}).Render(ctx, w)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	err = tx.Commit(ctx)
+	if err != nil {
+		slog.Error("unable to publish draft", "error", err)
+		ui.Toast(ui.ToastArgs{
+			Position: ui.ToastPositionTop,
+			Type:     ui.ToastTypeError,
+			Message:  "Failed! Your form was not saved.",
+		}).Render(ctx, w)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
-	w.WriteHeader(http.StatusNoContent)
+	ui.Toast(ui.ToastArgs{
+		Position: ui.ToastPositionTop,
+		Type:     ui.ToastTypeSuccess,
+		Message:  "Success! Your form has been saved.",
+	}).Render(ctx, w)
 }
 
 // DeleteForm deletes forms

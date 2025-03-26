@@ -1,0 +1,24 @@
+<div class=\"bg-sky-100 h-full\"><section id=\"app-container\" class=\"container mx-auto\">
+</section></div>
+<section id=\"builder-main-middle-col\" class=\"w-full h-full overflow-y-scroll overscroll-auto p-4 bg-gray-50 border-y-1 max-h-9/10\"><div class=\"mockup-browser border-base-300 border overflow-visible\"><div class=\"mockup-browser-toolbar\"><div class=\"input border-base-300 border\">https://your-form-domain.com/form</div></div><div class=\"flex border-base-300 bg-sky-100 border-t px-4 py-8\">
+</div></div></section>
+<div id=\"form-viewer\"
+ class=\"flex flex-col w-full mx-auto justify-top\"
+ class=\"flex flex-col w-full md:w-2/3 lg:w-1/2 mx-auto justify-top py-6 lg:py-12 px-3 lg:px-0\"
+ data-hx-swap-oob=\"true\"><div id=\"form-metadata\" data-data=\"
+\"></div><h1 class=\"rounded relative mb-8 font-black text-slate-700 text-2xl md:text-4xl lg:text-5xl\">
+</h1><div id=\"form-input\" hx-ext=\"response-targets\"><div id=\"errors\"></div><form _=\"on field_change(field_id, value) formValueChanged(field_id, value)\" class=\"flex flex-col gap-3\"
+ data-hx-post=\"
+\" data-hx-target-400=\"#errors\"
+ data-hx-disabled-elt=\"find #submit_button\" data-hx-indicator=\"#spinner\">
+<input name=\"short_code\" type=\"hidden\" value=\"
+\"> 
+<div class=\"py-3\"></div><button id=\"submit_button\" class=\"btn bg-primary-500 hover:bg-primary-400 cursor-pointer justify-center uppercase disabled:bg-gray-200 disabled:cursor-not-allowed\"
+ disabled
+>Submit <img id=\"spinner\" class=\"htmx-indicator\" src=\"
+\"></button></form></div>
+<div id=\"collector_footer\" class=\"pt-6 text-center\">
+</div>
+</div>
+<div class=\"bg-sky-100 h-screen\"><section id=\"app-container\" class=\"container mx-auto\"><p class=\"text-4xl pt-9\">Thank you!</p></section></div>
+<p class=\"underline\"></p>
