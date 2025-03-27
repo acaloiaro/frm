@@ -325,10 +325,10 @@ func NewField(w http.ResponseWriter, r *http.Request) {
 	switch fieldType {
 	case types.FormFieldTypeTextSingle:
 		newField.Label = "New text field"
-		newField.Placeholder = "Write some text"
+		newField.Placeholder = "Respond here"
 	case types.FormFieldTypeTextMultiple:
 		newField.Label = "New multi-line text field"
-		newField.Placeholder = "Write some text"
+		newField.Placeholder = "Respond here"
 	case types.FormFieldTypeSingleSelect:
 		newField.Label = "New select field"
 		newField.Placeholder = "Choose an item"

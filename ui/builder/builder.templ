@@ -286,7 +286,7 @@ templ fieldSettingsConfiguration(form frm.Form, field types.FormField) {
 			Name:        fields.FieldName(field, "", "label"),
 			Label:       "Field label",
 			LabelClass:  "my-4 text-lg",
-			Placeholder: "Write some text",
+			Placeholder: "Respond here",
 			Value:       field.Label,
 			Required:    true,
 			Hyperscript: fmt.Sprintf("on keyup debounced at 600ms trigger '%s'", FieldsFormUpdateEvent),
