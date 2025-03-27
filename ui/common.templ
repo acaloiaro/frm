@@ -13,6 +13,60 @@ import (
 
 var loadDependenciesOnce = templ.NewOnceHandle()
 
+type ToastType string
+type ToastPosition string
+
+const (
+	ToastPositionTop    = "top"
+	ToastPositionBottom = "bottom"
+)
+
+const (
+	ToastTypeSuccess = "success"
+	ToastTypeWarning = "warning"
+	ToastTypeError   = "error"
+)
+
+type ToastArgs struct {
+	Message  string
+	Position string
+	Type     ToastType
+}
+
+// Toast shows a toast message on screen
+templ Toast(arg ToastArgs) {
+	<div
+		class="toast toast-top toast-center pt-12 z-50 opacity-0"
+		_="on intersection(intersecting) transition my opacity from 0 to 1 over 500 milliseconds
+		then wait 3s
+		then transition my opacity from 1 to 0 over 500 milliseconds"
+	>
+		switch arg.Type {
+			case ToastTypeSuccess:
+				<div
+					class="card rounded-md bg-base-100 shadow-lg p-2 text-white bg-primary-400"
+					_="on click add .hidden to #messages"
+				>
+					<span>{ arg.Message }</span>
+				</div>
+			case ToastTypeWarning:
+				<div
+					class="card rounded-md bg-base-100 shadow-lg p-2 text-white bg-orange-400"
+					_="on click add .hidden to #messages"
+				>
+					<span>{ arg.Message }</span>
+				</div>
+			case ToastTypeError:
+				<div
+					class="card rounded-md bg-base-100 shadow-lg p-2 text-white bg-red-400"
+					_="on click add .hidden to #messages"
+				>
+					<span>{ arg.Message }</span>
+				</div>
+		}
+	</div>
+}
+
 templ HeroIcon(style string, name string) {
 	<svg data-src={ fmt.Sprintf("https://unpkg.com/heroicons/20/%s/%s.svg", style, name) } class="h-5 w-5"></svg>
 }
@@ -322,6 +376,7 @@ templ App(pageTitle string) {
 	<html lang="eng">
 		@Head(pageTitle)
 		<body>
+			<div id="messages"></div>
 			<main>
 				{ children... }
 			</main>
