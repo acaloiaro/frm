@@ -36,7 +36,7 @@ type ToastArgs struct {
 // Toast shows a toast message on screen
 templ Toast(arg ToastArgs) {
 	<div
-		class="toast toast-top toast-center pt-12 z-50 opacity-0"
+		class="toast toast-top toast-right pt-12 z-50 opacity-0"
 		_="on intersection(intersecting) transition my opacity from 0 to 1 over 500 milliseconds
 		then wait 3s
 		then transition my opacity from 1 to 0 over 500 milliseconds"

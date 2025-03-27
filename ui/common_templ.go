@@ -63,7 +63,7 @@ func Toast(arg ToastArgs) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"toast toast-top toast-center pt-12 z-50 opacity-0\" _=\"on intersection(intersecting) transition my opacity from 0 to 1 over 500 milliseconds\n\t\tthen wait 3s\n\t\tthen transition my opacity from 1 to 0 over 500 milliseconds\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"toast toast-top toast-right pt-12 z-50 opacity-0\" _=\"on intersection(intersecting) transition my opacity from 0 to 1 over 500 milliseconds\n\t\tthen wait 3s\n\t\tthen transition my opacity from 1 to 0 over 500 milliseconds\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
